@@ -3,9 +3,15 @@ import Stripe from "stripe";
 import { getServerUser } from "@/lib/auth/server-auth";
 import { adminDb } from "@/lib/firebase/admin";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-10-29.clover",
-});
+// Lazy load Stripe to avoid initialization during build
+const getStripe = () => {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY is not set");
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-10-29.clover",
+  });
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,6 +28,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const stripe = getStripe();
 
     // Create payment record in Firestore
     const paymentRef = await adminDb.collection("payments").add({

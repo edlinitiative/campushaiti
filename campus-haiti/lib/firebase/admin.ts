@@ -1,18 +1,26 @@
 import { initializeApp, getApps, cert, App } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
-import { getStorage } from "firebase-admin/storage";
+import { getAuth, Auth } from "firebase-admin/auth";
+import { getFirestore, Firestore } from "firebase-admin/firestore";
+import { getStorage, Storage } from "firebase-admin/storage";
 
-let adminApp: App;
+let adminApp: App | undefined;
+let _adminAuth: Auth | undefined;
+let _adminDb: Firestore | undefined;
+let _adminStorage: Storage | undefined;
 
-function getAdminApp() {
+function getAdminApp(): App {
   if (adminApp) {
     return adminApp;
   }
 
   if (getApps().length === 0) {
+    // Check if required env vars are present (skip during build)
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+      throw new Error("Firebase Admin environment variables are not set");
+    }
+
     // Parse the private key properly (handle escaped newlines)
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
 
     adminApp = initializeApp({
       credential: cert({
@@ -29,8 +37,46 @@ function getAdminApp() {
   return adminApp;
 }
 
-export const adminAuth = getAuth(getAdminApp());
-export const adminDb = getFirestore(getAdminApp());
-export const adminStorage = getStorage(getAdminApp());
+// Lazy getters for Firebase Admin services
+export const getAdminAuth = (): Auth => {
+  if (!_adminAuth) {
+    _adminAuth = getAuth(getAdminApp());
+  }
+  return _adminAuth;
+};
+
+export const getAdminDb = (): Firestore => {
+  if (!_adminDb) {
+    _adminDb = getFirestore(getAdminApp());
+  }
+  return _adminDb;
+};
+
+export const getAdminStorage = (): Storage => {
+  if (!_adminStorage) {
+    _adminStorage = getStorage(getAdminApp());
+  }
+  return _adminStorage;
+};
+
+// Deprecated: Use getAdminAuth(), getAdminDb(), getAdminStorage() instead
+// These are kept for backwards compatibility but will be removed
+export const adminAuth = new Proxy({} as Auth, {
+  get: (target, prop) => {
+    return (getAdminAuth() as any)[prop];
+  }
+});
+
+export const adminDb = new Proxy({} as Firestore, {
+  get: (target, prop) => {
+    return (getAdminDb() as any)[prop];
+  }
+});
+
+export const adminStorage = new Proxy({} as Storage, {
+  get: (target, prop) => {
+    return (getAdminStorage() as any)[prop];
+  }
+});
 
 export default getAdminApp;
