@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd campus-haiti && npm run build",
+  "devCommand": "cd campus-haiti && npm run dev",
+  "installCommand": "cd campus-haiti && npm install",
+  "outputDirectory": "campus-haiti/.next",
+  "framework": null
+}
