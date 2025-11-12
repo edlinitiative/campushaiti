@@ -1,0 +1,116 @@
+{
+  "common": {
+    "appName": "Campus Haiti",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "confirm": "Confirm",
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "nav": {
+    "home": "Home",
+    "apply": "Apply",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "partners": "Partners",
+    "help": "Help",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  },
+  "auth": {
+    "emailPlaceholder": "Enter your email",
+    "sendLink": "Send Magic Link",
+    "checkEmail": "Check your email for a sign-in link",
+    "signInWithPasskey": "Sign in with Passkey",
+    "registerPasskey": "Register Passkey",
+    "welcome": "Welcome to Campus Haiti"
+  },
+  "apply": {
+    "title": "Apply to Universities",
+    "steps": {
+      "profile": "Profile",
+      "documents": "Documents",
+      "programs": "Select Programs",
+      "payment": "Payment",
+      "review": "Review & Submit"
+    },
+    "profile": {
+      "title": "Complete Your Profile",
+      "personalInfo": "Personal Information",
+      "name": "Full Name",
+      "phone": "Phone Number",
+      "nationality": "Nationality",
+      "birthDate": "Date of Birth",
+      "address": "Address",
+      "education": "Education History",
+      "addEducation": "Add Education",
+      "essays": "Essays",
+      "personalStatement": "Personal Statement",
+      "whyThisProgram": "Why This Program?",
+      "careerGoals": "Career Goals"
+    },
+    "documents": {
+      "title": "Upload Documents",
+      "uploadNew": "Upload New Document",
+      "required": "Required Documents",
+      "transcript": "Academic Transcript",
+      "diploma": "Diploma",
+      "idCard": "ID Card",
+      "passport": "Passport",
+      "recommendationLetter": "Recommendation Letter"
+    },
+    "programs": {
+      "title": "Select Programs",
+      "search": "Search programs...",
+      "fee": "Application Fee",
+      "deadline": "Deadline",
+      "select": "Select Program"
+    },
+    "payment": {
+      "title": "Payment",
+      "total": "Total Amount",
+      "payWithStripe": "Pay with Card (Stripe)",
+      "payWithMonCash": "Pay with MonCash"
+    },
+    "review": {
+      "title": "Review & Submit",
+      "confirmSubmit": "Confirm and Submit Application"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "myApplications": "My Applications",
+    "myDocuments": "My Documents",
+    "myProfile": "My Profile",
+    "status": {
+      "DRAFT": "Draft",
+      "SUBMITTED": "Submitted",
+      "UNDER_REVIEW": "Under Review",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected"
+    }
+  },
+  "email": {
+    "welcome": {
+      "subject": "Welcome to Campus Haiti!",
+      "greeting": "Hello",
+      "message": "Thank you for joining Campus Haiti. We're excited to help you with your university applications."
+    },
+    "submissionReceived": {
+      "subject": "Application Submitted",
+      "message": "We've received your application. You'll be notified once it's been reviewed."
+    },
+    "paymentReceipt": {
+      "subject": "Payment Receipt",
+      "message": "Thank you for your payment. Your receipt is attached."
+    }
+  }
+}

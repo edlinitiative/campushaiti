@@ -1,0 +1,116 @@
+{
+  "common": {
+    "appName": "Campus Haïti",
+    "loading": "Chargement...",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "error": "Une erreur s'est produite",
+    "success": "Succès"
+  },
+  "nav": {
+    "home": "Accueil",
+    "apply": "Postuler",
+    "dashboard": "Tableau de bord",
+    "admin": "Admin",
+    "partners": "Partenaires",
+    "help": "Aide",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter"
+  },
+  "auth": {
+    "emailPlaceholder": "Entrez votre email",
+    "sendLink": "Envoyer le lien magique",
+    "checkEmail": "Vérifiez votre email pour un lien de connexion",
+    "signInWithPasskey": "Se connecter avec Passkey",
+    "registerPasskey": "Enregistrer Passkey",
+    "welcome": "Bienvenue sur Campus Haïti"
+  },
+  "apply": {
+    "title": "Postuler aux universités",
+    "steps": {
+      "profile": "Profil",
+      "documents": "Documents",
+      "programs": "Sélectionner les programmes",
+      "payment": "Paiement",
+      "review": "Révision et soumission"
+    },
+    "profile": {
+      "title": "Complétez votre profil",
+      "personalInfo": "Informations personnelles",
+      "name": "Nom complet",
+      "phone": "Numéro de téléphone",
+      "nationality": "Nationalité",
+      "birthDate": "Date de naissance",
+      "address": "Adresse",
+      "education": "Historique d'éducation",
+      "addEducation": "Ajouter une éducation",
+      "essays": "Essais",
+      "personalStatement": "Déclaration personnelle",
+      "whyThisProgram": "Pourquoi ce programme?",
+      "careerGoals": "Objectifs de carrière"
+    },
+    "documents": {
+      "title": "Télécharger des documents",
+      "uploadNew": "Télécharger un nouveau document",
+      "required": "Documents requis",
+      "transcript": "Relevé de notes",
+      "diploma": "Diplôme",
+      "idCard": "Carte d'identité",
+      "passport": "Passeport",
+      "recommendationLetter": "Lettre de recommandation"
+    },
+    "programs": {
+      "title": "Sélectionner les programmes",
+      "search": "Rechercher des programmes...",
+      "fee": "Frais de candidature",
+      "deadline": "Date limite",
+      "select": "Sélectionner le programme"
+    },
+    "payment": {
+      "title": "Paiement",
+      "total": "Montant total",
+      "payWithStripe": "Payer par carte (Stripe)",
+      "payWithMonCash": "Payer avec MonCash"
+    },
+    "review": {
+      "title": "Révision et soumission",
+      "confirmSubmit": "Confirmer et soumettre la candidature"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "myApplications": "Mes candidatures",
+    "myDocuments": "Mes documents",
+    "myProfile": "Mon profil",
+    "status": {
+      "DRAFT": "Brouillon",
+      "SUBMITTED": "Soumis",
+      "UNDER_REVIEW": "En cours d'examen",
+      "ACCEPTED": "Accepté",
+      "REJECTED": "Rejeté"
+    }
+  },
+  "email": {
+    "welcome": {
+      "subject": "Bienvenue sur Campus Haïti!",
+      "greeting": "Bonjour",
+      "message": "Merci de rejoindre Campus Haïti. Nous sommes ravis de vous aider avec vos candidatures universitaires."
+    },
+    "submissionReceived": {
+      "subject": "Candidature soumise",
+      "message": "Nous avons reçu votre candidature. Vous serez informé une fois qu'elle aura été examinée."
+    },
+    "paymentReceipt": {
+      "subject": "Reçu de paiement",
+      "message": "Merci pour votre paiement. Votre reçu est joint."
+    }
+  }
+}

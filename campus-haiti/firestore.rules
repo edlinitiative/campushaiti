@@ -1,0 +1,107 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && request.auth.token.role == role;
+    }
+    
+    function isAdmin() {
+      return hasRole('ADMIN');
+    }
+    
+    function isReviewer() {
+      return hasRole('REVIEWER');
+    }
+    
+    function isApplicant() {
+      return hasRole('APPLICANT');
+    }
+    
+    // Users collection - users can read/update their own data, admins can manage all
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin() || isReviewer();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Profiles collection - users can read/write their own profile
+    match /profiles/{uid} {
+      allow read: if isOwner(uid) || isAdmin() || isReviewer();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if isAdmin();
+    }
+    
+    // Universities collection - public read, admin write
+    match /universities/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Programs collection - public read, admin write
+    match /programs/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Applications collection - users can CRUD their own applications
+    match /applications/{id} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.applicantUid == request.auth.uid || isAdmin() || isReviewer());
+      allow create: if isAuthenticated() && request.resource.data.applicantUid == request.auth.uid;
+      allow update: if isAuthenticated() && 
+                       (resource.data.applicantUid == request.auth.uid || isAdmin() || isReviewer());
+      allow delete: if isAdmin();
+    }
+    
+    // Application Items - linked to applications
+    match /applicationItems/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Documents collection - users can CRUD their own documents
+    match /documents/{id} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.ownerUid == request.auth.uid || isAdmin() || isReviewer());
+      allow create: if isAuthenticated() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isOwner(resource.data.ownerUid);
+      allow delete: if isOwner(resource.data.ownerUid) || isAdmin();
+    }
+    
+    // Payments collection - read own payments, create new, admin can manage
+    match /payments/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin(); // Only admin/server can update payment status
+      allow delete: if isAdmin();
+    }
+    
+    // Notifications collection - users can read their own notifications
+    match /notifications/{id} {
+      allow read: if isAuthenticated() && resource.data.recipientUid == request.auth.uid;
+      allow create: if isAdmin(); // Only server/admin can create notifications
+      allow update: if isAuthenticated() && resource.data.recipientUid == request.auth.uid;
+      allow delete: if isOwner(resource.data.recipientUid) || isAdmin();
+    }
+    
+    // Audit logs - admin read only, server writes
+    match /auditLogs/{id} {
+      allow read: if isAdmin();
+      allow write: if false; // Only server can write audit logs
+    }
+  }
+}

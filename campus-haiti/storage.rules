@@ -1,0 +1,57 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && request.auth.token.role == role;
+    }
+    
+    function isAdmin() {
+      return hasRole('ADMIN');
+    }
+    
+    function isReviewer() {
+      return hasRole('REVIEWER');
+    }
+    
+    // Validate file size (max 10MB)
+    function isValidSize() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+    
+    // Validate MIME types for documents
+    function isValidDocumentType() {
+      return request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('application/msword') ||
+             request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    }
+    
+    // User documents path: users/{uid}/docs/{docId}
+    match /users/{uid}/docs/{docId} {
+      allow read: if isOwner(uid) || isAdmin() || isReviewer();
+      allow write: if isOwner(uid) && isValidSize() && isValidDocumentType();
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+    
+    // University logos - public read, admin write
+    match /universities/{universityId}/logo {
+      allow read: if true;
+      allow write: if isAdmin() && isValidSize();
+    }
+    
+    // Deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

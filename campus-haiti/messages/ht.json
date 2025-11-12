@@ -1,0 +1,116 @@
+{
+  "common": {
+    "appName": "Campus Ayiti",
+    "loading": "Chaje...",
+    "submit": "Soumèt",
+    "cancel": "Anile",
+    "save": "Anrejistre",
+    "delete": "Efase",
+    "edit": "Modifye",
+    "back": "Retounen",
+    "next": "Swivan",
+    "previous": "Anvan",
+    "close": "Fèmen",
+    "confirm": "Konfime",
+    "error": "Yon erè fèt",
+    "success": "Siksè"
+  },
+  "nav": {
+    "home": "Akèy",
+    "apply": "Aplike",
+    "dashboard": "Tablo de bò",
+    "admin": "Admin",
+    "partners": "Pateè",
+    "help": "Èd",
+    "signIn": "Konekte",
+    "signOut": "Dekonekte"
+  },
+  "auth": {
+    "emailPlaceholder": "Antre imel ou",
+    "sendLink": "Voye lyen majik",
+    "checkEmail": "Gade imel ou pou yon lyen koneksyon",
+    "signInWithPasskey": "Konekte ak Passkey",
+    "registerPasskey": "Anrejistre Passkey",
+    "welcome": "Byenveni sou Campus Ayiti"
+  },
+  "apply": {
+    "title": "Aplike nan inivèsite yo",
+    "steps": {
+      "profile": "Pwofil",
+      "documents": "Dokiman",
+      "programs": "Chwazi pwogram",
+      "payment": "Peman",
+      "review": "Revize epi soumèt"
+    },
+    "profile": {
+      "title": "Ranpli pwofil ou",
+      "personalInfo": "Enfòmasyon pèsonèl",
+      "name": "Non konplè",
+      "phone": "Nimewo telefòn",
+      "nationality": "Nasyonalite",
+      "birthDate": "Dat nesans",
+      "address": "Adrès",
+      "education": "Istwa edikasyon",
+      "addEducation": "Ajoute edikasyon",
+      "essays": "Konpozisyon",
+      "personalStatement": "Deklarasyon pèsonèl",
+      "whyThisProgram": "Poukisa pwogram sa a?",
+      "careerGoals": "Objektif karyè"
+    },
+    "documents": {
+      "title": "Telechaje dokiman",
+      "uploadNew": "Telechaje nouvo dokiman",
+      "required": "Dokiman obligatwa",
+      "transcript": "Relve nòt",
+      "diploma": "Diplòm",
+      "idCard": "Kat idantite",
+      "passport": "Paspò",
+      "recommendationLetter": "Lèt rekòmandasyon"
+    },
+    "programs": {
+      "title": "Chwazi pwogram",
+      "search": "Chèche pwogram...",
+      "fee": "Frè aplikasyon",
+      "deadline": "Dat limit",
+      "select": "Chwazi pwogram"
+    },
+    "payment": {
+      "title": "Peman",
+      "total": "Total",
+      "payWithStripe": "Peye ak kat (Stripe)",
+      "payWithMonCash": "Peye ak MonCash"
+    },
+    "review": {
+      "title": "Revize epi soumèt",
+      "confirmSubmit": "Konfime epi soumèt aplikasyon"
+    }
+  },
+  "dashboard": {
+    "title": "Tablo de bò",
+    "myApplications": "Aplikasyon mwen",
+    "myDocuments": "Dokiman mwen",
+    "myProfile": "Pwofil mwen",
+    "status": {
+      "DRAFT": "Bouyon",
+      "SUBMITTED": "Soumèt",
+      "UNDER_REVIEW": "Ap egzaminen",
+      "ACCEPTED": "Aksepte",
+      "REJECTED": "Rejte"
+    }
+  },
+  "email": {
+    "welcome": {
+      "subject": "Byenveni sou Campus Ayiti!",
+      "greeting": "Bonjou",
+      "message": "Mèsi pou ou rantre nan Campus Ayiti. Nou kontan pou ede w ak aplikasyon inivèsite yo."
+    },
+    "submissionReceived": {
+      "subject": "Aplikasyon soumèt",
+      "message": "Nou resevwa aplikasyon ou. Nou pral notifye w lè yo fin egzaminen l."
+    },
+    "paymentReceipt": {
+      "subject": "Resi peman",
+      "message": "Mèsi pou peman ou. Resi ou atache."
+    }
+  }
+}
