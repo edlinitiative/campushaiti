@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ClientAuthSync } from "@/components/ClientAuthSync";
 
 export default async function DashboardPage() {
   // Server-side auth check
@@ -36,6 +37,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <ClientAuthSync />
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
         <p className="text-muted-foreground">Manage your university applications</p>

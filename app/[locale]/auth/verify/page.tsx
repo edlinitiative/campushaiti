@@ -34,14 +34,19 @@ export default function VerifyEmailPage() {
 
         // Get ID token and create session
         const idToken = await result.user.getIdToken();
-        await fetch("/api/auth/session", {
+        const response = await fetch("/api/auth/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ idToken }),
         });
 
+        if (!response.ok) {
+          throw new Error("Failed to create session");
+        }
+
         setStatus("success");
-        setTimeout(() => router.push("/dashboard"), 1500);
+        // Wait longer to ensure cookie is set
+        setTimeout(() => router.push("/dashboard"), 2000);
       } catch (err: any) {
         setStatus("error");
         setError(err.message);

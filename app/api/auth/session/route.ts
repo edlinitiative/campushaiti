@@ -26,7 +26,11 @@ export async function POST(request: NextRequest) {
       path: "/",
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, {
+      headers: {
+        "Set-Cookie": `session=${sessionCookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 5}${process.env.NODE_ENV === "production" ? "; Secure" : ""}`
+      }
+    });
   } catch (error: any) {
     console.error("Session creation error:", error);
     return NextResponse.json(
