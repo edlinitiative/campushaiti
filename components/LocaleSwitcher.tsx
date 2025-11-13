@@ -20,13 +20,25 @@ export default function LocaleSwitcher() {
   const currentLocale = (params.locale as Locale) || "en";
 
   const handleLocaleChange = (newLocale: string) => {
-    // Remove the current locale from pathname if it exists
-    const pathWithoutLocale = pathname.replace(/^\/(en|fr|ht)/, "") || "/";
+    // Get the path without locale prefix
+    const segments = pathname.split('/').filter(Boolean);
+    const firstSegment = segments[0];
     
-    // Construct new path with new locale - always include locale prefix
-    const newPath = `/${newLocale}${pathWithoutLocale === "/" ? "" : pathWithoutLocale}`;
+    // Check if first segment is a locale
+    const hasLocaleInPath = locales.includes(firstSegment as Locale);
+    const pathWithoutLocale = hasLocaleInPath 
+      ? '/' + segments.slice(1).join('/')
+      : pathname;
+    
+    // Construct new path
+    // For English (default), use path without locale (as-needed behavior)
+    // For other locales, always include the locale prefix
+    const newPath = newLocale === 'en'
+      ? pathWithoutLocale || '/'
+      : `/${newLocale}${pathWithoutLocale || '/'}`;
     
     router.push(newPath);
+    router.refresh();
   };
 
   const localeNames: Record<Locale, string> = {

@@ -51,7 +51,8 @@ export default function VerifyEmailPage() {
 
         setStatus("success");
         // Wait longer to ensure cookie is set
-        setTimeout(() => router.push(`/${locale}/dashboard`), 2000);
+        const dashboardPath = locale === "en" ? "/dashboard" : `/${locale}/dashboard`;
+        setTimeout(() => router.push(dashboardPath), 2000);
       } catch (err: any) {
         console.error("Verification error:", err);
         setStatus("error");

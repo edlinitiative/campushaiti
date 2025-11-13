@@ -18,7 +18,9 @@ export default async function DashboardPage({
   // Server-side auth check
   const user = await getServerUser();
   if (!user) {
-    redirect(`/${locale}/auth/signin`);
+    // Use as-needed locale: English doesn't need /en prefix
+    const signinPath = locale === "en" ? "/auth/signin" : `/${locale}/auth/signin`;
+    redirect(signinPath);
   }
 
   const t = await getTranslations("dashboard");

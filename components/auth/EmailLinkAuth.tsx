@@ -29,8 +29,10 @@ export default function EmailLinkAuth() {
     setMessage("");
 
     try {
+      // Use as-needed locale behavior: English doesn't need /en prefix
+      const verifyPath = locale === "en" ? "/auth/verify" : `/${locale}/auth/verify`;
       const actionCodeSettings = {
-        url: `${window.location.origin}/${locale}/auth/verify`,
+        url: `${window.location.origin}${verifyPath}`,
         handleCodeInApp: true,
       };
 
