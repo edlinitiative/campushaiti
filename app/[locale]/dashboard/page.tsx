@@ -8,11 +8,17 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ClientAuthSync } from "@/components/ClientAuthSync";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  
   // Server-side auth check
   const user = await getServerUser();
   if (!user) {
-    redirect("/auth/signin");
+    redirect(`/${locale}/auth/signin`);
   }
 
   const t = await getTranslations("dashboard");

@@ -21,12 +21,10 @@ export default function LocaleSwitcher() {
 
   const handleLocaleChange = (newLocale: string) => {
     // Remove the current locale from pathname if it exists
-    const pathWithoutLocale = pathname.replace(/^\/(en|fr|ht)/, "");
+    const pathWithoutLocale = pathname.replace(/^\/(en|fr|ht)/, "") || "/";
     
-    // Construct new path with new locale
-    const newPath = newLocale === "en" 
-      ? pathWithoutLocale || "/" 
-      : `/${newLocale}${pathWithoutLocale || "/"}`;
+    // Construct new path with new locale - always include locale prefix
+    const newPath = `/${newLocale}${pathWithoutLocale === "/" ? "" : pathWithoutLocale}`;
     
     router.push(newPath);
   };
