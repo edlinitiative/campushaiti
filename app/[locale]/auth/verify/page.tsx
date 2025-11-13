@@ -41,7 +41,8 @@ export default function VerifyEmailPage() {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to create session");
+          const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+          throw new Error(errorData.error || errorData.details || "Failed to create session");
         }
 
         setStatus("success");

@@ -33,8 +33,16 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error: any) {
     console.error("Session creation error:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+    });
     return NextResponse.json(
-      { error: error.message },
+      { 
+        error: error.message || "Failed to create session",
+        details: error.code || "unknown_error"
+      },
       { status: 500 }
     );
   }
