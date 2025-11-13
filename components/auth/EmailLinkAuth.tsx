@@ -11,9 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useParams } from "next/navigation";
 
 export default function EmailLinkAuth() {
   const t = useTranslations("auth");
+  const params = useParams();
+  const locale = params.locale as string || "en";
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -27,7 +30,7 @@ export default function EmailLinkAuth() {
 
     try {
       const actionCodeSettings = {
-        url: window.location.origin + "/auth/verify",
+        url: `${window.location.origin}/${locale}/auth/verify`,
         handleCodeInApp: true,
       };
 
@@ -35,7 +38,7 @@ export default function EmailLinkAuth() {
       window.localStorage.setItem("emailForSignIn", email);
       setMessage(t("checkEmail"));
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to send email. Please try again.");
     } finally {
       setLoading(false);
     }

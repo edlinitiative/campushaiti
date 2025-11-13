@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { auth } from "@/lib/firebase/client";
 import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string || "en";
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");
   const [error, setError] = useState("");
 
@@ -14,7 +16,7 @@ export default function VerifyEmailPage() {
     const verifyEmail = async () => {
       if (!isSignInWithEmailLink(auth, window.location.href)) {
         setStatus("error");
-        setError("Invalid link");
+        setError("Invalid verification link. Please request a new one.");
         return;
       }
 
@@ -26,7 +28,7 @@ export default function VerifyEmailPage() {
         }
 
         if (!email) {
-          throw new Error("Email required");
+          throw new Error("Email is required to verify your account");
         }
 
         const result = await signInWithEmailLink(auth, email, window.location.href);
@@ -41,21 +43,24 @@ export default function VerifyEmailPage() {
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-          throw new Error(errorData.error || errorData.details || "Failed to create session");
+          const errorData = await response.json().catch(() => ({}));
+          const errorMsg = errorData.error || errorData.details || "Failed to create session. Please add Firebase Admin credentials to Vercel.";
+          console.error("Session creation failed:", errorData);
+          throw new Error(errorMsg);
         }
 
         setStatus("success");
         // Wait longer to ensure cookie is set
-        setTimeout(() => router.push("/dashboard"), 2000);
+        setTimeout(() => router.push(`/${locale}/dashboard`), 2000);
       } catch (err: any) {
+        console.error("Verification error:", err);
         setStatus("error");
-        setError(err.message);
+        setError(err.message || "An unexpected error occurred. Please try again.");
       }
     };
 
     verifyEmail();
-  }, [router]);
+  }, [router, locale]);
 
   return (
     <div className="container mx-auto px-4 py-16 text-center">
