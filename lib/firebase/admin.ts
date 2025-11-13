@@ -24,8 +24,16 @@ function getAdminApp(): App {
       throw new Error("Firebase Admin environment variables are not set. Please configure FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY in Vercel.");
     }
 
-    // Parse the private key properly (handle escaped newlines)
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
+    // Parse the private key properly (handle all formats)
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    
+    // Remove quotes if present
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = privateKey.slice(1, -1);
+    }
+    
+    // Replace escaped newlines with actual newlines
+    privateKey = privateKey.replace(/\\n/g, "\n");
 
     adminApp = initializeApp({
       credential: cert({
