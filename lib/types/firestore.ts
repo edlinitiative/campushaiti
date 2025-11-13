@@ -1,4 +1,6 @@
-export type UserRole = "APPLICANT" | "REVIEWER" | "ADMIN";
+export type UserRole = "APPLICANT" | "REVIEWER" | "ADMIN" | "SCHOOL_ADMIN";
+
+export type UniversityStatus = "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
 
 export type ApplicationStatus = "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "ACCEPTED" | "REJECTED";
 
@@ -65,9 +67,25 @@ export interface University {
   city: string;
   country: string;
   logoUrl?: string;
+  websiteUrl?: string;
   contactEmail: string;
+  contactPhone?: string;
+  description?: string;
+  status: UniversityStatus;
+  adminUids: string[]; // School admins who can manage this university
+  bankAccount?: {
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+    routingNumber?: string;
+    swiftCode?: string;
+  };
+  stripeAccountId?: string; // For receiving payments via Stripe Connect
+  monCashAccountId?: string;
   createdAt: Date;
   updatedAt: Date;
+  approvedAt?: Date;
+  approvedBy?: string; // Admin uid who approved
 }
 
 export interface Program {
@@ -80,8 +98,22 @@ export interface Program {
   feeCents: number;
   currency: string;
   deadline: Date;
+  customQuestions?: CustomQuestion[]; // University-specific questions
   createdAt: Date;
   updatedAt: Date;
+}
+
+export type QuestionType = "TEXT" | "TEXTAREA" | "SELECT" | "MULTISELECT" | "FILE" | "DATE" | "NUMBER";
+
+export interface CustomQuestion {
+  id: string;
+  question: string;
+  type: QuestionType;
+  required: boolean;
+  options?: string[]; // For SELECT/MULTISELECT
+  placeholder?: string;
+  helpText?: string;
+  order: number;
 }
 
 export interface Application {
@@ -101,10 +133,15 @@ export interface ApplicationItem {
     profileComplete?: boolean;
     documentsUploaded?: boolean;
     essaysSubmitted?: boolean;
+    customQuestionsAnswered?: boolean;
     paymentReceived?: boolean;
   };
+  customAnswers?: ApplicationItemAnswer[]; // Answers to university custom questions
   paymentId?: string;
   submittedAt?: Date;
+  reviewedBy?: string; // School admin UID
+  reviewedAt?: Date;
+  reviewNotes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -154,4 +191,171 @@ export interface AuditLog {
   resourceId: string;
   metadata?: Record<string, any>;
   createdAt: Date;
+}
+
+// School Partner Types
+export type SchoolStatus = "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
+
+export interface School {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  city: string;
+  country: string;
+  website?: string;
+  email: string;
+  phone?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+  };
+  status: SchoolStatus;
+  adminUids: string[]; // School administrators
+  settings: {
+    acceptsApplications: boolean;
+    requiresPayment: boolean;
+    applicationFeeCents?: number;
+    currency?: string;
+  };
+  paymentInfo?: {
+    provider: "STRIPE" | "MONCASH" | "BANK_TRANSFER";
+    accountId?: string; // Stripe Connect account ID
+    bankDetails?: {
+      accountName?: string;
+      accountNumber?: string;
+      bankName?: string;
+      routingNumber?: string;
+    };
+  };
+  statistics: {
+    totalApplications: number;
+    pendingApplications: number;
+    acceptedApplications: number;
+    rejectedApplications: number;
+  };
+  rejectionReason?: string; // If status is REJECTED
+  approvedAt?: Date;
+  approvedBy?: string; // Admin UID who approved
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SchoolProgram {
+  id: string;
+  schoolId: string;
+  name: string;
+  degree: string; // e.g., "Bachelor's", "Master's", "Certificate"
+  description: string;
+  requirements: string;
+  duration?: string; // e.g., "4 years", "2 semesters"
+  language?: string; // e.g., "English", "French", "Kreyòl"
+  feeCents: number;
+  currency: string;
+  capacity?: number; // Maximum number of students
+  deadline?: Date;
+  startDate?: Date;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CustomQuestion {
+  id: string;
+  schoolId: string;
+  programId?: string; // Optional: specific to a program, null = all programs
+  question: string;
+  type: QuestionType;
+  required: boolean;
+  options?: string[]; // For SELECT/MULTISELECT types
+  placeholder?: string;
+  helpText?: string;
+  order: number; // Display order
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SchoolApplication {
+  id: string;
+  schoolId: string;
+  programId: string;
+  applicantUid: string;
+  status: "SUBMITTED" | "UNDER_REVIEW" | "ACCEPTED" | "REJECTED" | "WAITLISTED";
+  customAnswers: Record<string, any>; // Question ID -> Answer
+  reviewNotes?: string;
+  reviewedBy?: string; // School admin UID
+  reviewedAt?: Date;
+  submittedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SchoolMessage {
+  id: string;
+  schoolId: string;
+  applicationId: string;
+  senderUid: string;
+  senderRole: "APPLICANT" | "SCHOOL_ADMIN";
+  message: string;
+  read: boolean;
+  createdAt: Date;
+}
+
+export interface SchoolAnalytics {
+  schoolId: string;
+  period: string; // e.g., "2025-01", "2025-Q1"
+  metrics: {
+    newApplications: number;
+    acceptedApplications: number;
+    rejectedApplications: number;
+    revenue: number;
+    averageReviewTime: number; // in hours
+    conversionRate: number; // percentage
+  };
+  createdAt: Date;
+}
+
+export interface UniversityRegistration {
+  id: string;
+  name: string;
+  slug: string;
+  city: string;
+  country: string;
+  contactEmail: string;
+  contactPhone?: string;
+  websiteUrl?: string;
+  description?: string;
+  logoUrl?: string;
+  
+  // Contact person
+  contactPersonName: string;
+  contactPersonEmail: string;
+  contactPersonPhone?: string;
+  contactPersonTitle?: string;
+  
+  // Registration info
+  registrationNumber?: string;
+  taxId?: string;
+  
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason?: string;
+  reviewedBy?: string; // Admin UID
+  reviewedAt?: Date;
+  
+  submittedBy: string; // User UID who submitted
+  submittedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ApplicationItemAnswer {
+  questionId: string;
+  answer: string | string[] | number | Date;
+  fileUrl?: string; // For FILE type questions
 }

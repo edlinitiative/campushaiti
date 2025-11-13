@@ -60,6 +60,9 @@ export default function Navigation() {
             <Link href={getLocalePath("/partners")} className="text-sm hover:underline">
               {t("partners")}
             </Link>
+            <Link href={getLocalePath("/schools/register")} className="text-sm hover:underline">
+              For Schools
+            </Link>
             <Link href={getLocalePath("/help")} className="text-sm hover:underline">
               {t("help")}
             </Link>
@@ -79,6 +82,11 @@ export default function Navigation() {
                   <Link href={getLocalePath("/dashboard")}>
                     <Button variant="ghost" size="sm">
                       {t("dashboard")}
+                    </Button>
+                  </Link>
+                  <Link href={getLocalePath("/schools/dashboard")}>
+                    <Button variant="ghost" size="sm">
+                      School Portal
                     </Button>
                   </Link>
                   <Button variant="outline" size="sm" onClick={handleSignOut}>

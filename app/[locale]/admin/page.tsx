@@ -1,5 +1,7 @@
 import { requireRole } from "@/lib/auth/server-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function AdminPage() {
   // Require admin role
@@ -12,13 +14,16 @@ export default async function AdminPage() {
       <div className="grid md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Manage Universities</CardTitle>
-            <CardDescription>Add and edit partner universities</CardDescription>
+            <CardTitle>University Registrations</CardTitle>
+            <CardDescription>Approve new university registrations</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Create and manage university profiles
+              Review and approve universities wanting to join the platform
             </p>
+            <Button asChild className="w-full">
+              <Link href="/admin/universities">Manage Universities</Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -27,10 +32,13 @@ export default async function AdminPage() {
             <CardTitle>Manage Programs</CardTitle>
             <CardDescription>Configure university programs</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
               Add programs, set fees, and manage deadlines
             </p>
+            <Button asChild className="w-full" variant="outline">
+              <Link href="/admin/programs">View Programs</Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -39,10 +47,13 @@ export default async function AdminPage() {
             <CardTitle>Review Applications</CardTitle>
             <CardDescription>Process applicant submissions</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
               Review and approve/reject applications
             </p>
+            <Button asChild className="w-full" variant="outline">
+              <Link href="/admin/applications">View Applications</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
