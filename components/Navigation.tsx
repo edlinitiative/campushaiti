@@ -15,6 +15,7 @@ export default function Navigation() {
   const locale = (params.locale as string) || "en";
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   // Helper to create locale-aware path (English doesn't need /en prefix)
   const getLocalePath = (path: string) => {
@@ -23,6 +24,7 @@ export default function Navigation() {
   };
 
   useEffect(() => {
+    setMounted(true);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -67,7 +69,10 @@ export default function Navigation() {
         <div className="flex items-center space-x-4">
           <LocaleSwitcher />
           
-          {!loading && (
+          {!mounted || loading ? (
+            // Show placeholder during hydration to match SSR
+            <div className="w-20 h-9" />
+          ) : (
             <>
               {user ? (
                 <>
