@@ -1,57 +1,37 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { auth, db } from "@/lib/firebase/client";
-import { onAuthStateChanged } from "firebase/auth";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { useTranslations } from "next-intl";
+import { getServerUser } from "@/lib/auth/server-auth";
+import { getAdminDb } from "@/lib/firebase/admin";
+import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function DashboardPage() {
-  const t = useTranslations("dashboard");
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [applications, setApplications] = useState<any[]>([]);
+export default async function DashboardPage() {
+  // Server-side auth check
+  const user = await getServerUser();
+  if (!user) {
+    redirect("/auth/signin");
+  }
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        router.push("/auth/signin");
-        return;
-      }
+  const t = await getTranslations("dashboard");
 
-      try {
-        // Fetch user's applications
-        const q = query(
-          collection(db, "applications"),
-          where("applicantUid", "==", user.uid)
-        );
-        const snapshot = await getDocs(q);
-        const apps = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setApplications(apps);
-      } catch (error) {
-        console.error("Error fetching applications:", error);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <p>{t("common.loading")}</p>
-      </div>
-    );
+  // Fetch applications server-side
+  let applications: any[] = [];
+  try {
+    const adminDb = getAdminDb();
+    const snapshot = await adminDb
+      .collection("applications")
+      .where("applicantUid", "==", user.uid)
+      .limit(20)
+      .get();
+    
+    applications = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error("Error fetching applications:", error);
   }
 
   return (
