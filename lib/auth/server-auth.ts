@@ -82,4 +82,4 @@ export async function revokeUserSessions(uid: string): Promise<void> {
   const adminAuth = getAdminAuth();
   await adminAuth.revokeRefreshTokens(uid);
 }
-}
+
