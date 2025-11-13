@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSessionCookie } from "@/lib/auth/server-auth";
-import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,21 +15,22 @@ export async function POST(request: NextRequest) {
     // Create session cookie (5 days)
     const sessionCookie = await createSessionCookie(idToken);
 
-    // Set cookie
-    const cookieStore = await cookies();
-    cookieStore.set("session", sessionCookie, {
-      maxAge: 60 * 60 * 24 * 5, // 5 days
+    // Set cookie with proper attributes
+    const isProduction = process.env.NODE_ENV === "production";
+    const response = NextResponse.json({ success: true });
+    
+    // Use ResponseCookies API for better compatibility
+    response.cookies.set({
+      name: "session",
+      value: sessionCookie,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isProduction,
       sameSite: "lax",
       path: "/",
+      maxAge: 60 * 60 * 24 * 5, // 5 days
     });
 
-    return NextResponse.json({ success: true }, {
-      headers: {
-        "Set-Cookie": `session=${sessionCookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 5}${process.env.NODE_ENV === "production" ? "; Secure" : ""}`
-      }
-    });
+    return response;
   } catch (error: any) {
     console.error("Session creation error:", error);
     return NextResponse.json(

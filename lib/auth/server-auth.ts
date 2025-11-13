@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { UserRole } from "@/lib/types/firestore";
 
 export interface ServerUser {
@@ -19,10 +19,12 @@ export async function getServerUser(): Promise<ServerUser | null> {
     const sessionCookie = cookieStore.get("session")?.value;
 
     if (!sessionCookie) {
+      console.log("No session cookie found");
       return null;
     }
 
     // Verify the session cookie
+    const adminAuth = getAdminAuth();
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
 
     return {
@@ -60,6 +62,7 @@ export async function requireRole(allowedRoles: UserRole[]): Promise<ServerUser>
  * Should only be called by admin endpoints
  */
 export async function setUserRole(uid: string, role: UserRole): Promise<void> {
+  const adminAuth = getAdminAuth();
   await adminAuth.setCustomUserClaims(uid, { role });
 }
 
@@ -68,6 +71,7 @@ export async function setUserRole(uid: string, role: UserRole): Promise<void> {
  * Used after successful authentication
  */
 export async function createSessionCookie(idToken: string, expiresIn: number = 60 * 60 * 24 * 5 * 1000): Promise<string> {
+  const adminAuth = getAdminAuth();
   return await adminAuth.createSessionCookie(idToken, { expiresIn });
 }
 
@@ -75,5 +79,7 @@ export async function createSessionCookie(idToken: string, expiresIn: number = 6
  * Revoke all refresh tokens for a user (force logout)
  */
 export async function revokeUserSessions(uid: string): Promise<void> {
+  const adminAuth = getAdminAuth();
   await adminAuth.revokeRefreshTokens(uid);
+}
 }
