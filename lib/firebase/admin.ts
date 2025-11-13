@@ -15,6 +15,13 @@ function getAdminApp(): App {
 
   if (getApps().length === 0) {
     // Check if required env vars are present (skip during build)
+    console.log("Checking Firebase Admin environment variables...");
+    console.log("FIREBASE_PROJECT_ID exists:", !!process.env.FIREBASE_PROJECT_ID);
+    console.log("FIREBASE_CLIENT_EMAIL exists:", !!process.env.FIREBASE_CLIENT_EMAIL);
+    console.log("FIREBASE_PRIVATE_KEY exists:", !!process.env.FIREBASE_PRIVATE_KEY);
+    console.log("FIREBASE_PRIVATE_KEY length:", process.env.FIREBASE_PRIVATE_KEY?.length || 0);
+    console.log("FIREBASE_PRIVATE_KEY starts with:", process.env.FIREBASE_PRIVATE_KEY?.substring(0, 30) || "N/A");
+    
     if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
       console.error("Missing Firebase Admin environment variables:", {
         FIREBASE_PROJECT_ID: !!process.env.FIREBASE_PROJECT_ID,
@@ -34,15 +41,23 @@ function getAdminApp(): App {
     
     // Replace escaped newlines with actual newlines
     privateKey = privateKey.replace(/\\n/g, "\n");
+    
+    console.log("Private key after processing starts with:", privateKey.substring(0, 30));
 
-    adminApp = initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: privateKey,
-      }),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    });
+    try {
+      adminApp = initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: privateKey,
+        }),
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      });
+      console.log("Firebase Admin initialized successfully!");
+    } catch (error) {
+      console.error("Failed to initialize Firebase Admin:", error);
+      throw error;
+    }
   } else {
     adminApp = getApps()[0];
   }
