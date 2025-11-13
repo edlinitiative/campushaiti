@@ -37,6 +37,9 @@ export default function LocaleSwitcher() {
       ? pathWithoutLocale || '/'
       : `/${newLocale}${pathWithoutLocale || '/'}`;
     
+    // Set a cookie to remember the user's locale preference
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+    
     router.push(newPath);
     router.refresh();
   };
