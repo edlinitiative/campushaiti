@@ -27,6 +27,15 @@ service cloud.firestore {
       return hasRole('APPLICANT');
     }
     
+    function isSchoolAdmin() {
+      return hasRole('SCHOOL_ADMIN');
+    }
+    
+    function isSchoolAdminOf(universityId) {
+      return isSchoolAdmin() && 
+             request.auth.uid in get(/databases/$(database)/documents/universities/$(universityId)).data.adminUids;
+    }
+    
     // Users collection - users can read/update their own data, admins can manage all
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin() || isReviewer();
@@ -43,16 +52,28 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Universities collection - public read, admin write
+    // Universities collection - public read, admin write, school admins can update their own
     match /universities/{id} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || isSchoolAdminOf(id);
+      allow delete: if isAdmin();
     }
     
-    // Programs collection - public read, admin write
+    // University Registrations - anyone can create, only admins can review
+    match /universityRegistrations/{id} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Programs collection - public read, admin and school admins can write
     match /programs/{id} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow create: if isAdmin() || isSchoolAdmin();
+      allow update: if isAdmin() || (isSchoolAdmin() && request.auth.uid in get(/databases/$(database)/documents/universities/$(resource.data.universityId)).data.adminUids);
+      allow delete: if isAdmin();
     }
     
     // Applications collection - users can CRUD their own applications
@@ -65,11 +86,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Application Items - linked to applications
+    // Application Items - applicants, admins, reviewers, and school admins of the university can read
     match /applicationItems/{id} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && 
+                     (resource.data.userId == request.auth.uid || 
+                      isAdmin() || 
+                      isReviewer() ||
+                      (isSchoolAdmin() && request.auth.uid in get(/databases/$(database)/documents/universities/$(resource.data.universityId)).data.adminUids));
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated() || isAdmin();
+      allow update: if isAuthenticated() || 
+                       isAdmin() || 
+                       (isSchoolAdmin() && request.auth.uid in get(/databases/$(database)/documents/universities/$(resource.data.universityId)).data.adminUids);
       allow delete: if isAdmin();
     }
     

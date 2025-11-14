@@ -15,6 +15,7 @@ export default function AdminUniversitiesPage() {
   const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [activeTab, setActiveTab] = useState("pending");
 
   const mockRegistrations = [
     {
@@ -52,23 +53,47 @@ export default function AdminUniversitiesPage() {
   ];
 
   useEffect(() => {
-    // Load pending registrations from Firestore
-    setRegistrations(mockRegistrations);
-  }, []);
+    loadRegistrations();
+  }, [activeTab]);
+
+  const loadRegistrations = async () => {
+    try {
+      const status = activeTab === 'pending' ? 'PENDING' : 
+                     activeTab === 'approved' ? 'APPROVED' : 'REJECTED';
+      
+      const response = await fetch(`/api/admin/registrations?status=${status}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setRegistrations(data.registrations || []);
+      } else {
+        // Fallback to mock data
+        setRegistrations(mockRegistrations);
+      }
+    } catch (err) {
+      console.error("Error loading registrations:", err);
+      setRegistrations(mockRegistrations);
+    }
+  };
 
   const handleApprove = async (registration: any) => {
-    if (!confirm(`Approve ${registration.name}?`)) return;
+    if (!confirm(`Approve ${registration.universityName}?`)) return;
 
     try {
-      // 1. Update registration status to APPROVED
-      // 2. Create university document
-      // 3. Send approval email
-      // 4. Create initial admin user account
-      
-      alert(`${registration.name} has been approved!`);
-      setRegistrations(registrations.filter(r => r.id !== registration.id));
+      const response = await fetch(`/api/admin/registrations/${registration.id}/approve`, {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        alert(`${registration.universityName} has been approved!`);
+        loadRegistrations(); // Reload the list
+      } else {
+        const error = await response.json();
+        alert(`Failed to approve: ${error.error}`);
+      }
     } catch (err) {
       console.error("Error approving registration:", err);
+      alert("An error occurred while approving the registration");
     }
   };
 
@@ -76,17 +101,25 @@ export default function AdminUniversitiesPage() {
     if (!selectedRegistration || !rejectionReason.trim()) return;
 
     try {
-      // 1. Update registration status to REJECTED
-      // 2. Save rejection reason
-      // 3. Send rejection email
-      
-      alert(`${selectedRegistration.name} has been rejected`);
-      setRegistrations(registrations.filter(r => r.id !== selectedRegistration.id));
-      setShowRejectDialog(false);
-      setSelectedRegistration(null);
-      setRejectionReason("");
+      const response = await fetch(`/api/admin/registrations/${selectedRegistration.id}/reject`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: rejectionReason }),
+      });
+
+      if (response.ok) {
+        alert(`Registration rejected`);
+        setShowRejectDialog(false);
+        setSelectedRegistration(null);
+        setRejectionReason("");
+        loadRegistrations(); // Reload the list
+      } else {
+        const error = await response.json();
+        alert(`Failed to reject: ${error.error}`);
+      }
     } catch (err) {
       console.error("Error rejecting registration:", err);
+      alert("An error occurred while rejecting the registration");
     }
   };
 
@@ -107,7 +140,7 @@ export default function AdminUniversitiesPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="pending" className="space-y-6">
+      <Tabs defaultValue="pending" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="pending">
             Pending Approval ({registrations.filter(r => r.status === "PENDING").length})

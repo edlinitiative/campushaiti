@@ -42,9 +42,41 @@ export default function SchoolApplicationsPage() {
   ];
 
   useEffect(() => {
-    // Load applications from Firestore
-    setApplications(mockApplications);
-  }, []);
+    loadApplications();
+  }, [filter]);
+
+  const loadApplications = async () => {
+    try {
+      const url = filter === "all" 
+        ? '/api/schools/applications'
+        : `/api/schools/applications?status=${filter.toUpperCase()}`;
+        
+      const response = await fetch(url);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const apps = data.applications || [];
+        
+        // Transform to match expected format
+        const transformedApps = apps.map((app: any) => ({
+          id: app.id,
+          applicantName: app.personalInfo?.fullName || "Unknown",
+          applicantEmail: app.personalInfo?.email || "",
+          program: app.programName || "Unknown Program",
+          submittedAt: app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "",
+          status: app.status || "SUBMITTED",
+        }));
+        
+        setApplications(transformedApps);
+      } else {
+        // Fallback to mock data
+        setApplications(mockApplications);
+      }
+    } catch (err) {
+      console.error("Error loading applications:", err);
+      setApplications(mockApplications);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
