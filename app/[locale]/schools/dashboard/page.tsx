@@ -28,22 +28,16 @@ export default function SchoolDashboardPage() {
 
   const loadDashboard = async () => {
     try {
-      // Fetch applications from API
-      const response = await fetch('/api/schools/applications');
+      // Fetch statistics from API
+      const response = await fetch('/api/schools/stats');
       
       if (response.ok) {
-        const data = await response.json();
-        const applications = data.applications || [];
-        
-        // Calculate stats
-        const now = Date.now();
-        const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
-        
+        const stats = await response.json();
         setStats({
-          applications: applications.length,
-          newApplications: applications.filter((app: any) => app.createdAt > sevenDaysAgo).length,
-          accepted: applications.filter((app: any) => app.status === 'ACCEPTED').length,
-          pending: applications.filter((app: any) => app.status === 'PENDING' || app.status === 'UNDER_REVIEW').length,
+          applications: stats.applications || 0,
+          newApplications: stats.newApplications || 0,
+          accepted: stats.accepted || 0,
+          pending: stats.pending || 0,
         });
       } else {
         // Fallback to demo data if not authenticated

@@ -16,6 +16,7 @@ export default function Navigation() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   // Helper to create locale-aware path (English doesn't need /en prefix)
   const getLocalePath = (path: string) => {
@@ -25,8 +26,17 @@ export default function Navigation() {
 
   useEffect(() => {
     setMounted(true);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      
+      if (user) {
+        // Get ID token to access custom claims
+        const idTokenResult = await user.getIdTokenResult();
+        setUserRole(idTokenResult.claims.role as string || null);
+      } else {
+        setUserRole(null);
+      }
+      
       setLoading(false);
     });
 
@@ -84,11 +94,25 @@ export default function Navigation() {
                       {t("dashboard")}
                     </Button>
                   </Link>
-                  <Link href={getLocalePath("/schools/dashboard")}>
-                    <Button variant="ghost" size="sm">
-                      School Portal
-                    </Button>
-                  </Link>
+                  
+                  {/* Show School Portal link only for SCHOOL_ADMIN users */}
+                  {userRole === "SCHOOL_ADMIN" && (
+                    <Link href={getLocalePath("/schools/dashboard")}>
+                      <Button variant="ghost" size="sm">
+                        School Portal
+                      </Button>
+                    </Link>
+                  )}
+                  
+                  {/* Show Admin link only for ADMIN users */}
+                  {userRole === "ADMIN" && (
+                    <Link href={getLocalePath("/admin")}>
+                      <Button variant="ghost" size="sm">
+                        Admin
+                      </Button>
+                    </Link>
+                  )}
+                  
                   <Button variant="outline" size="sm" onClick={handleSignOut}>
                     {t("signOut")}
                   </Button>

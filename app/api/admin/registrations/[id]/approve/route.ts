@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { sendUniversityApprovedEmail, sendNewRegistrationNotification } from "@/lib/email/service";
 import { University } from "@/lib/types/firestore";
 
 export const dynamic = "force-dynamic";
@@ -122,6 +123,14 @@ export async function PUT(
       reviewedAt: Date.now(),
       reviewedBy: decodedClaims.uid,
       universityId: universityRef.id,
+    });
+
+    // Send approval email
+    await sendUniversityApprovedEmail({
+      universityName: registration!.universityName,
+      contactName: registration!.contactPersonName,
+      email: registration!.contactPersonEmail,
+      tempPassword: schoolAdminUid && tempPassword ? tempPassword : undefined,
     });
 
     // TODO: Create school admin user account and send invitation email

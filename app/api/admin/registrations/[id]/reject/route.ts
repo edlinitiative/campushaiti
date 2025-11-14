@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { sendUniversityRejectedEmail } from "@/lib/email/service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -52,6 +53,16 @@ export async function PUT(
       reviewedAt: Date.now(),
       reviewedBy: decodedClaims.uid,
       rejectionReason: reason,
+    });
+
+    const registration = registrationDoc.data();
+    
+    // Send rejection email
+    await sendUniversityRejectedEmail({
+      universityName: registration!.universityName,
+      contactName: registration!.contactPersonName,
+      email: registration!.contactPersonEmail,
+      reason,
     });
 
     // TODO: Send rejection notification email to contact person with reason
