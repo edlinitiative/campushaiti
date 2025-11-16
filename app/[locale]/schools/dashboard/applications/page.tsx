@@ -15,32 +15,14 @@ export default function SchoolApplicationsPage() {
   const [search, setSearch] = useState("");
   const [demoMode, setDemoMode] = useState(false);
 
-  const mockApplications = [
-    {
-      id: "1",
-      applicantName: "Marie Joseph",
-      applicantEmail: "marie.j@email.com",
-      program: "Licence en Informatique",
-      submittedAt: "2025-11-10",
-      status: "SUBMITTED",
-    },
-    {
-      id: "2",
-      applicantName: "Jean Baptiste",
-      applicantEmail: "jean.b@email.com",
-      program: "Licence en Administration",
-      submittedAt: "2025-11-09",
-      status: "UNDER_REVIEW",
-    },
-    {
-      id: "3",
-      applicantName: "Sophie Laurent",
-      applicantEmail: "sophie.l@email.com",
-      program: "Master en Gestion",
-      submittedAt: "2025-11-08",
-      status: "ACCEPTED",
-    },
-  ];
+  const mockApplications = getDemoApplications().map(app => ({
+    id: app.id,
+    applicantName: app.applicantName,
+    applicantEmail: app.applicantEmail,
+    program: app.program,
+    submittedAt: new Date(app.submittedAt).toLocaleDateString(),
+    status: app.status,
+  }));
 
   useEffect(() => {
     loadApplications();

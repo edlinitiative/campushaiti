@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { getAllDemoPrograms } from "@/lib/demo-data";
 
 export default function SchoolProgramsPage() {
   const [programs, setPrograms] = useState<any[]>([]);
@@ -34,26 +35,21 @@ export default function SchoolProgramsPage() {
   const loadPrograms = async () => {
     try {
       // TODO: Fetch programs from API
-      // For now, using mock data
+      // For now, using comprehensive demo data
       setDemoMode(true); // Always in demo mode until API is implemented
-      setPrograms([
-        {
-          id: "1",
-          name: "Computer Science",
-          degree: "Bachelor",
-          feeCents: 150000,
-          currency: "HTG",
-          deadline: "2025-12-31",
-        },
-        {
-          id: "2",
-          name: "Business Administration",
-          degree: "Master",
-          feeCents: 200000,
-          currency: "HTG",
-          deadline: "2025-12-31",
-        },
-      ]);
+      const demoPrograms = getAllDemoPrograms();
+      setPrograms(demoPrograms.map(p => ({
+        id: p.id,
+        name: p.name,
+        degree: p.degree,
+        description: p.description,
+        requirements: p.requirements,
+        feeCents: p.feeCents,
+        currency: p.currency,
+        deadline: p.deadline,
+        duration: p.duration,
+        language: p.language,
+      })));
     } catch (err) {
       console.error("Error loading programs:", err);
       setDemoMode(true);
@@ -207,19 +203,41 @@ export default function SchoolProgramsPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Application Fee</p>
-                  <p className="text-lg font-semibold">
-                    {formatCurrency(program.feeCents, program.currency)}
-                  </p>
-                </div>
+                {program.description && (
+                  <div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {program.description}
+                    </p>
+                  </div>
+                )}
                 
-                <div>
-                  <p className="text-sm text-muted-foreground">Deadline</p>
-                  <p className="font-medium">
-                    {new Date(program.deadline).toLocaleDateString()}
-                  </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Application Fee</p>
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(program.feeCents, program.currency)}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-muted-foreground">Deadline</p>
+                    <p className="font-medium">
+                      {new Date(program.deadline).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
+
+                {program.duration && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Duration: <span className="font-medium text-foreground">{program.duration}</span></p>
+                  </div>
+                )}
+
+                {program.language && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Language: <span className="font-medium text-foreground">{program.language}</span></p>
+                  </div>
+                )}
 
                 <div className="pt-4 flex gap-2">
                   <Button variant="outline" size="sm" asChild className="flex-1">
