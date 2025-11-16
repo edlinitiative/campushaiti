@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle, XCircle, Clock, FileText, DollarSign, AlertCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Clock, FileText, DollarSign, AlertCircle, Download, User, GraduationCap, MapPin, Phone, Mail, Calendar } from "lucide-react";
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -144,6 +144,98 @@ export default function ApplicationDetailPage() {
     }
   };
 
+  const handleDownloadDossier = () => {
+    // Create a comprehensive text representation of the application
+    const dossier = `
+APPLICATION DOSSIER
+==================
+
+Applicant: ${application.applicantName}
+Program: ${application.program}
+Status: ${application.status}
+Submitted: ${new Date(application.submittedAt).toLocaleString()}
+
+PERSONAL INFORMATION
+--------------------
+Full Name: ${application.personalInfo.fullName}
+Email: ${application.personalInfo.email}
+Phone: ${application.personalInfo.phone}
+Date of Birth: ${application.personalInfo.dateOfBirth}
+Nationality/Address: ${application.personalInfo.address}
+
+EDUCATION BACKGROUND
+--------------------
+School Name: ${application.education.schoolName}
+Graduation Year: ${application.education.graduationYear}
+GPA: ${application.education.gpa}
+${application.education.fieldOfStudy ? `Field of Study: ${application.education.fieldOfStudy}` : ''}
+
+${application.personalStatement ? `
+PERSONAL STATEMENT
+------------------
+${application.personalStatement}
+` : ''}
+
+${application.customAnswers && application.customAnswers.length > 0 ? `
+PROGRAM-SPECIFIC QUESTIONS
+--------------------------
+${application.customAnswers.map((item: any, i: number) => `
+Q${i + 1}: ${item.question}
+A: ${item.answer}
+`).join('\n')}
+` : ''}
+
+${application.programAnswers ? `
+ADDITIONAL PROGRAM QUESTIONS
+----------------------------
+${Object.entries(application.programAnswers).map(([qId, answer]) => `
+Question ID: ${qId}
+Answer: ${answer}
+`).join('\n')}
+` : ''}
+
+APPLICATION CHECKLIST
+---------------------
+${Object.entries(application.checklist).map(([key, value]) => `
+${value ? '✓' : '✗'} ${key.replace(/([A-Z])/g, ' $1').trim()}
+`).join('')}
+
+${application.documentIds && application.documentIds.length > 0 ? `
+DOCUMENTS
+---------
+${application.documentIds.length} document(s) uploaded
+Document IDs: ${application.documentIds.join(', ')}
+` : 'No documents uploaded'}
+
+${application.feePaidCents ? `
+PAYMENT INFORMATION
+-------------------
+Amount: ${(application.feePaidCents / 100).toFixed(2)} ${application.feePaidCurrency || 'HTG'}
+Payment Status: ${application.checklist?.paymentReceived ? 'Received' : 'Pending'}
+` : ''}
+
+${reviewNotes ? `
+REVIEW NOTES
+------------
+${reviewNotes}
+` : ''}
+
+---
+Generated: ${new Date().toLocaleString()}
+    `.trim();
+
+    // Create and download file
+    const blob = new Blob([dossier], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `application_${application.applicantName.replace(/\s+/g, '_')}_${applicationId}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "SUBMITTED":
@@ -208,12 +300,18 @@ export default function ApplicationDetailPage() {
       )}
 
       <div className="mb-6">
-        <Button variant="ghost" asChild>
-          <Link href="/schools/dashboard/applications">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Applications
-          </Link>
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" asChild>
+            <Link href="/schools/dashboard/applications">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Applications
+            </Link>
+          </Button>
+          <Button onClick={handleDownloadDossier} variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            Download Dossier
+          </Button>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -240,32 +338,58 @@ export default function ApplicationDetailPage() {
           {/* Personal Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Personal Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Full Name</p>
-                  <p className="font-medium">{application.personalInfo.fullName}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Full Name</p>
+                  </div>
+                  <p className="font-medium">{application.personalInfo.fullName || 'Not provided'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">{application.personalInfo.email}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Email</p>
+                  </div>
+                  <p className="font-medium">{application.personalInfo.email || 'Not provided'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium">{application.personalInfo.phone}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Phone className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                  </div>
+                  <p className="font-medium">{application.personalInfo.phone || 'Not provided'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Date of Birth</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Date of Birth</p>
+                  </div>
                   <p className="font-medium">
-                    {new Date(application.personalInfo.dateOfBirth).toLocaleDateString()}
+                    {application.personalInfo.dateOfBirth 
+                      ? new Date(application.personalInfo.dateOfBirth).toLocaleDateString()
+                      : 'Not provided'}
                   </p>
                 </div>
                 <div className="md:col-span-2">
-                  <p className="text-sm text-muted-foreground">Address</p>
-                  <p className="font-medium">{application.personalInfo.address}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Nationality / Address</p>
+                  </div>
+                  <p className="font-medium">{application.personalInfo.address || 'Not provided'}</p>
                 </div>
+                {application.nationality && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Nationality</p>
+                    <p className="font-medium">{application.nationality}</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -273,22 +397,31 @@ export default function ApplicationDetailPage() {
           {/* Education */}
           <Card>
             <CardHeader>
-              <CardTitle>Education</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="w-5 h-5" />
+                Education Background
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">School Name</p>
-                  <p className="font-medium">{application.education.schoolName}</p>
+                  <p className="font-medium">{application.education.schoolName || 'Not provided'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Graduation Year</p>
-                  <p className="font-medium">{application.education.graduationYear}</p>
+                  <p className="font-medium">{application.education.graduationYear || 'Not provided'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">GPA</p>
-                  <p className="font-medium">{application.education.gpa}</p>
+                  <p className="font-medium">{application.education.gpa || 'Not provided'}</p>
                 </div>
+                {application.education.fieldOfStudy && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Field of Study</p>
+                    <p className="font-medium">{application.education.fieldOfStudy}</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -316,6 +449,24 @@ export default function ApplicationDetailPage() {
                   <div key={index}>
                     <p className="font-medium text-sm mb-1">{item.question}</p>
                     <p className="text-muted-foreground">{item.answer}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Program-Specific Answers */}
+          {application.programAnswers && Object.keys(application.programAnswers).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Program-Specific Questions</CardTitle>
+                <CardDescription>Additional questions answered for this program</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {Object.entries(application.programAnswers).map(([questionId, answer]: [string, any]) => (
+                  <div key={questionId} className="border-l-2 border-primary pl-4">
+                    <p className="font-medium text-sm mb-1 text-muted-foreground">Question {questionId}</p>
+                    <p className="text-sm whitespace-pre-wrap">{answer}</p>
                   </div>
                 ))}
               </CardContent>
