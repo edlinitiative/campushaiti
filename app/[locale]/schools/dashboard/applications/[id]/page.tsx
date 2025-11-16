@@ -37,37 +37,93 @@ export default function ApplicationDetailPage() {
       if (response.ok) {
         const data = await response.json();
         if (data.application) {
+          const app = data.application;
           setApplication({
-            id: data.application.id,
-            applicantName: data.application.applicantName || "Unknown",
-            applicantEmail: data.application.applicantEmail || "",
-            program: `${data.application.programName || "Unknown Program"} - ${data.application.programDegree || ""}`,
-            submittedAt: data.application.submittedAt || new Date().toISOString(),
-            status: data.application.status || "SUBMITTED",
+            id: app.id,
+            applicantName: app.applicantName || "Unknown",
+            applicantEmail: app.applicantEmail || "",
+            applicantPhone: app.applicantPhone || "",
+            program: `${app.programName || "Unknown Program"} - ${app.programDegree || ""}`,
+            universityName: app.universityName || "",
+            submittedAt: app.submittedAt || new Date().toISOString(),
+            status: app.status || "SUBMITTED",
+            
+            // Personal info
+            gender: app.gender || "",
+            birthPlace: app.birthPlace || "",
+            idNumber: app.idNumber || "",
+            whatsapp: app.whatsapp || "",
+            nationality: app.nationality || "",
+            
+            // Address
+            address: app.address || "",
+            city: app.city || "",
+            department: app.department || "",
+            country: app.country || "",
+            
+            // Parent info
+            fatherName: app.fatherName || "",
+            fatherPhone: app.fatherPhone || "",
+            fatherOccupation: app.fatherOccupation || "",
+            motherName: app.motherName || "",
+            motherPhone: app.motherPhone || "",
+            motherOccupation: app.motherOccupation || "",
+            guardianName: app.guardianName || "",
+            guardianPhone: app.guardianPhone || "",
+            guardianRelationship: app.guardianRelationship || "",
+            
+            // Emergency
+            emergencyName: app.emergencyName || "",
+            emergencyPhone: app.emergencyPhone || "",
+            emergencyRelationship: app.emergencyRelationship || "",
+            
+            // Education
+            lastSchoolName: app.lastSchoolName || "",
+            lastSchoolCity: app.lastSchoolCity || "",
+            graduationYear: app.graduationYear || "",
+            diplomaType: app.diplomaType || "",
+            fieldOfStudy: app.fieldOfStudy || "",
+            gpa: app.gpa || "",
+            hasBaccalaureat: app.hasBaccalaureat || "",
+            baccalaureatSeries: app.baccalaureatSeries || "",
+            
+            // Essays
+            personalStatement: app.personalStatement || "",
+            careerGoals: app.careerGoals || "",
+            whyThisUniversity: app.whyThisUniversity || "",
+            
             personalInfo: {
-              fullName: data.application.applicantName || "",
-              email: data.application.applicantEmail || "",
-              phone: data.application.applicantPhone || "",
-              dateOfBirth: data.application.birthDate || "",
-              address: data.application.nationality || "",
+              fullName: app.applicantName || "",
+              email: app.applicantEmail || "",
+              phone: app.applicantPhone || "",
+              dateOfBirth: app.birthDate || "",
+              address: app.nationality || "",
             },
-            education: data.application.education || {
-              schoolName: "",
-              graduationYear: "",
-              gpa: "",
+            education: {
+              schoolName: app.lastSchoolName || "",
+              city: app.lastSchoolCity || "",
+              graduationYear: app.graduationYear || "",
+              gpa: app.gpa || "",
+              diplomaType: app.diplomaType || "",
+              fieldOfStudy: app.fieldOfStudy || "",
+              hasBaccalaureat: app.hasBaccalaureat || "",
+              baccalaureatSeries: app.baccalaureatSeries || "",
             },
-            documents: [], // TODO: Fetch documents by documentIds
-            customAnswers: data.application.customAnswers || [],
-            checklist: data.application.checklist || {
+            documents: app.documents || [],
+            documentIds: app.documentIds || [],
+            customAnswers: app.customAnswers || [],
+            programAnswers: app.programAnswers || {},
+            checklist: app.checklist || {
               personalInfoCompleted: false,
               educationCompleted: false,
               documentsUploaded: false,
               customQuestionsAnswered: false,
             },
-            reviewNotes: data.application.reviewNotes || "",
-            personalStatement: data.application.personalStatement || "",
+            reviewNotes: app.reviewNotes || "",
+            feePaidCents: app.feePaidCents || 0,
+            feePaidCurrency: app.feePaidCurrency || "HTG",
           });
-          setReviewNotes(data.application.reviewNotes || "");
+          setReviewNotes(app.reviewNotes || "");
           setDemoMode(false);
           setLoading(false);
           return;
@@ -82,6 +138,7 @@ export default function ApplicationDetailPage() {
         applicantName: "Jean Baptiste",
         applicantEmail: "jean.baptiste@email.com",
         program: "Computer Science - Bachelor",
+        universityName: "Université d'État d'Haïti",
         submittedAt: "2025-11-10T14:30:00Z",
         status: "UNDER_REVIEW",
         personalInfo: {
@@ -112,7 +169,7 @@ export default function ApplicationDetailPage() {
         },
         reviewNotes: "",
       });
-      setReviewNotes(application?.reviewNotes || "");
+      setReviewNotes("");
     } catch (err) {
       console.error("Error loading application:", err);
       setDemoMode(true);
@@ -122,7 +179,14 @@ export default function ApplicationDetailPage() {
   };
 
   const handleUpdateStatus = async (newStatus: string) => {
-    if (!confirm(`Change status to ${newStatus}?`)) return;
+    // Handle demo mode
+    if (demoMode) {
+      alert("Demo Mode: Status changes are not saved. Please sign in to manage real applications.");
+      setApplication({ ...application, status: newStatus });
+      return;
+    }
+
+    if (!confirm(`Change status to ${newStatus.replace(/_/g, ' ')}?`)) return;
 
     setUpdating(true);
     try {
@@ -134,13 +198,14 @@ export default function ApplicationDetailPage() {
 
       if (response.ok) {
         setApplication({ ...application, status: newStatus });
-        alert("Application status updated successfully");
+        alert(`Application status updated to ${newStatus.replace(/_/g, ' ')}`);
       } else {
-        alert("Failed to update application");
+        const error = await response.json();
+        alert(`Failed to update application: ${error.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error("Error updating application:", err);
-      alert("An error occurred");
+      alert("An error occurred while updating the application");
     } finally {
       setUpdating(false);
     }
@@ -924,8 +989,33 @@ export default function ApplicationDetailPage() {
               <Button
                 className="w-full"
                 variant="outline"
-                onClick={() => {
-                  handleUpdateStatus(application.status);
+                onClick={async () => {
+                  if (demoMode) {
+                    alert("Demo Mode: Notes are not saved. Please sign in to manage real applications.");
+                    return;
+                  }
+                  
+                  setUpdating(true);
+                  try {
+                    const response = await fetch(`/api/schools/applications/${applicationId}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ reviewNotes }),
+                    });
+
+                    if (response.ok) {
+                      setApplication({ ...application, reviewNotes });
+                      alert("Notes saved successfully");
+                    } else {
+                      const error = await response.json();
+                      alert(`Failed to save notes: ${error.error || 'Unknown error'}`);
+                    }
+                  } catch (err) {
+                    console.error("Error saving notes:", err);
+                    alert("An error occurred while saving notes");
+                  } finally {
+                    setUpdating(false);
+                  }
                 }}
                 disabled={updating}
               >
