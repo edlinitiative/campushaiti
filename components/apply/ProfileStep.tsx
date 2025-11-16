@@ -460,6 +460,28 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
             <TabsContent value="address" className="space-y-4 mt-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
+                  Country *
+                </label>
+                <Select
+                  value={formData.country}
+                  onValueChange={(value) => handleChange("country", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Haiti">Haiti</SelectItem>
+                    <SelectItem value="United States">United States</SelectItem>
+                    <SelectItem value="Canada">Canada</SelectItem>
+                    <SelectItem value="France">France</SelectItem>
+                    <SelectItem value="Dominican Republic">Dominican Republic</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
                   Street Address *
                 </label>
                 <Input
@@ -484,36 +506,38 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Department *
+                    {formData.country === "Haiti" ? "Department *" : "State/Province/Region *"}
                   </label>
-                  <Select
-                    value={formData.department}
-                    onValueChange={(value) => handleChange("department", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {haitianDepartments.map((dept) => (
-                        <SelectItem key={dept} value={dept}>
-                          {dept}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {formData.country === "Haiti" ? (
+                    <Select
+                      value={formData.department}
+                      onValueChange={(value) => handleChange("department", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {haitianDepartments.map((dept) => (
+                          <SelectItem key={dept} value={dept}>
+                            {dept}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      required
+                      value={formData.department}
+                      onChange={(e) => handleChange("department", e.target.value)}
+                      placeholder={
+                        formData.country === "United States" ? "e.g., New York" :
+                        formData.country === "Canada" ? "e.g., Ontario" :
+                        formData.country === "France" ? "e.g., Île-de-France" :
+                        "Enter state/province/region"
+                      }
+                    />
+                  )}
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Country *
-                </label>
-                <Input
-                  required
-                  value={formData.country}
-                  onChange={(e) => handleChange("country", e.target.value)}
-                  placeholder="Haiti"
-                />
               </div>
             </TabsContent>
 
