@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle, XCircle, Clock } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Clock, FileText, DollarSign, AlertCircle } from "lucide-react";
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -29,9 +29,52 @@ export default function ApplicationDetailPage() {
 
   const loadApplication = async () => {
     try {
-      // TODO: Fetch application from API
-      // For now, using mock data
-      setDemoMode(true); // Always in demo mode until API is implemented
+      // Fetch application from Firestore
+      const response = await fetch(`/api/schools/applications/${applicationId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.application) {
+          setApplication({
+            id: data.application.id,
+            applicantName: data.application.applicantName || "Unknown",
+            applicantEmail: data.application.applicantEmail || "",
+            program: `${data.application.programName || "Unknown Program"} - ${data.application.programDegree || ""}`,
+            submittedAt: data.application.submittedAt || new Date().toISOString(),
+            status: data.application.status || "SUBMITTED",
+            personalInfo: {
+              fullName: data.application.applicantName || "",
+              email: data.application.applicantEmail || "",
+              phone: data.application.applicantPhone || "",
+              dateOfBirth: data.application.birthDate || "",
+              address: data.application.nationality || "",
+            },
+            education: data.application.education || {
+              schoolName: "",
+              graduationYear: "",
+              gpa: "",
+            },
+            documents: [], // TODO: Fetch documents by documentIds
+            customAnswers: data.application.customAnswers || [],
+            checklist: data.application.checklist || {
+              personalInfoCompleted: false,
+              educationCompleted: false,
+              documentsUploaded: false,
+              customQuestionsAnswered: false,
+            },
+            reviewNotes: data.application.reviewNotes || "",
+            personalStatement: data.application.personalStatement || "",
+          });
+          setReviewNotes(data.application.reviewNotes || "");
+          setDemoMode(false);
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Fallback to demo mode if API fails
+      console.log("Failed to fetch application, using demo mode");
+      setDemoMode(true);
       setApplication({
         id: applicationId,
         applicantName: "Jean Baptiste",
@@ -250,6 +293,18 @@ export default function ApplicationDetailPage() {
             </CardContent>
           </Card>
 
+          {/* Personal Statement */}
+          {application.personalStatement && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Personal Statement</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm whitespace-pre-wrap">{application.personalStatement}</p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Custom Questions */}
           {application.customAnswers?.length > 0 && (
             <Card>
@@ -267,29 +322,72 @@ export default function ApplicationDetailPage() {
             </Card>
           )}
 
+          {/* Application Fee & Payment */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5" />
+                Application Fee
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {application.feePaidCents ? (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Amount:</span>
+                      <span className="font-semibold">
+                        {(application.feePaidCents / 100).toFixed(2)} {application.feePaidCurrency || "HTG"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {application.checklist?.paymentReceived ? (
+                        <>
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="text-sm text-green-600 font-medium">Payment Received</span>
+                        </>
+                      ) : (
+                        <>
+                          <Clock className="w-4 h-4 text-amber-600" />
+                          <span className="text-sm text-amber-600 font-medium">Payment Pending</span>
+                        </>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No fee information available</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Documents */}
           <Card>
             <CardHeader>
-              <CardTitle>Documents</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Documents ({application.documentIds?.length || 0})
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {application.documents.map((doc: any, index: number) => (
-                  <div key={index} className="flex justify-between items-center py-2 border-b last:border-0">
-                    <div>
-                      <p className="font-medium">{doc.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Uploaded: {new Date(doc.uploadedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                        View
-                      </a>
-                    </Button>
+              {application.documentIds && application.documentIds.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {application.documentIds.length} document(s) uploaded
+                  </p>
+                  {/* TODO: Fetch and display actual documents */}
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <p className="text-sm text-blue-900">
+                      Document viewing will be available soon. Document IDs are stored in the application.
+                    </p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <AlertCircle className="w-4 h-4" />
+                  No documents uploaded
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -310,6 +408,15 @@ export default function ApplicationDetailPage() {
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Accept Application
+              </Button>
+              
+              <Button
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={() => handleUpdateStatus("WAITLISTED")}
+                disabled={updating || application.status === "WAITLISTED"}
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Add to Waitlist
               </Button>
               
               <Button

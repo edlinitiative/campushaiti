@@ -30,8 +30,9 @@ export default async function DashboardPage({
   try {
     const adminDb = getAdminDb();
     const snapshot = await adminDb
-      .collection("applications")
+      .collection("applicationItems")
       .where("applicantUid", "==", user.uid)
+      .orderBy("createdAt", "desc")
       .limit(20)
       .get();
     
@@ -68,11 +69,19 @@ export default async function DashboardPage({
             ) : (
               <div className="space-y-4">
                 {applications.map((app) => (
-                  <div key={app.id} className="border-b pb-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Application #{app.id.slice(0, 8)}</span>
-                      <Badge>{t(`status.${app.status}`)}</Badge>
+                  <div key={app.id} className="border rounded p-3 hover:bg-muted/50 transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{app.programName || "Program"}</p>
+                        <p className="text-xs text-muted-foreground">{app.universityName || "University"}</p>
+                      </div>
+                      <Badge className="ml-2">{t(`status.${app.status}`)}</Badge>
                     </div>
+                    {app.submittedAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Submitted: {new Date(app.submittedAt.seconds * 1000 || app.submittedAt).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>

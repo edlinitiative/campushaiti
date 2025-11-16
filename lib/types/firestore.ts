@@ -128,6 +128,36 @@ export interface ApplicationItem {
   id: string;
   applicationId: string;
   programId: string;
+  
+  // University/Program info (denormalized for efficient querying)
+  universityId: string;
+  universityName: string;
+  programName: string;
+  programDegree: string;
+  
+  // Applicant info (denormalized)
+  applicantUid: string;
+  applicantName: string;
+  applicantEmail: string;
+  applicantPhone?: string;
+  
+  // Profile data
+  personalStatement?: string;
+  nationality?: string;
+  birthDate?: Date;
+  
+  // Education background
+  education?: {
+    schoolName: string;
+    graduationYear: string;
+    gpa?: string;
+    fieldOfStudy?: string;
+  };
+  
+  // Document references
+  documentIds: string[]; // IDs from documents collection
+  
+  // Status and tracking
   status: ApplicationItemStatus;
   checklist: {
     profileComplete?: boolean;
@@ -136,12 +166,22 @@ export interface ApplicationItem {
     customQuestionsAnswered?: boolean;
     paymentReceived?: boolean;
   };
+  
+  // Custom university questions
   customAnswers?: ApplicationItemAnswer[]; // Answers to university custom questions
+  
+  // Payment
   paymentId?: string;
+  feePaidCents?: number;
+  feePaidCurrency?: string;
+  
+  // Review tracking
   submittedAt?: Date;
   reviewedBy?: string; // School admin UID
   reviewedAt?: Date;
   reviewNotes?: string;
+  
+  // Timestamps
   createdAt: Date;
   updatedAt: Date;
 }
