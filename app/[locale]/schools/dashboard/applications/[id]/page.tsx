@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle, XCircle, Clock, FileText, DollarSign, AlertCircle, Download, User, GraduationCap, MapPin, Phone, Mail, Calendar } from "lucide-react";
+import JSZip from "jszip";
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -144,9 +145,12 @@ export default function ApplicationDetailPage() {
     }
   };
 
-  const handleDownloadDossier = () => {
-    // Create a comprehensive text representation of the application
-    const dossier = `
+  const handleDownloadDossier = async () => {
+    try {
+      const zip = new JSZip();
+      
+      // Create a comprehensive text representation of the application
+      const dossier = `
 APPLICATION DOSSIER
 ==================
 
@@ -269,18 +273,48 @@ ${reviewNotes}
 
 ---
 Generated: ${new Date().toLocaleString()}
-    `.trim();
+      `.trim();
 
-    // Create and download file
-    const blob = new Blob([dossier], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `application_${application.applicantName.replace(/\s+/g, '_')}_${applicationId}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+      // Add the application info text file
+      zip.file("application_info.txt", dossier);
+
+      // Download documents if available
+      if (application.documents && application.documents.length > 0) {
+        const documentsFolder = zip.folder("documents");
+        
+        for (let i = 0; i < application.documents.length; i++) {
+          const doc = application.documents[i];
+          try {
+            // Fetch the document
+            const response = await fetch(doc.url);
+            if (response.ok) {
+              const blob = await response.blob();
+              const filename = doc.name || `document_${i + 1}`;
+              documentsFolder?.file(filename, blob);
+            }
+          } catch (err) {
+            console.error(`Error downloading document ${doc.name}:`, err);
+          }
+        }
+      } else {
+        // Add a readme if no documents
+        zip.file("documents/README.txt", "No documents have been uploaded for this application.");
+      }
+
+      // Generate and download the ZIP file
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `application_${application.applicantName.replace(/\s+/g, '_')}_${applicationId}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error creating ZIP file:", err);
+      alert("Failed to create download package. Please try again.");
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -356,7 +390,7 @@ Generated: ${new Date().toLocaleString()}
           </Button>
           <Button onClick={handleDownloadDossier} variant="outline">
             <Download className="w-4 h-4 mr-2" />
-            Download Dossier
+            Download Dossier (ZIP)
           </Button>
         </div>
       </div>
