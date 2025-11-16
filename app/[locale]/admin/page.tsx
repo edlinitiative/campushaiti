@@ -1,9 +1,10 @@
-import { requireRole } from "@/lib/auth/server-auth";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { getAdminDb } from "@/lib/firebase/admin";
 import { 
   Building2, 
   GraduationCap, 
@@ -18,70 +19,123 @@ import {
   XCircle
 } from "lucide-react";
 
-async function getAdminStats() {
-  const db = getAdminDb();
-  
-  try {
-    // Get counts from Firestore
-    const [universitiesSnap, programsSnap, applicationsSnap, usersSnap] = await Promise.all([
-      db.collection("universities").get(),
-      db.collection("programs").get(),
-      db.collection("applicationItems").get(),
-      db.collection("users").get(),
-    ]);
-
-    // Get pending universities
-    const pendingUniversities = universitiesSnap.docs.filter(
-      doc => doc.data().status === "PENDING"
-    ).length;
-
-    // Get application stats
-    const applications = applicationsSnap.docs.map(doc => doc.data());
-    const pendingApps = applications.filter(app => app.status === "SUBMITTED").length;
-    const underReviewApps = applications.filter(app => app.status === "UNDER_REVIEW").length;
-    const acceptedApps = applications.filter(app => app.status === "ACCEPTED").length;
-
-    return {
-      totalUniversities: universitiesSnap.size,
-      pendingUniversities,
-      approvedUniversities: universitiesSnap.docs.filter(
-        doc => doc.data().status === "APPROVED"
-      ).length,
-      totalPrograms: programsSnap.size,
-      totalApplications: applicationsSnap.size,
-      pendingApplications: pendingApps,
-      underReviewApplications: underReviewApps,
-      acceptedApplications: acceptedApps,
-      totalUsers: usersSnap.size,
-      applicants: usersSnap.docs.filter(doc => doc.data().role === "APPLICANT").length,
-      schoolAdmins: usersSnap.docs.filter(doc => doc.data().role === "SCHOOL_ADMIN").length,
-    };
-  } catch (error) {
-    console.error("Error fetching admin stats:", error);
-    return {
-      totalUniversities: 0,
-      pendingUniversities: 0,
-      approvedUniversities: 0,
-      totalPrograms: 0,
-      totalApplications: 0,
-      pendingApplications: 0,
-      underReviewApplications: 0,
-      acceptedApplications: 0,
-      totalUsers: 0,
-      applicants: 0,
-      schoolAdmins: 0,
-    };
-  }
+interface AdminStats {
+  totalUniversities: number;
+  pendingUniversities: number;
+  approvedUniversities: number;
+  totalPrograms: number;
+  totalApplications: number;
+  pendingApplications: number;
+  underReviewApplications: number;
+  acceptedApplications: number;
+  totalUsers: number;
+  applicants: number;
+  schoolAdmins: number;
 }
 
-export default async function AdminPage() {
-  // Require admin role
-  await requireRole(["ADMIN"]);
+export default function AdminPage() {
+  const [loading, setLoading] = useState(true);
+  const [demoMode, setDemoMode] = useState(false);
+  const [stats, setStats] = useState<AdminStats>({
+    totalUniversities: 0,
+    pendingUniversities: 0,
+    approvedUniversities: 0,
+    totalPrograms: 0,
+    totalApplications: 0,
+    pendingApplications: 0,
+    underReviewApplications: 0,
+    acceptedApplications: 0,
+    totalUsers: 0,
+    applicants: 0,
+    schoolAdmins: 0,
+  });
 
-  const stats = await getAdminStats();
+  useEffect(() => {
+    loadAdminStats();
+  }, []);
+
+  const loadAdminStats = async () => {
+    try {
+      const response = await fetch('/api/admin/stats');
+      
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+        setDemoMode(false);
+      } else {
+        // Enable demo mode if not authenticated
+        setDemoMode(true);
+        setStats({
+          totalUniversities: 12,
+          pendingUniversities: 3,
+          approvedUniversities: 9,
+          totalPrograms: 48,
+          totalApplications: 234,
+          pendingApplications: 45,
+          underReviewApplications: 67,
+          acceptedApplications: 89,
+          totalUsers: 567,
+          applicants: 523,
+          schoolAdmins: 42,
+        });
+      }
+    } catch (err) {
+      console.error("Error loading admin stats:", err);
+      // Enable demo mode on error
+      setDemoMode(true);
+      setStats({
+        totalUniversities: 12,
+        pendingUniversities: 3,
+        approvedUniversities: 9,
+        totalPrograms: 48,
+        totalApplications: 234,
+        pendingApplications: 45,
+        underReviewApplications: 67,
+        acceptedApplications: 89,
+        totalUsers: 567,
+        applicants: 523,
+        schoolAdmins: 42,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p>Loading dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {demoMode && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-amber-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <p className="text-sm text-amber-800 mb-3">
+                You&apos;re viewing demo data. To access the real admin dashboard, please{" "}
+                <Link href="/auth/signin" className="underline font-medium">
+                  sign in
+                </Link>{" "}
+                with your admin account.
+              </p>
+              <div className="text-xs text-amber-700">
+                This demo shows you what the platform admin portal looks like with sample data.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Platform Admin Dashboard</h1>
         <p className="text-muted-foreground">Manage universities, programs, and monitor platform activity</p>
