@@ -88,7 +88,7 @@ export default function SchoolSettingsPage() {
             <div className="flex-1">
               <h3 className="font-semibold text-amber-900 mb-1">Demo Mode - Read Only</h3>
               <p className="text-sm text-amber-800 mb-2">
-                You're viewing sample settings. Changes cannot be saved in demo mode. Please{' '}
+                You&apos;re viewing sample settings. Changes cannot be saved in demo mode. Please{' '}
                 <Link href="/auth/signin" className="underline font-medium">sign in</Link>
                 {' '}or{' '}
                 <Link href="/schools/register" className="underline font-medium">register your institution</Link>

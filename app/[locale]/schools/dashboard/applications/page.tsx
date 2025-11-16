@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getDemoApplications } from "@/lib/demo-data";
 
 export default function SchoolApplicationsPage() {
   const [applications, setApplications] = useState<any[]>([]);
