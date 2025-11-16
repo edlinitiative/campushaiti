@@ -27,6 +27,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
   const t = useTranslations("apply.payment");
   const [loading, setLoading] = useState(false);
+  const [loadingPrograms, setLoadingPrograms] = useState(true);
   const [selectedPrograms, setSelectedPrograms] = useState<any[]>([]);
   const [schoolGroups, setSchoolGroups] = useState<SchoolGroup[]>([]);
   const [programsToPayNow, setProgramsToPayNow] = useState<Set<string>>(new Set());
@@ -59,30 +60,47 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
   }, [selectedPrograms]);
 
   const loadSelectedPrograms = async () => {
-    // Load from new format with answers
-    const programsDataStr = localStorage.getItem("selectedProgramsData");
-    if (programsDataStr) {
-      const programsData = JSON.parse(programsDataStr);
-      setSelectedPrograms(programsData);
-      // By default, select all programs to pay now
-      setProgramsToPayNow(new Set(programsData.map((p: any) => p.id)));
-      return;
-    }
-
-    // Fallback to old format
-    const programIds = JSON.parse(localStorage.getItem("selectedPrograms") || "[]");
-    const programs = [];
-
-    for (const id of programIds) {
-      const programDoc = await getDoc(doc(db, "programs", id));
-      if (programDoc.exists()) {
-        const data = programDoc.data();
-        programs.push({ id, ...data });
+    setLoadingPrograms(true);
+    try {
+      // Load from new format with answers
+      const programsDataStr = localStorage.getItem("selectedProgramsData");
+      console.log("Loading programs data:", programsDataStr);
+      
+      if (programsDataStr) {
+        const programsData = JSON.parse(programsDataStr);
+        console.log("Parsed programs data:", programsData);
+        setSelectedPrograms(programsData);
+        // By default, select all programs to pay now
+        setProgramsToPayNow(new Set(programsData.map((p: any) => p.id)));
+        return;
       }
-    }
 
-    setSelectedPrograms(programs);
-    setProgramsToPayNow(new Set(programs.map(p => p.id)));
+      // Fallback to old format
+      const programIds = JSON.parse(localStorage.getItem("selectedPrograms") || "[]");
+      console.log("Fallback to old format, program IDs:", programIds);
+      
+      if (programIds.length === 0) {
+        console.warn("No programs found in localStorage");
+        return;
+      }
+      
+      const programs = [];
+
+      for (const id of programIds) {
+        const programDoc = await getDoc(doc(db, "programs", id));
+        if (programDoc.exists()) {
+          const data = programDoc.data();
+          programs.push({ id, ...data });
+        }
+      }
+
+      setSelectedPrograms(programs);
+      setProgramsToPayNow(new Set(programs.map(p => p.id)));
+    } catch (error) {
+      console.error("Error loading programs:", error);
+    } finally {
+      setLoadingPrograms(false);
+    }
   };
 
   const toggleProgramPayment = (programId: string) => {
@@ -172,8 +190,17 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {selectedPrograms.length === 0 ? (
-          <p className="text-muted-foreground">Loading programs...</p>
+        {loadingPrograms ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Loading programs...</p>
+          </div>
+        ) : selectedPrograms.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-4">No programs selected. Please go back and select programs first.</p>
+            <Button onClick={onBack} variant="outline">
+              Back to Program Selection
+            </Button>
+          </div>
         ) : (
           <>
             {/* Programs List with Individual Selection - Grouped by School */}
