@@ -9,11 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { loadStripe } from "@stripe/stripe-js";
-import { CreditCard, Wallet, CheckCircle2 } from "lucide-react";
+import { CreditCard, Wallet, CheckCircle2, Building2 } from "lucide-react";
 
 interface PaymentStepProps {
   onNext: () => void;
   onBack: () => void;
+}
+
+interface SchoolGroup {
+  universityId: string;
+  universityName: string;
+  programs: any[];
 }
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
@@ -22,12 +28,35 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
   const t = useTranslations("apply.payment");
   const [loading, setLoading] = useState(false);
   const [selectedPrograms, setSelectedPrograms] = useState<any[]>([]);
+  const [schoolGroups, setSchoolGroups] = useState<SchoolGroup[]>([]);
   const [programsToPayNow, setProgramsToPayNow] = useState<Set<string>>(new Set());
   const [paidPrograms, setPaidPrograms] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadSelectedPrograms();
   }, []);
+
+  useEffect(() => {
+    // Group programs by school
+    const grouped = selectedPrograms.reduce((acc, program) => {
+      const universityId = program.universityId || 'unknown';
+      const universityName = program.universityName || 'Unknown University';
+      
+      const existing = acc.find((g: SchoolGroup) => g.universityId === universityId);
+      if (existing) {
+        existing.programs.push(program);
+      } else {
+        acc.push({
+          universityId,
+          universityName,
+          programs: [program]
+        });
+      }
+      return acc;
+    }, [] as SchoolGroup[]);
+    
+    setSchoolGroups(grouped);
+  }, [selectedPrograms]);
 
   const loadSelectedPrograms = async () => {
     // Load from new format with answers
@@ -147,7 +176,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
           <p className="text-muted-foreground">Loading programs...</p>
         ) : (
           <>
-            {/* Programs List with Individual Selection */}
+            {/* Programs List with Individual Selection - Grouped by School */}
             <div className="space-y-3">
               <h3 className="font-semibold flex items-center justify-between">
                 <span>Select Programs to Pay Now</span>
@@ -166,51 +195,64 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
                 </Button>
               </h3>
               
-              {selectedPrograms.map((program) => {
-                const isPayingNow = programsToPayNow.has(program.id);
-                const isPaid = paidPrograms.has(program.id);
-                
-                return (
-                  <div
-                    key={program.id}
-                    className={`border rounded-lg p-4 ${isPayingNow ? 'border-primary bg-primary/5' : ''} ${isPaid ? 'border-green-500 bg-green-50' : ''}`}
-                  >
-                    <div className="flex items-start space-x-3">
-                      {!isPaid ? (
-                        <Checkbox
-                          id={`pay-${program.id}`}
-                          checked={isPayingNow}
-                          onCheckedChange={() => toggleProgramPayment(program.id)}
-                        />
-                      ) : (
-                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
-                      )}
-                      <div className="flex-1">
-                        <label
-                          htmlFor={`pay-${program.id}`}
-                          className="font-medium cursor-pointer block"
-                        >
-                          {program.name}
-                        </label>
-                        {program.universityName && (
-                          <p className="text-sm text-muted-foreground">{program.universityName}</p>
-                        )}
-                        <div className="mt-2 flex gap-2 items-center">
-                          <Badge variant="outline">
-                            {program.currency} {(program.feeCents / 100).toFixed(2)}
-                          </Badge>
-                          {isPaid && (
-                            <Badge className="bg-green-600">Paid</Badge>
-                          )}
-                          {!isPaid && !isPayingNow && (
-                            <Badge variant="secondary">Pay Later</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+              {schoolGroups.map((school) => (
+                <div key={school.universityId} className="border-2 rounded-lg overflow-hidden">
+                  {/* School Header */}
+                  <div className="px-4 py-3 bg-gradient-to-r from-muted to-background border-b flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span className="font-semibold">{school.universityName}</span>
+                    <Badge variant="outline" className="ml-auto">
+                      {school.programs.filter(p => programsToPayNow.has(p.id)).length} of {school.programs.length} selected
+                    </Badge>
                   </div>
-                );
-              })}
+                  
+                  {/* Programs under this school */}
+                  <div className="p-3 bg-muted/20 space-y-2">
+                    {school.programs.map((program) => {
+                      const isPayingNow = programsToPayNow.has(program.id);
+                      const isPaid = paidPrograms.has(program.id);
+                      
+                      return (
+                        <div
+                          key={program.id}
+                          className={`border rounded-lg p-4 bg-white ${isPayingNow ? 'border-primary ring-2 ring-primary/20' : ''} ${isPaid ? 'border-green-500 bg-green-50' : ''}`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            {!isPaid ? (
+                              <Checkbox
+                                id={`pay-${program.id}`}
+                                checked={isPayingNow}
+                                onCheckedChange={() => toggleProgramPayment(program.id)}
+                              />
+                            ) : (
+                              <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                            )}
+                            <div className="flex-1">
+                              <label
+                                htmlFor={`pay-${program.id}`}
+                                className="font-medium cursor-pointer block"
+                              >
+                                {program.name}
+                              </label>
+                              <div className="mt-2 flex gap-2 items-center">
+                                <Badge variant="outline" className="font-semibold">
+                                  {program.currency} {(program.feeCents / 100).toFixed(2)}
+                                </Badge>
+                                {isPaid && (
+                                  <Badge className="bg-green-600">Paid</Badge>
+                                )}
+                                {!isPaid && !isPayingNow && (
+                                  <Badge variant="secondary">Pay Later</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Payment Summary */}
