@@ -157,23 +157,70 @@ Submitted: ${new Date(application.submittedAt).toLocaleString()}
 
 PERSONAL INFORMATION
 --------------------
-Full Name: ${application.personalInfo.fullName}
-Email: ${application.personalInfo.email}
-Phone: ${application.personalInfo.phone}
-Date of Birth: ${application.personalInfo.dateOfBirth}
-Nationality/Address: ${application.personalInfo.address}
+Full Name: ${application.personalInfo?.fullName || application.applicantName || 'Not provided'}
+Email: ${application.personalInfo?.email || application.applicantEmail || 'Not provided'}
+Gender: ${application.gender || 'Not provided'}
+Phone: ${application.personalInfo?.phone || 'Not provided'}
+WhatsApp: ${application.whatsapp || 'Not provided'}
+Date of Birth: ${application.personalInfo?.dateOfBirth || 'Not provided'}
+Place of Birth: ${application.birthPlace || 'Not provided'}
+ID Number: ${application.idNumber || 'Not provided'}
+Nationality: ${application.nationality || 'Not provided'}
+
+ADDRESS INFORMATION
+-------------------
+Street Address: ${application.address || application.addressDetails?.street || 'Not provided'}
+City: ${application.city || application.addressDetails?.city || 'Not provided'}
+Department/State: ${application.department || application.addressDetails?.department || 'Not provided'}
+Country: ${application.country || application.addressDetails?.country || 'Not provided'}
+
+PARENT/GUARDIAN INFORMATION
+---------------------------
+Father's Name: ${application.fatherName || application.parentInfo?.fatherName || 'Not provided'}
+Father's Phone: ${application.fatherPhone || application.parentInfo?.fatherPhone || 'Not provided'}
+Father's Occupation: ${application.fatherOccupation || application.parentInfo?.fatherOccupation || 'Not provided'}
+
+Mother's Name: ${application.motherName || application.parentInfo?.motherName || 'Not provided'}
+Mother's Phone: ${application.motherPhone || application.parentInfo?.motherPhone || 'Not provided'}
+Mother's Occupation: ${application.motherOccupation || application.parentInfo?.motherOccupation || 'Not provided'}
+
+${(application.guardianName || application.parentInfo?.guardianName) ? `Guardian's Name: ${application.guardianName || application.parentInfo?.guardianName || 'Not provided'}
+Guardian's Phone: ${application.guardianPhone || application.parentInfo?.guardianPhone || 'Not provided'}
+Guardian's Relationship: ${application.guardianRelationship || application.parentInfo?.guardianRelationship || 'Not provided'}` : ''}
+
+EMERGENCY CONTACT
+-----------------
+Name: ${application.emergencyName || application.emergencyContact?.name || 'Not provided'}
+Phone: ${application.emergencyPhone || application.emergencyContact?.phone || 'Not provided'}
+Relationship: ${application.emergencyRelationship || application.emergencyContact?.relationship || 'Not provided'}
 
 EDUCATION BACKGROUND
 --------------------
-School Name: ${application.education.schoolName}
-Graduation Year: ${application.education.graduationYear}
-GPA: ${application.education.gpa}
-${application.education.fieldOfStudy ? `Field of Study: ${application.education.fieldOfStudy}` : ''}
+School Name: ${application.education?.schoolName || application.lastSchoolName || 'Not provided'}
+School City: ${application.education?.city || application.lastSchoolCity || 'Not provided'}
+Graduation Year: ${application.education?.graduationYear || application.graduationYear || 'Not provided'}
+Diploma Type: ${application.education?.diplomaType || application.diplomaType || 'Not provided'}
+Field of Study: ${application.education?.fieldOfStudy || application.fieldOfStudy || 'Not provided'}
+GPA/Average: ${application.education?.gpa || application.gpa || 'Not provided'}
+Baccalauréat: ${application.education?.hasBaccalaureat || application.hasBaccalaureat || 'Not provided'}
+${(application.education?.baccalaureatSeries || application.baccalaureatSeries) ? `Baccalauréat Series: ${application.education?.baccalaureatSeries || application.baccalaureatSeries}` : ''}
 
-${application.personalStatement ? `
+${(application.personalStatement || application.essays?.personalStatement) ? `
 PERSONAL STATEMENT
 ------------------
-${application.personalStatement}
+${application.personalStatement || application.essays?.personalStatement}
+` : ''}
+
+${(application.essays?.careerGoals || application.careerGoals) ? `
+CAREER GOALS
+------------
+${application.essays?.careerGoals || application.careerGoals}
+` : ''}
+
+${(application.essays?.whyThisUniversity || application.whyThisUniversity) ? `
+WHY THIS UNIVERSITY
+-------------------
+${application.essays?.whyThisUniversity || application.whyThisUniversity}
 ` : ''}
 
 ${application.customAnswers && application.customAnswers.length > 0 ? `
@@ -350,21 +397,18 @@ Generated: ${new Date().toLocaleString()}
                     <User className="w-4 h-4 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Full Name</p>
                   </div>
-                  <p className="font-medium">{application.personalInfo.fullName || 'Not provided'}</p>
+                  <p className="font-medium">{application.personalInfo?.fullName || application.applicantName || 'Not provided'}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Mail className="w-4 h-4 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Email</p>
                   </div>
-                  <p className="font-medium">{application.personalInfo.email || 'Not provided'}</p>
+                  <p className="font-medium">{application.personalInfo?.email || application.applicantEmail || 'Not provided'}</p>
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                  </div>
-                  <p className="font-medium">{application.personalInfo.phone || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">Gender</p>
+                  <p className="font-medium">{application.gender || 'Not provided'}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -372,24 +416,160 @@ Generated: ${new Date().toLocaleString()}
                     <p className="text-sm text-muted-foreground">Date of Birth</p>
                   </div>
                   <p className="font-medium">
-                    {application.personalInfo.dateOfBirth 
+                    {application.personalInfo?.dateOfBirth 
                       ? new Date(application.personalInfo.dateOfBirth).toLocaleDateString()
                       : 'Not provided'}
                   </p>
                 </div>
-                <div className="md:col-span-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Nationality / Address</p>
-                  </div>
-                  <p className="font-medium">{application.personalInfo.address || 'Not provided'}</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">Place of Birth</p>
+                  <p className="font-medium">{application.birthPlace || 'Not provided'}</p>
                 </div>
-                {application.nationality && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Nationality</p>
-                    <p className="font-medium">{application.nationality}</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">ID Number</p>
+                  <p className="font-medium">{application.idNumber || 'Not provided'}</p>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Phone className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Phone</p>
                   </div>
-                )}
+                  <p className="font-medium">{application.personalInfo?.phone || application.applicantPhone || 'Not provided'}</p>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Phone className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">WhatsApp</p>
+                  </div>
+                  <p className="font-medium">{application.whatsapp || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Nationality</p>
+                  <p className="font-medium">{application.nationality || application.personalInfo?.address || 'Not provided'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Address Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Address Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <p className="text-sm text-muted-foreground">Street Address</p>
+                  <p className="font-medium">{application.address || application.addressDetails?.street || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">City</p>
+                  <p className="font-medium">{application.city || application.addressDetails?.city || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Department/State</p>
+                  <p className="font-medium">{application.department || application.addressDetails?.department || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Country</p>
+                  <p className="font-medium">{application.country || application.addressDetails?.country || 'Not provided'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Parent/Guardian Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Parent & Guardian Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Father */}
+              <div className="border-b pb-4">
+                <h4 className="font-semibold mb-3">Father Information</h4>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="font-medium">{application.fatherName || application.parentInfo?.fatherName || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="font-medium">{application.fatherPhone || application.parentInfo?.fatherPhone || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Occupation</p>
+                    <p className="font-medium">{application.fatherOccupation || application.parentInfo?.fatherOccupation || 'Not provided'}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Mother */}
+              <div className="border-b pb-4">
+                <h4 className="font-semibold mb-3">Mother Information</h4>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="font-medium">{application.motherName || application.parentInfo?.motherName || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="font-medium">{application.motherPhone || application.parentInfo?.motherPhone || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Occupation</p>
+                    <p className="font-medium">{application.motherOccupation || application.parentInfo?.motherOccupation || 'Not provided'}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Guardian (if applicable) */}
+              {(application.guardianName || application.parentInfo?.guardianName) && (
+                <div>
+                  <h4 className="font-semibold mb-3">Guardian Information</h4>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Name</p>
+                      <p className="font-medium">{application.guardianName || application.parentInfo?.guardianName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="font-medium">{application.guardianPhone || application.parentInfo?.guardianPhone || 'Not provided'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Relationship</p>
+                      <p className="font-medium">{application.guardianRelationship || application.parentInfo?.guardianRelationship || 'Not provided'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Emergency Contact */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5" />
+                Emergency Contact
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Name</p>
+                  <p className="font-medium">{application.emergencyName || application.emergencyContact?.name || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="font-medium">{application.emergencyPhone || application.emergencyContact?.phone || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Relationship</p>
+                  <p className="font-medium">{application.emergencyRelationship || application.emergencyContact?.relationship || 'Not provided'}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -406,34 +586,67 @@ Generated: ${new Date().toLocaleString()}
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">School Name</p>
-                  <p className="font-medium">{application.education.schoolName || 'Not provided'}</p>
+                  <p className="font-medium">{application.education?.schoolName || application.lastSchoolName || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">School City</p>
+                  <p className="font-medium">{application.education?.city || application.lastSchoolCity || 'Not provided'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Graduation Year</p>
-                  <p className="font-medium">{application.education.graduationYear || 'Not provided'}</p>
+                  <p className="font-medium">{application.education?.graduationYear || application.graduationYear || 'Not provided'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">GPA</p>
-                  <p className="font-medium">{application.education.gpa || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">Diploma Type</p>
+                  <p className="font-medium">{application.education?.diplomaType || application.diplomaType || 'Not provided'}</p>
                 </div>
-                {application.education.fieldOfStudy && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Field of Study</p>
+                  <p className="font-medium">{application.education?.fieldOfStudy || application.fieldOfStudy || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">GPA / Average</p>
+                  <p className="font-medium">{application.education?.gpa || application.gpa || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Baccalauréat</p>
+                  <p className="font-medium">{application.education?.hasBaccalaureat || application.hasBaccalaureat || 'Not provided'}</p>
+                </div>
+                {(application.education?.baccalaureatSeries || application.baccalaureatSeries) && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Field of Study</p>
-                    <p className="font-medium">{application.education.fieldOfStudy}</p>
+                    <p className="text-sm text-muted-foreground">Baccalauréat Series</p>
+                    <p className="font-medium">{application.education?.baccalaureatSeries || application.baccalaureatSeries}</p>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Personal Statement */}
-          {application.personalStatement && (
+          {/* Essays & Personal Statements */}
+          {(application.personalStatement || application.essays?.personalStatement || application.essays?.careerGoals || application.essays?.whyThisUniversity || application.careerGoals || application.whyThisUniversity) && (
             <Card>
               <CardHeader>
-                <CardTitle>Personal Statement</CardTitle>
+                <CardTitle>Essays & Personal Statements</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm whitespace-pre-wrap">{application.personalStatement}</p>
+              <CardContent className="space-y-4">
+                {(application.personalStatement || application.essays?.personalStatement) && (
+                  <div>
+                    <h4 className="font-semibold text-sm mb-2">Personal Statement</h4>
+                    <p className="text-sm whitespace-pre-wrap text-muted-foreground">{application.personalStatement || application.essays?.personalStatement}</p>
+                  </div>
+                )}
+                {(application.essays?.careerGoals || application.careerGoals) && (
+                  <div className="border-t pt-4">
+                    <h4 className="font-semibold text-sm mb-2">Career Goals</h4>
+                    <p className="text-sm whitespace-pre-wrap text-muted-foreground">{application.essays?.careerGoals || application.careerGoals}</p>
+                  </div>
+                )}
+                {(application.essays?.whyThisUniversity || application.whyThisUniversity) && (
+                  <div className="border-t pt-4">
+                    <h4 className="font-semibold text-sm mb-2">Why This University</h4>
+                    <p className="text-sm whitespace-pre-wrap text-muted-foreground">{application.essays?.whyThisUniversity || application.whyThisUniversity}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
