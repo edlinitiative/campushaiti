@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle, XCircle, Clock, FileText, DollarSign, AlertCircle, Download, User, GraduationCap, MapPin, Phone, Mail, Calendar } from "lucide-react";
 import JSZip from "jszip";
+import jsPDF from "jspdf";
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -149,134 +150,196 @@ export default function ApplicationDetailPage() {
     try {
       const zip = new JSZip();
       
-      // Create a comprehensive text representation of the application
-      const dossier = `
-APPLICATION DOSSIER
-==================
+      // Create PDF
+      const pdf = new jsPDF();
+      let yPos = 20;
+      const pageHeight = pdf.internal.pageSize.height;
+      const margin = 20;
+      const lineHeight = 7;
+      const maxWidth = 170;
 
-Applicant: ${application.applicantName}
-Program: ${application.program}
-Status: ${application.status}
-Submitted: ${new Date(application.submittedAt).toLocaleString()}
+      // Helper function to add text with auto page break
+      const addText = (text: string, fontSize = 10, isBold = false, indent = 0) => {
+        if (yPos > pageHeight - margin) {
+          pdf.addPage();
+          yPos = 20;
+        }
+        pdf.setFontSize(fontSize);
+        pdf.setFont("helvetica", isBold ? "bold" : "normal");
+        
+        const lines = pdf.splitTextToSize(text, maxWidth - indent);
+        lines.forEach((line: string) => {
+          if (yPos > pageHeight - margin) {
+            pdf.addPage();
+            yPos = 20;
+          }
+          pdf.text(line, margin + indent, yPos);
+          yPos += lineHeight;
+        });
+      };
 
-PERSONAL INFORMATION
---------------------
-Full Name: ${application.personalInfo?.fullName || application.applicantName || 'Not provided'}
-Email: ${application.personalInfo?.email || application.applicantEmail || 'Not provided'}
-Gender: ${application.gender || 'Not provided'}
-Phone: ${application.personalInfo?.phone || 'Not provided'}
-WhatsApp: ${application.whatsapp || 'Not provided'}
-Date of Birth: ${application.personalInfo?.dateOfBirth || 'Not provided'}
-Place of Birth: ${application.birthPlace || 'Not provided'}
-ID Number: ${application.idNumber || 'Not provided'}
-Nationality: ${application.nationality || 'Not provided'}
+      const addSection = (title: string) => {
+        yPos += 3;
+        addText(title, 14, true);
+        yPos += 2;
+      };
 
-ADDRESS INFORMATION
--------------------
-Street Address: ${application.address || application.addressDetails?.street || 'Not provided'}
-City: ${application.city || application.addressDetails?.city || 'Not provided'}
-Department/State: ${application.department || application.addressDetails?.department || 'Not provided'}
-Country: ${application.country || application.addressDetails?.country || 'Not provided'}
+      const addField = (label: string, value: string) => {
+        addText(`${label}: ${value || 'Not provided'}`, 10, false);
+      };
 
-PARENT/GUARDIAN INFORMATION
----------------------------
-Father's Name: ${application.fatherName || application.parentInfo?.fatherName || 'Not provided'}
-Father's Phone: ${application.fatherPhone || application.parentInfo?.fatherPhone || 'Not provided'}
-Father's Occupation: ${application.fatherOccupation || application.parentInfo?.fatherOccupation || 'Not provided'}
+      // Header
+      pdf.setFillColor(41, 128, 185);
+      pdf.rect(0, 0, pdf.internal.pageSize.width, 40, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(20);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("APPLICATION DOSSIER", margin, 25);
+      pdf.setTextColor(0, 0, 0);
+      yPos = 50;
 
-Mother's Name: ${application.motherName || application.parentInfo?.motherName || 'Not provided'}
-Mother's Phone: ${application.motherPhone || application.parentInfo?.motherPhone || 'Not provided'}
-Mother's Occupation: ${application.motherOccupation || application.parentInfo?.motherOccupation || 'Not provided'}
+      // Application Overview
+      addSection("Application Overview");
+      addField("Applicant", application.applicantName);
+      addField("Program", application.program);
+      addField("Status", application.status);
+      addField("Submitted", new Date(application.submittedAt).toLocaleString());
 
-${(application.guardianName || application.parentInfo?.guardianName) ? `Guardian's Name: ${application.guardianName || application.parentInfo?.guardianName || 'Not provided'}
-Guardian's Phone: ${application.guardianPhone || application.parentInfo?.guardianPhone || 'Not provided'}
-Guardian's Relationship: ${application.guardianRelationship || application.parentInfo?.guardianRelationship || 'Not provided'}` : ''}
+      // Personal Information
+      addSection("Personal Information");
+      addField("Full Name", application.personalInfo?.fullName || application.applicantName);
+      addField("Email", application.personalInfo?.email || application.applicantEmail);
+      addField("Gender", application.gender);
+      addField("Phone", application.personalInfo?.phone);
+      addField("WhatsApp", application.whatsapp);
+      addField("Date of Birth", application.personalInfo?.dateOfBirth);
+      addField("Place of Birth", application.birthPlace);
+      addField("ID Number", application.idNumber);
+      addField("Nationality", application.nationality);
 
-EMERGENCY CONTACT
------------------
-Name: ${application.emergencyName || application.emergencyContact?.name || 'Not provided'}
-Phone: ${application.emergencyPhone || application.emergencyContact?.phone || 'Not provided'}
-Relationship: ${application.emergencyRelationship || application.emergencyContact?.relationship || 'Not provided'}
+      // Address Information
+      addSection("Address Information");
+      addField("Street Address", application.address || application.addressDetails?.street);
+      addField("City", application.city || application.addressDetails?.city);
+      addField("Department/State", application.department || application.addressDetails?.department);
+      addField("Country", application.country || application.addressDetails?.country);
 
-EDUCATION BACKGROUND
---------------------
-School Name: ${application.education?.schoolName || application.lastSchoolName || 'Not provided'}
-School City: ${application.education?.city || application.lastSchoolCity || 'Not provided'}
-Graduation Year: ${application.education?.graduationYear || application.graduationYear || 'Not provided'}
-Diploma Type: ${application.education?.diplomaType || application.diplomaType || 'Not provided'}
-Field of Study: ${application.education?.fieldOfStudy || application.fieldOfStudy || 'Not provided'}
-GPA/Average: ${application.education?.gpa || application.gpa || 'Not provided'}
-Baccalauréat: ${application.education?.hasBaccalaureat || application.hasBaccalaureat || 'Not provided'}
-${(application.education?.baccalaureatSeries || application.baccalaureatSeries) ? `Baccalauréat Series: ${application.education?.baccalaureatSeries || application.baccalaureatSeries}` : ''}
+      // Parent/Guardian Information
+      addSection("Parent & Guardian Information");
+      addText("Father's Information:", 11, true);
+      addField("  Name", application.fatherName || application.parentInfo?.fatherName);
+      addField("  Phone", application.fatherPhone || application.parentInfo?.fatherPhone);
+      addField("  Occupation", application.fatherOccupation || application.parentInfo?.fatherOccupation);
+      
+      yPos += 2;
+      addText("Mother's Information:", 11, true);
+      addField("  Name", application.motherName || application.parentInfo?.motherName);
+      addField("  Phone", application.motherPhone || application.parentInfo?.motherPhone);
+      addField("  Occupation", application.motherOccupation || application.parentInfo?.motherOccupation);
 
-${(application.personalStatement || application.essays?.personalStatement) ? `
-PERSONAL STATEMENT
-------------------
-${application.personalStatement || application.essays?.personalStatement}
-` : ''}
+      if (application.guardianName || application.parentInfo?.guardianName) {
+        yPos += 2;
+        addText("Guardian's Information:", 11, true);
+        addField("  Name", application.guardianName || application.parentInfo?.guardianName);
+        addField("  Phone", application.guardianPhone || application.parentInfo?.guardianPhone);
+        addField("  Relationship", application.guardianRelationship || application.parentInfo?.guardianRelationship);
+      }
 
-${(application.essays?.careerGoals || application.careerGoals) ? `
-CAREER GOALS
-------------
-${application.essays?.careerGoals || application.careerGoals}
-` : ''}
+      // Emergency Contact
+      addSection("Emergency Contact");
+      addField("Name", application.emergencyName || application.emergencyContact?.name);
+      addField("Phone", application.emergencyPhone || application.emergencyContact?.phone);
+      addField("Relationship", application.emergencyRelationship || application.emergencyContact?.relationship);
 
-${(application.essays?.whyThisUniversity || application.whyThisUniversity) ? `
-WHY THIS UNIVERSITY
--------------------
-${application.essays?.whyThisUniversity || application.whyThisUniversity}
-` : ''}
+      // Education Background
+      addSection("Education Background");
+      addField("School Name", application.education?.schoolName || application.lastSchoolName);
+      addField("School City", application.education?.city || application.lastSchoolCity);
+      addField("Graduation Year", application.education?.graduationYear || application.graduationYear);
+      addField("Diploma Type", application.education?.diplomaType || application.diplomaType);
+      addField("Field of Study", application.education?.fieldOfStudy || application.fieldOfStudy);
+      addField("GPA/Average", application.education?.gpa || application.gpa);
+      addField("Baccalauréat", application.education?.hasBaccalaureat || application.hasBaccalaureat);
+      if (application.education?.baccalaureatSeries || application.baccalaureatSeries) {
+        addField("Baccalauréat Series", application.education?.baccalaureatSeries || application.baccalaureatSeries);
+      }
 
-${application.customAnswers && application.customAnswers.length > 0 ? `
-PROGRAM-SPECIFIC QUESTIONS
---------------------------
-${application.customAnswers.map((item: any, i: number) => `
-Q${i + 1}: ${item.question}
-A: ${item.answer}
-`).join('\n')}
-` : ''}
+      // Essays
+      if (application.personalStatement || application.essays?.personalStatement) {
+        addSection("Personal Statement");
+        addText(application.personalStatement || application.essays?.personalStatement, 9, false, 5);
+      }
 
-${application.programAnswers ? `
-ADDITIONAL PROGRAM QUESTIONS
-----------------------------
-${Object.entries(application.programAnswers).map(([qId, answer]) => `
-Question ID: ${qId}
-Answer: ${answer}
-`).join('\n')}
-` : ''}
+      if (application.essays?.careerGoals || application.careerGoals) {
+        addSection("Career Goals");
+        addText(application.essays?.careerGoals || application.careerGoals, 9, false, 5);
+      }
 
-APPLICATION CHECKLIST
----------------------
-${Object.entries(application.checklist).map(([key, value]) => `
-${value ? '✓' : '✗'} ${key.replace(/([A-Z])/g, ' $1').trim()}
-`).join('')}
+      if (application.essays?.whyThisUniversity || application.whyThisUniversity) {
+        addSection("Why This University");
+        addText(application.essays?.whyThisUniversity || application.whyThisUniversity, 9, false, 5);
+      }
 
-${application.documentIds && application.documentIds.length > 0 ? `
-DOCUMENTS
----------
-${application.documentIds.length} document(s) uploaded
-Document IDs: ${application.documentIds.join(', ')}
-` : 'No documents uploaded'}
+      // Program-Specific Questions
+      if (application.customAnswers && application.customAnswers.length > 0) {
+        addSection("Program-Specific Questions");
+        application.customAnswers.forEach((item: any, i: number) => {
+          addText(`Q${i + 1}: ${item.question}`, 10, true);
+          addText(`A: ${item.answer}`, 9, false, 5);
+          yPos += 2;
+        });
+      }
 
-${application.feePaidCents ? `
-PAYMENT INFORMATION
--------------------
-Amount: ${(application.feePaidCents / 100).toFixed(2)} ${application.feePaidCurrency || 'HTG'}
-Payment Status: ${application.checklist?.paymentReceived ? 'Received' : 'Pending'}
-` : ''}
+      if (application.programAnswers) {
+        addSection("Additional Program Questions");
+        Object.entries(application.programAnswers).forEach(([qId, answer]) => {
+          addText(`Question ID: ${qId}`, 10, true);
+          addText(`Answer: ${answer}`, 9, false, 5);
+          yPos += 2;
+        });
+      }
 
-${reviewNotes ? `
-REVIEW NOTES
-------------
-${reviewNotes}
-` : ''}
+      // Application Checklist
+      addSection("Application Checklist");
+      Object.entries(application.checklist).forEach(([key, value]) => {
+        const symbol = value ? '✓' : '✗';
+        const label = key.replace(/([A-Z])/g, ' $1').trim();
+        addText(`${symbol} ${label}`, 10, false);
+      });
 
----
-Generated: ${new Date().toLocaleString()}
-      `.trim();
+      // Documents
+      addSection("Documents");
+      if (application.documents && application.documents.length > 0) {
+        addField("Total Documents", application.documents.length.toString());
+        application.documents.forEach((doc: any, i: number) => {
+          addText(`${i + 1}. ${doc.name || `Document ${i + 1}`}`, 9, false, 5);
+        });
+      } else {
+        addText("No documents uploaded", 10, false);
+      }
 
-      // Add the application info text file
-      zip.file("application_info.txt", dossier);
+      // Payment Information
+      if (application.feePaidCents) {
+        addSection("Payment Information");
+        addField("Amount", `${(application.feePaidCents / 100).toFixed(2)} ${application.feePaidCurrency || 'HTG'}`);
+        addField("Payment Status", application.checklist?.paymentReceived ? 'Received' : 'Pending');
+      }
+
+      // Review Notes
+      if (reviewNotes) {
+        addSection("Review Notes");
+        addText(reviewNotes, 9, false, 5);
+      }
+
+      // Footer
+      yPos = pageHeight - 15;
+      pdf.setFontSize(8);
+      pdf.setTextColor(128, 128, 128);
+      pdf.text(`Generated: ${new Date().toLocaleString()}`, margin, yPos);
+
+      // Add PDF to ZIP
+      const pdfBlob = pdf.output('blob');
+      zip.file("application_dossier.pdf", pdfBlob);
 
       // Download documents if available
       if (application.documents && application.documents.length > 0) {
@@ -285,7 +348,6 @@ Generated: ${new Date().toLocaleString()}
         for (let i = 0; i < application.documents.length; i++) {
           const doc = application.documents[i];
           try {
-            // Fetch the document
             const response = await fetch(doc.url);
             if (response.ok) {
               const blob = await response.blob();
@@ -297,7 +359,6 @@ Generated: ${new Date().toLocaleString()}
           }
         }
       } else {
-        // Add a readme if no documents
         zip.file("documents/README.txt", "No documents have been uploaded for this application.");
       }
 
