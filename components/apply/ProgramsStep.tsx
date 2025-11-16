@@ -8,16 +8,24 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Building2 } from "lucide-react";
 
 interface ProgramsStepProps {
   onNext: () => void;
   onBack: () => void;
 }
 
+interface SchoolGroup {
+  universityId: string;
+  universityName: string;
+  programs: any[];
+}
+
 export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
   const t = useTranslations("apply.programs");
   const [programs, setPrograms] = useState<any[]>([]);
+  const [schoolGroups, setSchoolGroups] = useState<SchoolGroup[]>([]);
+  const [selectedSchools, setSelectedSchools] = useState<Set<string>>(new Set());
   const [selectedPrograms, setSelectedPrograms] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +35,28 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
   useEffect(() => {
     loadPrograms();
   }, []);
+
+  useEffect(() => {
+    // Group programs by school
+    const grouped = programs.reduce((acc, program) => {
+      const universityId = program.universityId || 'unknown';
+      const universityName = program.universityName || 'Unknown University';
+      
+      const existing = acc.find((g: SchoolGroup) => g.universityId === universityId);
+      if (existing) {
+        existing.programs.push(program);
+      } else {
+        acc.push({
+          universityId,
+          universityName,
+          programs: [program]
+        });
+      }
+      return acc;
+    }, [] as SchoolGroup[]);
+    
+    setSchoolGroups(grouped);
+  }, [programs]);
 
   const loadPrograms = async () => {
     setLoading(true);
@@ -58,6 +88,26 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleSchool = (schoolId: string) => {
+    setSelectedSchools((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(schoolId)) {
+        newSet.delete(schoolId);
+        // Deselect all programs from this school
+        const schoolPrograms = schoolGroups.find(g => g.universityId === schoolId)?.programs || [];
+        const programIds = schoolPrograms.map(p => p.id);
+        setSelectedPrograms(prev => prev.filter(id => !programIds.includes(id)));
+        // Remove answers for deselected programs
+        const newAnswers = { ...programAnswers };
+        programIds.forEach(id => delete newAnswers[id]);
+        setProgramAnswers(newAnswers);
+      } else {
+        newSet.add(schoolId);
+      }
+      return newSet;
+    });
   };
 
   const toggleProgram = (programId: string) => {
@@ -174,7 +224,7 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
     <Card>
       <CardHeader>
         <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>Select the programs you want to apply to</CardDescription>
+        <CardDescription>First select schools, then choose programs within each school</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {error && (
@@ -192,7 +242,7 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
           </div>
         )}
         
-        {!error && programs.length === 0 && !loading && (
+        {!error && schoolGroups.length === 0 && !loading && (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">No programs available at this time.</p>
             <Button onClick={loadPrograms} variant="outline" size="sm">
@@ -201,88 +251,124 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
           </div>
         )}
         
-        {!error && programs.length > 0 && (
-          <div className="space-y-4">
-            {programs.map((program) => {
-              const isSelected = selectedPrograms.includes(program.id);
-              const isExpanded = expandedPrograms.has(program.id);
-              const hasQuestions = program.additionalQuestions && program.additionalQuestions.length > 0;
+        {!error && schoolGroups.length > 0 && (
+          <div className="space-y-6">
+            {schoolGroups.map((school) => {
+              const isSchoolSelected = selectedSchools.has(school.universityId);
+              const schoolProgramCount = school.programs.filter(p => selectedPrograms.includes(p.id)).length;
               
               return (
-                <div key={program.id} className="border rounded-lg overflow-hidden">
-                  <div className="flex items-start space-x-3 p-4">
-                    <Checkbox
-                      id={program.id}
-                      checked={isSelected}
-                      onCheckedChange={() => toggleProgram(program.id)}
-                    />
-                    <div className="flex-1">
-                      <label htmlFor={program.id} className="font-semibold cursor-pointer">
-                        {program.name}
-                      </label>
-                      {program.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{program.description}</p>
-                      )}
-                      <div className="mt-2 flex gap-2 flex-wrap">
-                        <Badge variant="secondary">{program.degree}</Badge>
-                        {program.universityName && (
-                          <Badge variant="outline">{program.universityName}</Badge>
-                        )}
-                        <Badge>
-                          Fee: {program.currency} {(program.feeCents / 100).toFixed(2)}
-                        </Badge>
-                        {hasQuestions && (
-                          <Badge variant="secondary">
-                            {program.additionalQuestions.length} additional {program.additionalQuestions.length === 1 ? 'question' : 'questions'}
-                          </Badge>
-                        )}
+                <div key={school.universityId} className="border-2 rounded-lg overflow-hidden">
+                  {/* School Header */}
+                  <div className={`p-4 bg-gradient-to-r ${isSchoolSelected ? 'from-primary/10 to-primary/5 border-b-2 border-primary' : 'from-muted to-background border-b'}`}>
+                    <div className="flex items-center space-x-3">
+                      <Checkbox
+                        id={school.universityId}
+                        checked={isSchoolSelected}
+                        onCheckedChange={() => toggleSchool(school.universityId)}
+                        className="h-5 w-5"
+                      />
+                      <div className="flex-1">
+                        <label htmlFor={school.universityId} className="flex items-center gap-2 cursor-pointer">
+                          <Building2 className="h-5 w-5 text-primary" />
+                          <span className="font-bold text-lg">{school.universityName}</span>
+                        </label>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {school.programs.length} {school.programs.length === 1 ? 'program' : 'programs'} available
+                          {schoolProgramCount > 0 && ` · ${schoolProgramCount} selected`}
+                        </p>
                       </div>
-                      
-                      {hasQuestions && isSelected && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleExpanded(program.id)}
-                          className="mt-2 px-2 h-8"
-                        >
-                          {isExpanded ? (
-                            <>
-                              <ChevronUp className="h-4 w-4 mr-1" />
-                              Hide Questions
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-4 w-4 mr-1" />
-                              Answer Additional Questions
-                            </>
-                          )}
-                        </Button>
-                      )}
                     </div>
                   </div>
-                  
-                  {/* Additional Questions Section */}
-                  {hasQuestions && isSelected && isExpanded && (
-                    <div className="border-t bg-muted/50 p-4 space-y-4">
-                      <h4 className="font-semibold text-sm">Additional Questions for {program.name}</h4>
-                      {program.additionalQuestions.map((question: any) => (
-                        <div key={question.id} className="space-y-2">
-                          <Label htmlFor={`${program.id}-${question.id}`}>
-                            {question.question}
-                            {question.required && <span className="text-red-500 ml-1">*</span>}
-                          </Label>
-                          <Textarea
-                            id={`${program.id}-${question.id}`}
-                            value={programAnswers[program.id]?.[question.id] || ''}
-                            onChange={(e) => handleAnswerChange(program.id, question.id, e.target.value)}
-                            placeholder="Type your answer here..."
-                            rows={4}
-                            required={question.required}
-                            className="resize-none"
-                          />
-                        </div>
-                      ))}
+
+                  {/* Programs List - Only show if school is selected */}
+                  {isSchoolSelected && (
+                    <div className="p-4 bg-muted/30 space-y-3">
+                      {school.programs.map((program) => {
+                        const isProgramSelected = selectedPrograms.includes(program.id);
+                        const isExpanded = expandedPrograms.has(program.id);
+                        const hasQuestions = program.additionalQuestions && program.additionalQuestions.length > 0;
+                        
+                        return (
+                          <div 
+                            key={program.id} 
+                            className={`border rounded-lg bg-white ${isProgramSelected ? 'ring-2 ring-primary' : ''}`}
+                          >
+                            <div className="flex items-start space-x-3 p-4">
+                              <Checkbox
+                                id={program.id}
+                                checked={isProgramSelected}
+                                onCheckedChange={() => toggleProgram(program.id)}
+                              />
+                              <div className="flex-1">
+                                <label htmlFor={program.id} className="font-semibold cursor-pointer block">
+                                  {program.name}
+                                </label>
+                                {program.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{program.description}</p>
+                                )}
+                                <div className="mt-2 flex gap-2 flex-wrap">
+                                  <Badge variant="secondary">{program.degree}</Badge>
+                                  <Badge>
+                                    Fee: {program.currency} {(program.feeCents / 100).toFixed(2)}
+                                  </Badge>
+                                  {hasQuestions && (
+                                    <Badge variant="secondary">
+                                      {program.additionalQuestions.length} additional {program.additionalQuestions.length === 1 ? 'question' : 'questions'}
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                {hasQuestions && isProgramSelected && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => toggleExpanded(program.id)}
+                                    className="mt-2 px-2 h-8"
+                                  >
+                                    {isExpanded ? (
+                                      <>
+                                        <ChevronUp className="h-4 w-4 mr-1" />
+                                        Hide Questions
+                                      </>
+                                    ) : (
+                                      <>
+                                        <ChevronDown className="h-4 w-4 mr-1" />
+                                        Answer Additional Questions
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* Additional Questions Section */}
+                            {hasQuestions && isProgramSelected && isExpanded && (
+                              <div className="border-t bg-muted/50 p-4 space-y-4">
+                                <h4 className="font-semibold text-sm">Additional Questions for {program.name}</h4>
+                                {program.additionalQuestions.map((question: any) => (
+                                  <div key={question.id} className="space-y-2">
+                                    <Label htmlFor={`${program.id}-${question.id}`}>
+                                      {question.question}
+                                      {question.required && <span className="text-red-500 ml-1">*</span>}
+                                    </Label>
+                                    <Textarea
+                                      id={`${program.id}-${question.id}`}
+                                      value={programAnswers[program.id]?.[question.id] || ''}
+                                      onChange={(e) => handleAnswerChange(program.id, question.id, e.target.value)}
+                                      placeholder="Type your answer here..."
+                                      rows={4}
+                                      required={question.required}
+                                      className="resize-none"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -294,7 +380,7 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
         <div className="flex gap-2">
           <Button variant="outline" onClick={onBack}>Back</Button>
           <Button onClick={handleContinue} className="flex-1" disabled={selectedPrograms.length === 0}>
-            Continue ({selectedPrograms.length} selected)
+            Continue ({selectedPrograms.length} {selectedPrograms.length === 1 ? 'program' : 'programs'} selected)
           </Button>
         </div>
       </CardContent>
