@@ -60,7 +60,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
       for (const programId of programIds) {
         const programDoc = await getDoc(doc(db, "programs", programId));
         if (programDoc.exists()) {
-          const program = { id: programDoc.id, ...programDoc.data() };
+          const program = { id: programDoc.id, ...programDoc.data() } as any;
           
           // Fetch university data for this program
           const universityDoc = await getDoc(doc(db, "universities", program.universityId));

@@ -1,6 +1,5 @@
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -59,7 +58,7 @@ export default function HelpPage() {
               <MessageCircle className="h-8 w-8 text-blue-600 mb-2" />
               <CardTitle>Contact Support</CardTitle>
               <CardDescription>
-                Can't find what you're looking for? Our support team is here to help.
+                Can&apos;t find what you&apos;re looking for? Our support team is here to help.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -76,91 +75,87 @@ export default function HelpPage() {
             <CardTitle>Frequently Asked Questions</CardTitle>
             <CardDescription>Browse common questions and answers</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>How do I apply to universities?</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-2 text-sm">
-                    <p>To apply to universities through Campus Haiti:</p>
-                    <ol className="list-decimal pl-5 space-y-1">
-                      <li>Create an account and sign in</li>
-                      <li>Complete your profile with personal information</li>
-                      <li>Upload required documents (transcripts, ID, etc.)</li>
-                      <li>Browse universities and select programs</li>
-                      <li>Pay application fees securely</li>
-                      <li>Submit your application and track its status</li>
-                    </ol>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+          <CardContent className="space-y-6">
+            <div>
+              <h3 className="font-semibold mb-2">How do I apply to universities?</h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>To apply to universities through Campus Haiti:</p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>Create an account and sign in</li>
+                  <li>Complete your profile with personal information</li>
+                  <li>Upload required documents (transcripts, ID, etc.)</li>
+                  <li>Browse universities and select programs</li>
+                  <li>Pay application fees securely</li>
+                  <li>Submit your application and track its status</li>
+                </ol>
+              </div>
+            </div>
 
-              <AccordionItem value="item-2">
-                <AccordionTrigger>What payment methods are accepted?</AccordionTrigger>
-                <AccordionContent>
-                  We accept two secure payment methods:
-                  <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li><strong>Stripe:</strong> Credit/debit cards (Visa, Mastercard, American Express)</li>
-                    <li><strong>MonCash:</strong> Mobile money for local payments in Haiti</li>
-                  </ul>
-                  All transactions are encrypted and secure.
-                </AccordionContent>
-              </AccordionItem>
+            <div>
+              <h3 className="font-semibold mb-2">What payment methods are accepted?</h3>
+              <div className="text-sm text-muted-foreground">
+                We accept two secure payment methods:
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li><strong>Stripe:</strong> Credit/debit cards (Visa, Mastercard, American Express)</li>
+                  <li><strong>MonCash:</strong> Mobile money for local payments in Haiti</li>
+                </ul>
+                <p className="mt-2">All transactions are encrypted and secure.</p>
+              </div>
+            </div>
 
-              <AccordionItem value="item-3">
-                <AccordionTrigger>How do I track my application status?</AccordionTrigger>
-                <AccordionContent>
-                  After submitting your application:
-                  <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li>Sign in to your dashboard</li>
-                    <li>View all your applications in one place</li>
-                    <li>See real-time status updates (Submitted, Under Review, Accepted, Rejected)</li>
-                    <li>Receive email notifications for important updates</li>
-                    <li>Access additional information or requirements from universities</li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
+            <div>
+              <h3 className="font-semibold mb-2">How do I track my application status?</h3>
+              <div className="text-sm text-muted-foreground">
+                After submitting your application:
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li>Sign in to your dashboard</li>
+                  <li>View all your applications in one place</li>
+                  <li>See real-time status updates (Submitted, Under Review, Accepted, Rejected)</li>
+                  <li>Receive email notifications for important updates</li>
+                  <li>Access additional information or requirements from universities</li>
+                </ul>
+              </div>
+            </div>
 
-              <AccordionItem value="item-4">
-                <AccordionTrigger>What documents do I need?</AccordionTrigger>
-                <AccordionContent>
-                  Common required documents include:
-                  <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li>Copy of valid ID or passport</li>
-                    <li>High school transcripts and diplomas (Baccalauréat)</li>
-                    <li>Recent passport-sized photograph</li>
-                    <li>Birth certificate (for some programs)</li>
-                    <li>Recommendation letters (for graduate programs)</li>
-                  </ul>
-                  Specific requirements may vary by university and program.
-                </AccordionContent>
-              </AccordionItem>
+            <div>
+              <h3 className="font-semibold mb-2">What documents do I need?</h3>
+              <div className="text-sm text-muted-foreground">
+                Common required documents include:
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li>Copy of valid ID or passport</li>
+                  <li>High school transcripts and diplomas (Baccalauréat)</li>
+                  <li>Recent passport-sized photograph</li>
+                  <li>Birth certificate (for some programs)</li>
+                  <li>Recommendation letters (for graduate programs)</li>
+                </ul>
+                <p className="mt-2">Specific requirements may vary by university and program.</p>
+              </div>
+            </div>
 
-              <AccordionItem value="item-5">
-                <AccordionTrigger>Can I apply to multiple universities?</AccordionTrigger>
-                <AccordionContent>
-                  Yes! One of the main benefits of Campus Haiti is the ability to apply to multiple universities and programs with a single application. You can:
-                  <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li>Select as many programs as you want</li>
-                    <li>Reuse your profile and documents across applications</li>
-                    <li>Pay all fees in one transaction</li>
-                    <li>Track all applications from one dashboard</li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
+            <div>
+              <h3 className="font-semibold mb-2">Can I apply to multiple universities?</h3>
+              <div className="text-sm text-muted-foreground">
+                Yes! One of the main benefits of Campus Haiti is the ability to apply to multiple universities and programs with a single application. You can:
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li>Select as many programs as you want</li>
+                  <li>Reuse your profile and documents across applications</li>
+                  <li>Pay all fees in one transaction</li>
+                  <li>Track all applications from one dashboard</li>
+                </ul>
+              </div>
+            </div>
 
-              <AccordionItem value="item-6">
-                <AccordionTrigger>How long does the application process take?</AccordionTrigger>
-                <AccordionContent>
-                  The timeline varies:
-                  <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li><strong>Completing application:</strong> 30-60 minutes if you have all documents ready</li>
-                    <li><strong>University review:</strong> Typically 2-6 weeks, depending on the institution</li>
-                    <li><strong>Admission decision:</strong> You'll be notified via email and dashboard</li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <div>
+              <h3 className="font-semibold mb-2">How long does the application process take?</h3>
+              <div className="text-sm text-muted-foreground">
+                The timeline varies:
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li><strong>Completing application:</strong> 30-60 minutes if you have all documents ready</li>
+                  <li><strong>University review:</strong> Typically 2-6 weeks, depending on the institution</li>
+                  <li><strong>Admission decision:</strong> You&apos;ll be notified via email and dashboard</li>
+                </ul>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

@@ -157,7 +157,7 @@ export default async function AdminUsersPage() {
             <div>
               <p className="font-medium text-blue-800">School Admin</p>
               <p className="text-muted-foreground">
-                Manage their university's programs, review applications, configure settings
+                Manage their university&apos;s programs, review applications, configure settings
               </p>
             </div>
             <div>
