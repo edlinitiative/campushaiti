@@ -15,6 +15,7 @@ export default function SchoolDashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [university, setUniversity] = useState<any>(null);
+  const [demoMode, setDemoMode] = useState(false);
   const [stats, setStats] = useState({
     applications: 0,
     newApplications: 0,
@@ -39,8 +40,10 @@ export default function SchoolDashboardPage() {
           accepted: stats.accepted || 0,
           pending: stats.pending || 0,
         });
+        setDemoMode(false);
       } else {
-        // Fallback to demo data if not authenticated
+        // Enable demo mode if not authenticated
+        setDemoMode(true);
         setStats({
           applications: 45,
           newApplications: 12,
@@ -50,17 +53,22 @@ export default function SchoolDashboardPage() {
       }
       
       setUniversity({
-        name: "Your University",
+        name: demoMode ? "Demo University" : "Your University",
         status: "APPROVED",
       });
     } catch (err) {
       console.error("Error loading dashboard:", err);
-      // Fallback to demo data on error
+      // Enable demo mode on error
+      setDemoMode(true);
       setStats({
         applications: 45,
         newApplications: 12,
         accepted: 28,
         pending: 17,
+      });
+      setUniversity({
+        name: "Demo University",
+        status: "APPROVED",
       });
     } finally {
       setLoading(false);
@@ -77,6 +85,34 @@ export default function SchoolDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {demoMode && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-amber-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <p className="text-sm text-amber-800 mb-3">
+                You&apos;re viewing demo data. To access your real school dashboard, please{" "}
+                <Link href="/auth/signin" className="underline font-medium">
+                  sign in
+                </Link>{" "}
+                with your school admin account or{" "}
+                <Link href="/schools/register" className="underline font-medium">
+                  register your university
+                </Link>.
+              </p>
+              <div className="text-xs text-amber-700">
+                This demo shows you what the school portal looks like with sample data.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">School Dashboard</h1>
