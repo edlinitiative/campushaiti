@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface ProgramsStepProps {
   onNext: () => void;
@@ -22,6 +25,8 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
   const [programs, setPrograms] = useState<any[]>(cachedPrograms || []);
   const [selectedPrograms, setSelectedPrograms] = useState<string[]>([]);
   const [loading, setLoading] = useState(!cachedPrograms);
+  const [expandedPrograms, setExpandedPrograms] = useState<Set<string>>(new Set());
+  const [programAnswers, setProgramAnswers] = useState<Record<string, Record<string, string>>>({});
 
   useEffect(() => {
     loadPrograms();
@@ -55,11 +60,54 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
   };
 
   const toggleProgram = (programId: string) => {
-    setSelectedPrograms((prev) =>
-      prev.includes(programId)
-        ? prev.filter((id) => id !== programId)
-        : [...prev, programId]
-    );
+    setSelectedPrograms((prev) => {
+      if (prev.includes(programId)) {
+        // Remove program and its answers
+        const newAnswers = { ...programAnswers };
+        delete newAnswers[programId];
+        setProgramAnswers(newAnswers);
+        return prev.filter((id) => id !== programId);
+      } else {
+        // Add program
+        return [...prev, programId];
+      }
+    });
+  };
+
+  const toggleExpanded = (programId: string) => {
+    setExpandedPrograms((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(programId)) {
+        newSet.delete(programId);
+      } else {
+        newSet.add(programId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleAnswerChange = (programId: string, questionId: string, answer: string) => {
+    setProgramAnswers((prev) => ({
+      ...prev,
+      [programId]: {
+        ...(prev[programId] || {}),
+        [questionId]: answer,
+      },
+    }));
+  };
+
+  const validateAnswers = () => {
+    for (const programId of selectedPrograms) {
+      const program = programs.find(p => p.id === programId);
+      if (program?.additionalQuestions) {
+        for (const question of program.additionalQuestions) {
+          if (question.required && !programAnswers[programId]?.[question.id]?.trim()) {
+            return { valid: false, message: `Please answer all required questions for ${program.name}` };
+          }
+        }
+      }
+    }
+    return { valid: true };
   };
 
   const handleContinue = () => {
@@ -67,7 +115,28 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
       alert("Please select at least one program");
       return;
     }
-    // Store selected programs in localStorage for payment step
+    
+    // Validate all required questions are answered
+    const validation = validateAnswers();
+    if (!validation.valid) {
+      alert(validation.message);
+      return;
+    }
+    
+    // Store selected programs and answers in localStorage for payment step
+    const programsData = selectedPrograms.map(programId => {
+      const program = programs.find(p => p.id === programId);
+      return {
+        id: programId,
+        name: program?.name,
+        feeCents: program?.feeCents,
+        currency: program?.currency,
+        universityName: program?.universityName,
+        answers: programAnswers[programId] || {},
+      };
+    });
+    
+    localStorage.setItem("selectedProgramsData", JSON.stringify(programsData));
     localStorage.setItem("selectedPrograms", JSON.stringify(selectedPrograms));
     onNext();
   };
@@ -111,27 +180,91 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
           <p className="text-muted-foreground">No programs available at this time.</p>
         ) : (
           <div className="space-y-4">
-            {programs.map((program) => (
-              <div key={program.id} className="flex items-start space-x-3 border p-4 rounded">
-                <Checkbox
-                  id={program.id}
-                  checked={selectedPrograms.includes(program.id)}
-                  onCheckedChange={() => toggleProgram(program.id)}
-                />
-                <div className="flex-1">
-                  <label htmlFor={program.id} className="font-semibold cursor-pointer">
-                    {program.name}
-                  </label>
-                  <p className="text-sm text-muted-foreground">{program.description}</p>
-                  <div className="mt-2 flex gap-2">
-                    <Badge variant="secondary">{program.degree}</Badge>
-                    <Badge>
-                      Fee: {program.currency} {(program.feeCents / 100).toFixed(2)}
-                    </Badge>
+            {programs.map((program) => {
+              const isSelected = selectedPrograms.includes(program.id);
+              const isExpanded = expandedPrograms.has(program.id);
+              const hasQuestions = program.additionalQuestions && program.additionalQuestions.length > 0;
+              
+              return (
+                <div key={program.id} className="border rounded-lg overflow-hidden">
+                  <div className="flex items-start space-x-3 p-4">
+                    <Checkbox
+                      id={program.id}
+                      checked={isSelected}
+                      onCheckedChange={() => toggleProgram(program.id)}
+                    />
+                    <div className="flex-1">
+                      <label htmlFor={program.id} className="font-semibold cursor-pointer">
+                        {program.name}
+                      </label>
+                      {program.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{program.description}</p>
+                      )}
+                      <div className="mt-2 flex gap-2 flex-wrap">
+                        <Badge variant="secondary">{program.degree}</Badge>
+                        {program.universityName && (
+                          <Badge variant="outline">{program.universityName}</Badge>
+                        )}
+                        <Badge>
+                          Fee: {program.currency} {(program.feeCents / 100).toFixed(2)}
+                        </Badge>
+                        {hasQuestions && (
+                          <Badge variant="secondary">
+                            {program.additionalQuestions.length} additional {program.additionalQuestions.length === 1 ? 'question' : 'questions'}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {hasQuestions && isSelected && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleExpanded(program.id)}
+                          className="mt-2 px-2 h-8"
+                        >
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp className="h-4 w-4 mr-1" />
+                              Hide Questions
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="h-4 w-4 mr-1" />
+                              Answer Additional Questions
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
                   </div>
+                  
+                  {/* Additional Questions Section */}
+                  {hasQuestions && isSelected && isExpanded && (
+                    <div className="border-t bg-muted/50 p-4 space-y-4">
+                      <h4 className="font-semibold text-sm">Additional Questions for {program.name}</h4>
+                      {program.additionalQuestions.map((question: any) => (
+                        <div key={question.id} className="space-y-2">
+                          <Label htmlFor={`${program.id}-${question.id}`}>
+                            {question.question}
+                            {question.required && <span className="text-red-500 ml-1">*</span>}
+                          </Label>
+                          <Textarea
+                            id={`${program.id}-${question.id}`}
+                            value={programAnswers[program.id]?.[question.id] || ''}
+                            onChange={(e) => handleAnswerChange(program.id, question.id, e.target.value)}
+                            placeholder="Type your answer here..."
+                            rows={4}
+                            required={question.required}
+                            className="resize-none"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

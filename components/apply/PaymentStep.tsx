@@ -6,7 +6,10 @@ import { doc, getDoc } from "firebase/firestore";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { loadStripe } from "@stripe/stripe-js";
+import { CreditCard, Wallet, CheckCircle2 } from "lucide-react";
 
 interface PaymentStepProps {
   onNext: () => void;
@@ -18,129 +21,269 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
   const t = useTranslations("apply.payment");
   const [loading, setLoading] = useState(false);
-  const [totalAmount, setTotalAmount] = useState(0);
   const [selectedPrograms, setSelectedPrograms] = useState<any[]>([]);
+  const [programsToPayNow, setProgramsToPayNow] = useState<Set<string>>(new Set());
+  const [paidPrograms, setPaidPrograms] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadSelectedPrograms();
   }, []);
 
   const loadSelectedPrograms = async () => {
+    // Load from new format with answers
+    const programsDataStr = localStorage.getItem("selectedProgramsData");
+    if (programsDataStr) {
+      const programsData = JSON.parse(programsDataStr);
+      setSelectedPrograms(programsData);
+      // By default, select all programs to pay now
+      setProgramsToPayNow(new Set(programsData.map((p: any) => p.id)));
+      return;
+    }
+
+    // Fallback to old format
     const programIds = JSON.parse(localStorage.getItem("selectedPrograms") || "[]");
     const programs = [];
-    let total = 0;
 
     for (const id of programIds) {
       const programDoc = await getDoc(doc(db, "programs", id));
       if (programDoc.exists()) {
         const data = programDoc.data();
         programs.push({ id, ...data });
-        total += (data.feeCents as number);
       }
     }
 
     setSelectedPrograms(programs);
-    setTotalAmount(total);
+    setProgramsToPayNow(new Set(programs.map(p => p.id)));
   };
 
-  const handleStripePayment = async () => {
-    setLoading(true);
-    try {
-      // Create checkout session
-      const response = await fetch("/api/payments/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          applicationItemId: "temp_id", // In real app, create application item first
-          amountCents: totalAmount,
-          currency: "USD",
-        }),
-      });
-
-      const { sessionUrl } = await response.json();
-      
-      if (sessionUrl) {
-        window.location.href = sessionUrl;
+  const toggleProgramPayment = (programId: string) => {
+    setProgramsToPayNow(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(programId)) {
+        newSet.delete(programId);
+      } else {
+        newSet.add(programId);
       }
-    } catch (error) {
-      console.error("Payment error:", error);
-      alert("Payment failed");
-    } finally {
-      setLoading(false);
-    }
+      return newSet;
+    });
   };
 
-  const handleMonCashPayment = async () => {
+  const getSelectedTotal = () => {
+    return selectedPrograms
+      .filter(p => programsToPayNow.has(p.id))
+      .reduce((sum, p) => sum + p.feeCents, 0);
+  };
+
+  const getPrimaryCurrency = () => {
+    const programToPay = selectedPrograms.find(p => programsToPayNow.has(p.id));
+    return programToPay?.currency || "HTG";
+  };
+
+  const handlePayment = async (method: 'stripe' | 'moncash') => {
+    const programsToPay = selectedPrograms.filter(p => programsToPayNow.has(p.id));
+    
+    if (programsToPay.length === 0) {
+      alert("Please select at least one program to pay for");
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await fetch("/api/payments/moncash/create", {
+      const totalAmount = getSelectedTotal();
+      const currency = method === 'stripe' ? 'USD' : 'HTG';
+      
+      const endpoint = method === 'stripe' 
+        ? "/api/payments/stripe/checkout"
+        : "/api/payments/moncash/create";
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           applicationItemId: "temp_id",
           amountCents: totalAmount,
-          currency: "HTG",
+          currency,
+          programs: programsToPay.map(p => ({
+            id: p.id,
+            name: p.name,
+            feeCents: p.feeCents,
+          })),
         }),
       });
 
-      const { paymentUrl } = await response.json();
+      const data = await response.json();
+      const redirectUrl = data.sessionUrl || data.paymentUrl;
       
-      if (paymentUrl) {
-        window.location.href = paymentUrl;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
       }
     } catch (error) {
       console.error("Payment error:", error);
-      alert("Payment failed");
+      alert("Payment failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSkipToReview = () => {
+    if (programsToPayNow.size > 0) {
+      if (!confirm("You have unpaid programs selected. Are you sure you want to skip payment?")) {
+        return;
+      }
+    }
+    onNext();
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>Complete payment for application fees</CardDescription>
+        <CardTitle>Application Fees Payment</CardTitle>
+        <CardDescription>
+          Pay for application fees. You can pay for all programs now or select individual programs to pay for later.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="border rounded p-4">
-          <h3 className="font-semibold mb-2">Selected Programs</h3>
-          {selectedPrograms.map((program) => (
-            <div key={program.id} className="flex justify-between py-2">
-              <span>{program.name}</span>
-              <span>
-                {program.currency} {(program.feeCents / 100).toFixed(2)}
-              </span>
+        {selectedPrograms.length === 0 ? (
+          <p className="text-muted-foreground">Loading programs...</p>
+        ) : (
+          <>
+            {/* Programs List with Individual Selection */}
+            <div className="space-y-3">
+              <h3 className="font-semibold flex items-center justify-between">
+                <span>Select Programs to Pay Now</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (programsToPayNow.size === selectedPrograms.length) {
+                      setProgramsToPayNow(new Set());
+                    } else {
+                      setProgramsToPayNow(new Set(selectedPrograms.map(p => p.id)));
+                    }
+                  }}
+                >
+                  {programsToPayNow.size === selectedPrograms.length ? "Deselect All" : "Select All"}
+                </Button>
+              </h3>
+              
+              {selectedPrograms.map((program) => {
+                const isPayingNow = programsToPayNow.has(program.id);
+                const isPaid = paidPrograms.has(program.id);
+                
+                return (
+                  <div
+                    key={program.id}
+                    className={`border rounded-lg p-4 ${isPayingNow ? 'border-primary bg-primary/5' : ''} ${isPaid ? 'border-green-500 bg-green-50' : ''}`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      {!isPaid ? (
+                        <Checkbox
+                          id={`pay-${program.id}`}
+                          checked={isPayingNow}
+                          onCheckedChange={() => toggleProgramPayment(program.id)}
+                        />
+                      ) : (
+                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                      )}
+                      <div className="flex-1">
+                        <label
+                          htmlFor={`pay-${program.id}`}
+                          className="font-medium cursor-pointer block"
+                        >
+                          {program.name}
+                        </label>
+                        {program.universityName && (
+                          <p className="text-sm text-muted-foreground">{program.universityName}</p>
+                        )}
+                        <div className="mt-2 flex gap-2 items-center">
+                          <Badge variant="outline">
+                            {program.currency} {(program.feeCents / 100).toFixed(2)}
+                          </Badge>
+                          {isPaid && (
+                            <Badge className="bg-green-600">Paid</Badge>
+                          )}
+                          {!isPaid && !isPayingNow && (
+                            <Badge variant="secondary">Pay Later</Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-          <div className="border-t mt-2 pt-2 flex justify-between font-bold">
-            <span>Total</span>
-            <span>USD {(totalAmount / 100).toFixed(2)}</span>
-          </div>
-        </div>
 
-        <div className="space-y-3">
-          <Button
-            onClick={handleStripePayment}
-            disabled={loading}
-            className="w-full"
-          >
-            {t("payWithStripe")}
-          </Button>
-          <Button
-            onClick={handleMonCashPayment}
-            disabled={loading}
-            variant="outline"
-            className="w-full"
-          >
-            {t("payWithMonCash")}
-          </Button>
-        </div>
+            {/* Payment Summary */}
+            {programsToPayNow.size > 0 && (
+              <div className="border rounded-lg p-4 bg-muted/50">
+                <h3 className="font-semibold mb-3">Payment Summary</h3>
+                <div className="space-y-2">
+                  {selectedPrograms
+                    .filter(p => programsToPayNow.has(p.id))
+                    .map((program) => (
+                      <div key={program.id} className="flex justify-between text-sm">
+                        <span>{program.name}</span>
+                        <span className="font-medium">
+                          {program.currency} {(program.feeCents / 100).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  <div className="border-t pt-2 mt-2 flex justify-between font-bold">
+                    <span>Total to Pay Now</span>
+                    <span>
+                      {getPrimaryCurrency()} {(getSelectedTotal() / 100).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
+            {/* Payment Methods */}
+            {programsToPayNow.size > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-semibold">Choose Payment Method</h3>
+                <Button
+                  onClick={() => handlePayment('stripe')}
+                  disabled={loading}
+                  className="w-full"
+                  size="lg"
+                >
+                  <CreditCard className="mr-2 h-5 w-5" />
+                  Pay with Credit/Debit Card (Stripe)
+                </Button>
+                <Button
+                  onClick={() => handlePayment('moncash')}
+                  disabled={loading}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  <Wallet className="mr-2 h-5 w-5" />
+                  Pay with MonCash (Haiti)
+                </Button>
+              </div>
+            )}
+
+            {/* Information Box */}
+            <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+              <h4 className="font-semibold text-sm mb-2">Payment Information</h4>
+              <ul className="text-sm space-y-1 text-muted-foreground">
+                <li>• You can pay for all programs at once or individually</li>
+                <li>• Uncheck programs you want to pay for later</li>
+                <li>• You can return to complete payment anytime</li>
+                <li>• Each program has its own application fee</li>
+              </ul>
+            </div>
+          </>
+        )}
+
+        {/* Navigation */}
         <div className="flex gap-2">
-          <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={onNext} variant="secondary" className="flex-1">
-            Skip Payment (for testing)
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button onClick={handleSkipToReview} className="flex-1">
+            {programsToPayNow.size === 0 ? "Continue to Review" : "Pay Later & Continue"}
           </Button>
         </div>
       </CardContent>
