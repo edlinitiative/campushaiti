@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getWordCount } from "@/lib/validation";
 
 interface ProfileStepProps {
   onNext: () => void;
@@ -20,6 +22,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
   const t = useTranslations("apply.profile");
   const [loading, setLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState("personal");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     // Personal Information
     firstName: "",
@@ -146,6 +149,55 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
     const user = auth.currentUser;
     if (!user) return;
 
+    // Validate all fields before submission
+    const validation = await import("@/lib/validation");
+    const result = validation.validateProfileForm(formData);
+    
+    if (!result.valid) {
+      setErrors(result.errors);
+      // Scroll to first error or switch to tab with errors
+      const errorTabs = {
+        firstName: "personal",
+        lastName: "personal",
+        gender: "personal",
+        birthDate: "personal",
+        birthPlace: "personal",
+        phone: "personal",
+        whatsapp: "personal",
+        email: "personal",
+        nationality: "personal",
+        address: "address",
+        city: "address",
+        department: "address",
+        country: "address",
+        emergencyName: "family",
+        emergencyPhone: "family",
+        emergencyRelationship: "family",
+        lastSchoolName: "education",
+        lastSchoolCity: "education",
+        graduationYear: "education",
+        diplomaType: "education",
+        fieldOfStudy: "education",
+        gpa: "education",
+        baccalaureatSeries: "education",
+        personalStatement: "essays",
+        careerGoals: "essays",
+        whyThisUniversity: "essays",
+      };
+      
+      // Switch to first tab with errors
+      const firstError = Object.keys(result.errors)[0];
+      if (firstError && errorTabs[firstError as keyof typeof errorTabs]) {
+        setCurrentTab(errorTabs[firstError as keyof typeof errorTabs]);
+      }
+      
+      alert("Please correct the errors in the form before submitting.");
+      return;
+    }
+    
+    // Clear any previous errors
+    setErrors({});
+
     setLoading(true);
     try {
       // Save comprehensive profile
@@ -226,7 +278,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
       onNext();
     } catch (error) {
       console.error("Error saving profile:", error);
-      alert("Error saving profile");
+      alert("Error saving profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -234,6 +286,14 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const haitianDepartments = [
@@ -764,7 +824,20 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                   onChange={(e) => handleChange("personalStatement", e.target.value)}
                   rows={6}
                   placeholder="Share your story, experiences, and what has shaped who you are today..."
+                  className={errors.personalStatement ? "border-red-500" : ""}
                 />
+                <div className="flex justify-between items-center mt-1">
+                  {errors.personalStatement && (
+                    <p className="text-sm text-red-500">{errors.personalStatement}</p>
+                  )}
+                  <p className={`text-sm ml-auto ${
+                    getWordCount(formData.personalStatement) < 300 || getWordCount(formData.personalStatement) > 500
+                      ? 'text-red-500'
+                      : 'text-muted-foreground'
+                  }`}>
+                    {getWordCount(formData.personalStatement)} / 300-500 words
+                  </p>
+                </div>
               </div>
 
               <div>
@@ -780,7 +853,20 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                   onChange={(e) => handleChange("careerGoals", e.target.value)}
                   rows={5}
                   placeholder="What are your professional goals? How will this degree help you achieve them?"
+                  className={errors.careerGoals ? "border-red-500" : ""}
                 />
+                <div className="flex justify-between items-center mt-1">
+                  {errors.careerGoals && (
+                    <p className="text-sm text-red-500">{errors.careerGoals}</p>
+                  )}
+                  <p className={`text-sm ml-auto ${
+                    getWordCount(formData.careerGoals) < 200 || getWordCount(formData.careerGoals) > 300
+                      ? 'text-red-500'
+                      : 'text-muted-foreground'
+                  }`}>
+                    {getWordCount(formData.careerGoals)} / 200-300 words
+                  </p>
+                </div>
               </div>
 
               <div>
@@ -796,10 +882,31 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                   onChange={(e) => handleChange("whyThisUniversity", e.target.value)}
                   rows={5}
                   placeholder="What attracted you to this university? What specific programs, opportunities, or values align with your goals?"
+                  className={errors.whyThisUniversity ? "border-red-500" : ""}
                 />
+                <div className="flex justify-between items-center mt-1">
+                  {errors.whyThisUniversity && (
+                    <p className="text-sm text-red-500">{errors.whyThisUniversity}</p>
+                  )}
+                  <p className={`text-sm ml-auto ${
+                    getWordCount(formData.whyThisUniversity) < 200 || getWordCount(formData.whyThisUniversity) > 300
+                      ? 'text-red-500'
+                      : 'text-muted-foreground'
+                  }`}>
+                    {getWordCount(formData.whyThisUniversity)} / 200-300 words
+                  </p>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
+
+          {Object.keys(errors).length > 0 && (
+            <Alert className="mt-4">
+              <AlertDescription>
+                Please correct the errors above before continuing. Check all required fields and essay word counts.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="flex justify-between mt-6">
             {currentTab !== "personal" && (
