@@ -190,13 +190,22 @@ export default function ApplicationDetailPage() {
 
       // Header
       pdf.setFillColor(41, 128, 185);
-      pdf.rect(0, 0, pdf.internal.pageSize.width, 40, 'F');
+      pdf.rect(0, 0, pdf.internal.pageSize.width, 50, 'F');
       pdf.setTextColor(255, 255, 255);
+      
+      // School name at the top
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "normal");
+      const schoolName = application.universityName || application.program?.split(' - ')[0] || "University";
+      pdf.text(schoolName, margin, 15);
+      
+      // Main title
       pdf.setFontSize(20);
       pdf.setFont("helvetica", "bold");
-      pdf.text("APPLICATION DOSSIER", margin, 25);
+      pdf.text("APPLICATION DOSSIER", margin, 35);
+      
       pdf.setTextColor(0, 0, 0);
-      yPos = 50;
+      yPos = 60;
 
       // Application Overview
       addSection("Application Overview");
