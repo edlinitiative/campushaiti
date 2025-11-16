@@ -32,7 +32,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
     
     const user = auth.currentUser;
     if (!user) {
-      setError("Not authenticated");
+      setError("Not authenticated. Please sign in again.");
       setPreparingData(false);
       return;
     }
@@ -40,23 +40,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
     try {
       console.log("Preparing application data for user:", user.uid);
       
-      // 1. Fetch user data
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      const userData = userDoc.data();
-      console.log("User data:", userData);
-
-      // 2. Fetch profile data
-      const profileDoc = await getDoc(doc(db, "profiles", user.uid));
-      const profileData = profileDoc.data();
-      console.log("Profile data:", profileData);
-
-      // 3. Fetch documents
-      const docsQuery = query(collection(db, "documents"), where("ownerUid", "==", user.uid));
-      const docsSnapshot = await getDocs(docsQuery);
-      const documents = docsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      console.log("Documents:", documents);
-
-      // 4. Load selected programs from new format
+      // 4. Load selected programs from new format (FIRST - no Firebase needed)
       const programsDataStr = localStorage.getItem("selectedProgramsData");
       console.log("Programs data from localStorage:", programsDataStr);
       
@@ -67,7 +51,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
         programsData = JSON.parse(programsDataStr);
         console.log("Using new format programs:", programsData);
       } else {
-        // Fallback to old format
+        // Fallback to old format - requires Firebase
         const programIds = JSON.parse(localStorage.getItem("selectedPrograms") || "[]");
         console.log("Fallback to old format, program IDs:", programIds);
         
@@ -77,20 +61,28 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
           return;
         }
 
-        for (const programId of programIds) {
-          const programDoc = await getDoc(doc(db, "programs", programId));
-          if (programDoc.exists()) {
-            const program = { id: programDoc.id, ...programDoc.data() } as any;
-            
-            // Fetch university data for this program
-            if (program.universityId) {
-              const universityDoc = await getDoc(doc(db, "universities", program.universityId));
-              const university = universityDoc.exists() ? universityDoc.data() : null;
-              program.universityName = university?.name || "Unknown University";
+        // Only fetch from Firestore if we have IDs and no data
+        try {
+          for (const programId of programIds) {
+            const programDoc = await getDoc(doc(db, "programs", programId));
+            if (programDoc.exists()) {
+              const program = { id: programDoc.id, ...programDoc.data() } as any;
+              
+              // Fetch university data for this program
+              if (program.universityId) {
+                const universityDoc = await getDoc(doc(db, "universities", program.universityId));
+                const university = universityDoc.exists() ? universityDoc.data() : null;
+                program.universityName = university?.name || "Unknown University";
+              }
+              
+              programsData.push(program);
             }
-            
-            programsData.push(program);
           }
+        } catch (dbError) {
+          console.error("Error fetching from Firestore:", dbError);
+          setError("Cannot load programs. Please ensure you completed the program selection step.");
+          setPreparingData(false);
+          return;
         }
       }
 
@@ -98,6 +90,39 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
         setError("No programs selected. Please go back and select programs.");
         setPreparingData(false);
         return;
+      }
+
+      // Now try to load user/profile data (optional for review)
+      let userData: any = {};
+      let profileData: any = {};
+      let documents: any[] = [];
+
+      try {
+        // 1. Fetch user data
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        userData = userDoc.data() || {};
+        console.log("User data:", userData);
+      } catch (err) {
+        console.warn("Could not fetch user data:", err);
+      }
+
+      try {
+        // 2. Fetch profile data
+        const profileDoc = await getDoc(doc(db, "profiles", user.uid));
+        profileData = profileDoc.data() || {};
+        console.log("Profile data:", profileData);
+      } catch (err) {
+        console.warn("Could not fetch profile data:", err);
+      }
+
+      try {
+        // 3. Fetch documents
+        const docsQuery = query(collection(db, "documents"), where("ownerUid", "==", user.uid));
+        const docsSnapshot = await getDocs(docsQuery);
+        documents = docsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        console.log("Documents:", documents);
+      } catch (err) {
+        console.warn("Could not fetch documents:", err);
       }
 
       setApplicationData({
