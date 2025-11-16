@@ -185,8 +185,10 @@ export default function SchoolApplicationsPage() {
                       </Link>
                     </Button>
                     {app.status === "SUBMITTED" && (
-                      <Button size="sm">
-                        Start Review
+                      <Button size="sm" asChild>
+                        <Link href={`/schools/dashboard/applications/${app.id}`}>
+                          Start Review
+                        </Link>
                       </Button>
                     )}
                   </div>
