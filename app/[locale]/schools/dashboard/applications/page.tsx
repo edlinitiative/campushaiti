@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DollarSign, TrendingUp, FileText, CheckCircle } from "lucide-react";
 import { getDemoApplications } from "@/lib/demo-data";
 
 export default function SchoolApplicationsPage() {
@@ -15,6 +16,12 @@ export default function SchoolApplicationsPage() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [demoMode, setDemoMode] = useState(false);
+  const [financialStats, setFinancialStats] = useState({
+    totalRevenue: 0,
+    totalApplications: 0,
+    paidApplications: 0,
+    averageFee: 0,
+  });
 
   const mockApplications = getDemoApplications().map(app => ({
     id: app.id,
@@ -41,26 +48,52 @@ export default function SchoolApplicationsPage() {
         const data = await response.json();
         const apps = data.applications || [];
         
-        // Transform to match expected format
+        // Transform to match expected format and calculate financial stats
         const transformedApps = apps.map((app: any) => ({
           id: app.id,
-          applicantName: app.personalInfo?.fullName || "Unknown",
-          applicantEmail: app.personalInfo?.email || "",
+          applicantName: app.personalInfo?.fullName || app.applicantName || "Unknown",
+          applicantEmail: app.personalInfo?.email || app.applicantEmail || "",
           program: app.programName || "Unknown Program",
           submittedAt: app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "",
           status: app.status || "SUBMITTED",
+          feePaidCents: app.feePaidCents || 0,
+          feePaidCurrency: app.feePaidCurrency || "HTG",
         }));
+        
+        // Calculate financial statistics
+        const paidApps = transformedApps.filter((app: any) => app.feePaidCents > 0);
+        const totalRevenue = transformedApps.reduce((sum: number, app: any) => sum + (app.feePaidCents || 0), 0);
+        const averageFee = paidApps.length > 0 ? totalRevenue / paidApps.length : 0;
+        
+        setFinancialStats({
+          totalRevenue,
+          totalApplications: transformedApps.length,
+          paidApplications: paidApps.length,
+          averageFee,
+        });
         
         setApplications(transformedApps);
         setDemoMode(false);
       } else {
-        // Fallback to mock data
+        // Fallback to mock data with demo financial stats
         setApplications(mockApplications);
+        setFinancialStats({
+          totalRevenue: 45000000, // 450,000 HTG (demo)
+          totalApplications: mockApplications.length,
+          paidApplications: 8,
+          averageFee: 5625000, // 56,250 HTG average
+        });
         setDemoMode(true);
       }
     } catch (err) {
       console.error("Error loading applications:", err);
       setApplications(mockApplications);
+      setFinancialStats({
+        totalRevenue: 45000000,
+        totalApplications: mockApplications.length,
+        paidApplications: 8,
+        averageFee: 5625000,
+      });
       setDemoMode(true);
     }
   };
@@ -124,6 +157,73 @@ export default function SchoolApplicationsPage() {
         <Button variant="outline" asChild>
           <Link href="/schools/dashboard">← Back to Dashboard</Link>
         </Button>
+      </div>
+
+      {/* Financial Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(financialStats.totalRevenue / 100).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })} HTG
+            </div>
+            <p className="text-xs text-muted-foreground">
+              From application fees
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{financialStats.totalApplications}</div>
+            <p className="text-xs text-muted-foreground">
+              All time submissions
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Paid Applications</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{financialStats.paidApplications}</div>
+            <p className="text-xs text-muted-foreground">
+              {financialStats.totalApplications > 0 
+                ? `${((financialStats.paidApplications / financialStats.totalApplications) * 100).toFixed(1)}% payment rate`
+                : 'No applications yet'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Fee</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(financialStats.averageFee / 100).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })} HTG
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Per application
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
