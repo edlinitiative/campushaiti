@@ -27,6 +27,9 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
   }, []);
 
   const prepareApplicationData = async () => {
+    setPreparingData(true);
+    setError(null);
+    
     const user = auth.currentUser;
     if (!user) {
       setError("Not authenticated");
@@ -35,42 +38,66 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
     }
 
     try {
+      console.log("Preparing application data for user:", user.uid);
+      
       // 1. Fetch user data
       const userDoc = await getDoc(doc(db, "users", user.uid));
       const userData = userDoc.data();
+      console.log("User data:", userData);
 
       // 2. Fetch profile data
       const profileDoc = await getDoc(doc(db, "profiles", user.uid));
       const profileData = profileDoc.data();
+      console.log("Profile data:", profileData);
 
       // 3. Fetch documents
       const docsQuery = query(collection(db, "documents"), where("ownerUid", "==", user.uid));
       const docsSnapshot = await getDocs(docsQuery);
       const documents = docsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      console.log("Documents:", documents);
 
-      // 4. Fetch selected programs with university data
-      const programIds = JSON.parse(localStorage.getItem("selectedPrograms") || "[]");
-      if (programIds.length === 0) {
-        setError("No programs selected");
-        setPreparingData(false);
-        return;
+      // 4. Load selected programs from new format
+      const programsDataStr = localStorage.getItem("selectedProgramsData");
+      console.log("Programs data from localStorage:", programsDataStr);
+      
+      let programsData = [];
+      
+      if (programsDataStr) {
+        // New format - already has all data including answers
+        programsData = JSON.parse(programsDataStr);
+        console.log("Using new format programs:", programsData);
+      } else {
+        // Fallback to old format
+        const programIds = JSON.parse(localStorage.getItem("selectedPrograms") || "[]");
+        console.log("Fallback to old format, program IDs:", programIds);
+        
+        if (programIds.length === 0) {
+          setError("No programs selected. Please go back and select programs.");
+          setPreparingData(false);
+          return;
+        }
+
+        for (const programId of programIds) {
+          const programDoc = await getDoc(doc(db, "programs", programId));
+          if (programDoc.exists()) {
+            const program = { id: programDoc.id, ...programDoc.data() } as any;
+            
+            // Fetch university data for this program
+            if (program.universityId) {
+              const universityDoc = await getDoc(doc(db, "universities", program.universityId));
+              const university = universityDoc.exists() ? universityDoc.data() : null;
+              program.universityName = university?.name || "Unknown University";
+            }
+            
+            programsData.push(program);
+          }
+        }
       }
 
-      const programsData = [];
-      for (const programId of programIds) {
-        const programDoc = await getDoc(doc(db, "programs", programId));
-        if (programDoc.exists()) {
-          const program = { id: programDoc.id, ...programDoc.data() } as any;
-          
-          // Fetch university data for this program
-          const universityDoc = await getDoc(doc(db, "universities", program.universityId));
-          const university = universityDoc.exists() ? universityDoc.data() : null;
-          
-          programsData.push({
-            ...program,
-            universityName: university?.name || "Unknown University",
-          });
-        }
+      if (programsData.length === 0) {
+        setError("No programs selected. Please go back and select programs.");
+        setPreparingData(false);
+        return;
       }
 
       setApplicationData({
@@ -95,10 +122,11 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
         programs: programsData,
       });
 
+      console.log("Application data prepared successfully");
       setPreparingData(false);
     } catch (err) {
       console.error("Error preparing application data:", err);
-      setError("Failed to prepare application data");
+      setError(`Failed to prepare application data: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setPreparingData(false);
     }
   };
@@ -121,16 +149,16 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
 
       // Create application items for each selected program
       for (const program of applicationData.programs) {
-        await addDoc(collection(db, "applicationItems"), {
+        const itemData: any = {
           // Application reference
           applicationId: applicationRef.id,
           programId: program.id,
           
           // University/Program info (denormalized)
-          universityId: program.universityId,
-          universityName: program.universityName,
+          universityId: program.universityId || 'unknown',
+          universityName: program.universityName || 'Unknown University',
           programName: program.name,
-          programDegree: program.degree,
+          programDegree: program.degree || '',
           
           // Applicant info (denormalized)
           applicantUid: user.uid,
@@ -155,7 +183,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
             profileComplete: true,
             documentsUploaded: applicationData.documents.length > 0,
             essaysSubmitted: !!applicationData.profile.personalStatement,
-            customQuestionsAnswered: false, // TODO: Implement custom questions
+            customQuestionsAnswered: !!(program.answers && Object.keys(program.answers).length > 0),
             paymentReceived: false, // Will be updated by payment webhook
           },
           
@@ -163,11 +191,19 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
           submittedAt: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        };
+
+        // Add program answers if they exist
+        if (program.answers && Object.keys(program.answers).length > 0) {
+          itemData.programAnswers = program.answers;
+        }
+
+        await addDoc(collection(db, "applicationItems"), itemData);
       }
 
       // Clear localStorage
       localStorage.removeItem("selectedPrograms");
+      localStorage.removeItem("selectedProgramsData");
 
       // TODO: Send email notification to student
       // TODO: Send email notification to universities
