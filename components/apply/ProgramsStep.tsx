@@ -15,16 +15,12 @@ interface ProgramsStepProps {
   onBack: () => void;
 }
 
-// Cache programs in memory
-let cachedPrograms: any[] | null = null;
-let cacheTime = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
 export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
   const t = useTranslations("apply.programs");
-  const [programs, setPrograms] = useState<any[]>(cachedPrograms || []);
+  const [programs, setPrograms] = useState<any[]>([]);
   const [selectedPrograms, setSelectedPrograms] = useState<string[]>([]);
-  const [loading, setLoading] = useState(!cachedPrograms);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expandedPrograms, setExpandedPrograms] = useState<Set<string>>(new Set());
   const [programAnswers, setProgramAnswers] = useState<Record<string, Record<string, string>>>({});
 
@@ -33,27 +29,32 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
   }, []);
 
   const loadPrograms = async () => {
-    // Use cache if available and fresh
-    if (cachedPrograms && Date.now() - cacheTime < CACHE_DURATION) {
-      setPrograms(cachedPrograms);
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
+    setError(null);
 
     try {
+      console.log("Fetching programs from /api/programs");
       const response = await fetch("/api/programs", {
-        cache: "force-cache",
-        next: { revalidate: 300 }
+        cache: "no-store"
       });
       
-      if (!response.ok) throw new Error("Failed to fetch");
+      console.log("Response status:", response.status, response.ok);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch programs: ${response.status}`);
+      }
       
       const progs = await response.json();
-      cachedPrograms = progs;
-      cacheTime = Date.now();
+      console.log("Loaded programs:", progs, "Count:", progs.length);
+      
+      if (!Array.isArray(progs)) {
+        throw new Error("Invalid response format");
+      }
+      
       setPrograms(progs);
-    } catch (error) {
-      console.error("Error loading programs:", error);
+    } catch (err) {
+      console.error("Error loading programs:", err);
+      setError(err instanceof Error ? err.message : "Failed to load programs");
     } finally {
       setLoading(false);
     }
@@ -176,9 +177,31 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
         <CardDescription>Select the programs you want to apply to</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {programs.length === 0 ? (
-          <p className="text-muted-foreground">No programs available at this time.</p>
-        ) : (
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800 font-semibold">Error loading programs</p>
+            <p className="text-red-600 text-sm mt-1">{error}</p>
+            <Button 
+              onClick={loadPrograms} 
+              variant="outline" 
+              size="sm" 
+              className="mt-3"
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+        
+        {!error && programs.length === 0 && !loading && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-4">No programs available at this time.</p>
+            <Button onClick={loadPrograms} variant="outline" size="sm">
+              Refresh
+            </Button>
+          </div>
+        )}
+        
+        {!error && programs.length > 0 && (
           <div className="space-y-4">
             {programs.map((program) => {
               const isSelected = selectedPrograms.includes(program.id);
