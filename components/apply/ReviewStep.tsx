@@ -230,8 +230,31 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
       localStorage.removeItem("selectedPrograms");
       localStorage.removeItem("selectedProgramsData");
 
-      // TODO: Send email notification to student
-      // TODO: Send email notification to universities
+      // Send email notifications to student
+      try {
+        const dashboardUrl = `${window.location.origin}/dashboard`;
+        
+        for (const program of applicationData.programs) {
+          await fetch('/api/email/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: applicationData.user.email,
+              template: 'applicationSubmitted',
+              data: {
+                studentName: applicationData.user.name,
+                programName: program.name,
+                universityName: program.universityName || 'Unknown University',
+                applicationId: applicationRef.id,
+                dashboardUrl
+              }
+            })
+          });
+        }
+      } catch (emailErr) {
+        console.error('Failed to send confirmation email:', emailErr);
+        // Don't block submission if email fails
+      }
 
       // Redirect to dashboard
       router.push("/dashboard");

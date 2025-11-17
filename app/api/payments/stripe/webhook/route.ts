@@ -46,6 +46,9 @@ export async function POST(request: NextRequest) {
 
       if (paymentId) {
         // Update payment status
+        const paymentDoc = await adminDb.collection("payments").doc(paymentId).get();
+        const paymentData = paymentDoc.data();
+        
         await adminDb.collection("payments").doc(paymentId).update({
           status: "PAID",
           updatedAt: new Date(),
@@ -59,6 +62,36 @@ export async function POST(request: NextRequest) {
             "checklist.paymentReceived": true,
             updatedAt: new Date(),
           });
+          
+          // Send payment confirmation email
+          try {
+            const appItemDoc = await adminDb.collection("applicationItems").doc(applicationItemId).get();
+            const appItemData = appItemDoc.data();
+            
+            if (appItemData && paymentData) {
+              const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://campushaiti.com'}/dashboard`;
+              
+              await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://campushaiti.com'}/api/email/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  to: appItemData.applicantEmail,
+                  template: 'paymentConfirmation',
+                  data: {
+                    studentName: appItemData.applicantName,
+                    programName: appItemData.programName,
+                    amount: (paymentData.amount / 100).toFixed(2),
+                    currency: paymentData.currency?.toUpperCase() || 'USD',
+                    transactionId: paymentId,
+                    dashboardUrl
+                  }
+                })
+              });
+            }
+          } catch (emailErr) {
+            console.error('Failed to send payment confirmation email:', emailErr);
+            // Don't block payment processing if email fails
+          }
         }
 
         console.log(`Payment ${paymentId} marked as PAID`);

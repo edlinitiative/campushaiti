@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, TrendingUp, FileText, CheckCircle, Users, Clock, XCircle, AlertCircle } from "lucide-react";
+import { DollarSign, TrendingUp, FileText, CheckCircle, Users, Clock, XCircle, AlertCircle, Download, Calendar, BarChart } from "lucide-react";
 
 export default function SchoolAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
+  const [allApplications, setAllApplications] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState({
     financial: {
       totalRevenue: 0,
@@ -23,6 +24,13 @@ export default function SchoolAnalyticsPage() {
       rejected: 0,
       waitlisted: 0,
     },
+    trends: {
+      applicationsThisWeek: 0,
+      applicationsLastWeek: 0,
+      acceptanceRate: 0,
+      conversionRate: 0,
+    },
+    programs: [] as { name: string; count: number }[],
   });
 
   useEffect(() => {
@@ -36,6 +44,7 @@ export default function SchoolAnalyticsPage() {
       if (response.ok) {
         const data = await response.json();
         const apps = data.applications || [];
+        setAllApplications(apps);
         
         // Calculate financial statistics
         const paidApps = apps.filter((app: any) => app.feePaidCents > 0);
@@ -51,6 +60,36 @@ export default function SchoolAnalyticsPage() {
           waitlisted: apps.filter((app: any) => app.status === "WAITLISTED").length,
         };
         
+        // Calculate trends
+        const now = new Date();
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+        
+        const applicationsThisWeek = apps.filter((app: any) => 
+          new Date(app.createdAt || app.submittedAt) >= oneWeekAgo
+        ).length;
+        
+        const applicationsLastWeek = apps.filter((app: any) => {
+          const date = new Date(app.createdAt || app.submittedAt);
+          return date >= twoWeeksAgo && date < oneWeekAgo;
+        }).length;
+        
+        const totalDecided = applicationStats.accepted + applicationStats.rejected;
+        const acceptanceRate = totalDecided > 0 ? (applicationStats.accepted / totalDecided) * 100 : 0;
+        const conversionRate = apps.length > 0 ? (paidApps.length / apps.length) * 100 : 0;
+        
+        // Calculate program statistics
+        const programCounts: { [key: string]: number } = {};
+        apps.forEach((app: any) => {
+          const program = app.programName || "Unknown Program";
+          programCounts[program] = (programCounts[program] || 0) + 1;
+        });
+        
+        const programs = Object.entries(programCounts)
+          .map(([name, count]) => ({ name, count: count as number }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5); // Top 5 programs
+        
         setAnalytics({
           financial: {
             totalRevenue,
@@ -59,6 +98,13 @@ export default function SchoolAnalyticsPage() {
             averageFee,
           },
           applications: applicationStats,
+          trends: {
+            applicationsThisWeek,
+            applicationsLastWeek,
+            acceptanceRate,
+            conversionRate,
+          },
+          programs,
         });
         
         setDemoMode(false);
@@ -78,6 +124,18 @@ export default function SchoolAnalyticsPage() {
             rejected: 1,
             waitlisted: 1,
           },
+          trends: {
+            applicationsThisWeek: 3,
+            applicationsLastWeek: 2,
+            acceptanceRate: 75.0,
+            conversionRate: 80.0,
+          },
+          programs: [
+            { name: "Computer Science", count: 4 },
+            { name: "Business Administration", count: 3 },
+            { name: "Engineering", count: 2 },
+            { name: "Medicine", count: 1 },
+          ],
         });
         setDemoMode(true);
       }
@@ -97,11 +155,64 @@ export default function SchoolAnalyticsPage() {
           rejected: 1,
           waitlisted: 1,
         },
+        trends: {
+          applicationsThisWeek: 3,
+          applicationsLastWeek: 2,
+          acceptanceRate: 75.0,
+          conversionRate: 80.0,
+        },
+        programs: [
+          { name: "Computer Science", count: 4 },
+          { name: "Business Administration", count: 3 },
+          { name: "Engineering", count: 2 },
+        ],
       });
       setDemoMode(true);
     } finally {
       setLoading(false);
     }
+  };
+
+  const exportAnalytics = () => {
+    const csvData = [
+      ['Campus Haiti Analytics Report'],
+      [`Generated: ${new Date().toLocaleString()}`],
+      [''],
+      ['Financial Overview'],
+      ['Metric', 'Value'],
+      ['Total Revenue', `${(analytics.financial.totalRevenue / 100).toFixed(2)} HTG`],
+      ['Total Applications', analytics.financial.totalApplications.toString()],
+      ['Paid Applications', analytics.financial.paidApplications.toString()],
+      ['Average Fee', `${(analytics.financial.averageFee / 100).toFixed(2)} HTG`],
+      [''],
+      ['Application Status'],
+      ['Status', 'Count'],
+      ['Submitted', analytics.applications.submitted.toString()],
+      ['Under Review', analytics.applications.underReview.toString()],
+      ['Accepted', analytics.applications.accepted.toString()],
+      ['Rejected', analytics.applications.rejected.toString()],
+      ['Waitlisted', analytics.applications.waitlisted.toString()],
+      [''],
+      ['Trends'],
+      ['Metric', 'Value'],
+      ['Applications This Week', analytics.trends.applicationsThisWeek.toString()],
+      ['Applications Last Week', analytics.trends.applicationsLastWeek.toString()],
+      ['Acceptance Rate', `${analytics.trends.acceptanceRate.toFixed(1)}%`],
+      ['Payment Rate', `${analytics.trends.conversionRate.toFixed(1)}%`],
+      [''],
+      ['Top Programs'],
+      ['Program', 'Applications'],
+      ...analytics.programs.map(p => [p.name, p.count.toString()]),
+    ];
+
+    const csv = csvData.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -139,9 +250,15 @@ export default function SchoolAnalyticsPage() {
           <h1 className="text-3xl font-bold">Analytics & Insights</h1>
           <p className="text-muted-foreground">Track your institution&apos;s application and revenue metrics</p>
         </div>
-        <Button variant="outline" asChild>
-          <Link href="/schools/dashboard">← Back to Dashboard</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportAnalytics}>
+            <Download className="w-4 h-4 mr-2" />
+            Export Report
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/schools/dashboard">← Back to Dashboard</Link>
+          </Button>
+        </div>
       </div>
 
       {/* Financial Summary */}
@@ -283,6 +400,189 @@ export default function SchoolAnalyticsPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Trends & Performance Metrics */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Trends & Performance</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">This Week</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{analytics.trends.applicationsThisWeek}</div>
+              <p className="text-xs text-muted-foreground">
+                {analytics.trends.applicationsThisWeek > analytics.trends.applicationsLastWeek ? (
+                  <span className="text-green-600">
+                    ↑ {analytics.trends.applicationsThisWeek - analytics.trends.applicationsLastWeek} from last week
+                  </span>
+                ) : analytics.trends.applicationsThisWeek < analytics.trends.applicationsLastWeek ? (
+                  <span className="text-red-600">
+                    ↓ {analytics.trends.applicationsLastWeek - analytics.trends.applicationsThisWeek} from last week
+                  </span>
+                ) : (
+                  <span className="text-gray-600">Same as last week</span>
+                )}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Last Week</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{analytics.trends.applicationsLastWeek}</div>
+              <p className="text-xs text-muted-foreground">
+                Previous 7 days
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Acceptance Rate</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {analytics.trends.acceptanceRate.toFixed(1)}%
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Of decided applications
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Payment Rate</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {analytics.trends.conversionRate.toFixed(1)}%
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Applications with payment
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Program Popularity */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Top Programs</h2>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Program Popularity</CardTitle>
+                <CardDescription>Most applied programs</CardDescription>
+              </div>
+              <BarChart className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            {analytics.programs.length > 0 ? (
+              <div className="space-y-4">
+                {analytics.programs.map((program, index) => {
+                  const maxCount = analytics.programs[0]?.count || 1;
+                  const percentage = (program.count / maxCount) * 100;
+                  
+                  return (
+                    <div key={index}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">{program.name}</span>
+                        <span className="text-sm text-muted-foreground">{program.count} apps</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-primary h-2.5 rounded-full transition-all"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No program data available yet
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Conversion Funnel */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Application Funnel</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Application Journey</CardTitle>
+            <CardDescription>From submission to decision</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[
+                { 
+                  label: 'Total Applications', 
+                  count: analytics.financial.totalApplications, 
+                  color: 'bg-blue-500',
+                  percentage: 100
+                },
+                { 
+                  label: 'Paid Applications', 
+                  count: analytics.financial.paidApplications, 
+                  color: 'bg-green-500',
+                  percentage: analytics.financial.totalApplications > 0 
+                    ? (analytics.financial.paidApplications / analytics.financial.totalApplications) * 100 
+                    : 0
+                },
+                { 
+                  label: 'Under Review', 
+                  count: analytics.applications.underReview, 
+                  color: 'bg-amber-500',
+                  percentage: analytics.financial.totalApplications > 0 
+                    ? (analytics.applications.underReview / analytics.financial.totalApplications) * 100 
+                    : 0
+                },
+                { 
+                  label: 'Accepted', 
+                  count: analytics.applications.accepted, 
+                  color: 'bg-green-600',
+                  percentage: analytics.financial.totalApplications > 0 
+                    ? (analytics.applications.accepted / analytics.financial.totalApplications) * 100 
+                    : 0
+                },
+              ].map((stage, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <div className="w-32 text-sm font-medium">{stage.label}</div>
+                  <div className="flex-1">
+                    <div className="w-full bg-gray-200 rounded-full h-8 relative overflow-hidden">
+                      <div 
+                        className={`${stage.color} h-8 rounded-full transition-all flex items-center justify-end pr-3`}
+                        style={{ width: `${stage.percentage}%` }}
+                      >
+                        <span className="text-white text-sm font-medium">
+                          {stage.count}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-16 text-right text-sm text-muted-foreground">
+                    {stage.percentage.toFixed(0)}%
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Key Metrics Summary */}

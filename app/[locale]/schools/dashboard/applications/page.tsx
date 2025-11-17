@@ -6,16 +6,38 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { BarChart3, Download, Mail, CheckSquare, XSquare } from "lucide-react";
 import { getDemoApplications } from "@/lib/demo-data";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function SchoolApplicationsPage() {
   const [applications, setApplications] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [demoMode, setDemoMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkActionDialog, setBulkActionDialog] = useState<'status' | 'email' | null>(null);
+  const [bulkStatus, setBulkStatus] = useState<string>("UNDER_REVIEW");
+  const [bulkEmailSubject, setBulkEmailSubject] = useState("");
+  const [bulkEmailMessage, setBulkEmailMessage] = useState("");
+  const [processing, setProcessing] = useState(false);
+  
+  // Advanced filters
+  const [programFilter, setProgramFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("date-desc");
 
   const mockApplications = getDemoApplications().map(app => ({
     id: app.id,
@@ -84,13 +106,177 @@ export default function SchoolApplicationsPage() {
   };
 
   const filteredApplications = applications.filter(app => {
+    // Status filter
     if (filter !== "all" && app.status !== filter) return false;
+    
+    // Search filter
     if (search && !app.applicantName.toLowerCase().includes(search.toLowerCase()) &&
         !app.applicantEmail.toLowerCase().includes(search.toLowerCase())) {
       return false;
     }
+    
+    // Program filter
+    if (programFilter !== "all" && app.program !== programFilter) return false;
+    
+    // Date filter
+    if (dateFilter !== "all") {
+      const appDate = new Date(app.submittedAt);
+      const now = new Date();
+      const daysDiff = Math.floor((now.getTime() - appDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (dateFilter === "today" && daysDiff > 0) return false;
+      if (dateFilter === "week" && daysDiff > 7) return false;
+      if (dateFilter === "month" && daysDiff > 30) return false;
+    }
+    
     return true;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case "date-desc":
+        return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+      case "date-asc":
+        return new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
+      case "name-asc":
+        return a.applicantName.localeCompare(b.applicantName);
+      case "name-desc":
+        return b.applicantName.localeCompare(a.applicantName);
+      default:
+        return 0;
+    }
   });
+
+  // Get unique programs for filter
+  const uniquePrograms = Array.from(new Set(applications.map(app => app.program)));
+
+  const clearFilters = () => {
+    setSearch("");
+    setFilter("all");
+    setProgramFilter("all");
+    setDateFilter("all");
+    setSortBy("date-desc");
+  };
+
+  // Selection handlers
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredApplications.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredApplications.map(app => app.id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  // Bulk actions
+  const handleBulkStatusUpdate = async () => {
+    if (demoMode) {
+      alert("Demo Mode: Bulk actions are not available. Please sign in to use this feature.");
+      setBulkActionDialog(null);
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      await Promise.all(
+        selectedIds.map(id =>
+          fetch(`/api/schools/applications/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: bulkStatus })
+          })
+        )
+      );
+      
+      alert(`Successfully updated ${selectedIds.length} applications to ${bulkStatus.replace('_', ' ')}`);
+      setSelectedIds([]);
+      setBulkActionDialog(null);
+      loadApplications();
+    } catch (error) {
+      console.error('Bulk update error:', error);
+      alert('Failed to update some applications. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleBulkEmail = async () => {
+    if (demoMode) {
+      alert("Demo Mode: Bulk email is not available. Please sign in to use this feature.");
+      setBulkActionDialog(null);
+      return;
+    }
+
+    if (!bulkEmailSubject.trim() || !bulkEmailMessage.trim()) {
+      alert('Please provide both subject and message');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const selectedApps = applications.filter(app => selectedIds.includes(app.id));
+      
+      await Promise.all(
+        selectedApps.map(app =>
+          fetch('/api/email/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: app.applicantEmail,
+              template: 'customMessage',
+              data: {
+                studentName: app.applicantName,
+                subject: bulkEmailSubject,
+                message: bulkEmailMessage
+              }
+            })
+          })
+        )
+      );
+      
+      alert(`Successfully sent email to ${selectedIds.length} applicants`);
+      setSelectedIds([]);
+      setBulkActionDialog(null);
+      setBulkEmailSubject('');
+      setBulkEmailMessage('');
+    } catch (error) {
+      console.error('Bulk email error:', error);
+      alert('Failed to send some emails. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const exportToCSV = () => {
+    const selectedApps = selectedIds.length > 0 
+      ? applications.filter(app => selectedIds.includes(app.id))
+      : filteredApplications;
+
+    const headers = ['Name', 'Email', 'Program', 'Status', 'Submitted Date'];
+    const rows = selectedApps.map(app => [
+      app.applicantName,
+      app.applicantEmail,
+      app.program,
+      app.status,
+      app.submittedAt
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `applications-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -135,26 +321,149 @@ export default function SchoolApplicationsPage() {
         </div>
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.length > 0 && (
+        <Card className="mb-6 border-primary">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckSquare className="h-5 w-5 text-primary" />
+                <span className="font-semibold">
+                  {selectedIds.length} application{selectedIds.length > 1 ? 's' : ''} selected
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBulkActionDialog('status')}
+                  disabled={processing}
+                >
+                  Update Status
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBulkActionDialog('email')}
+                  disabled={processing}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Email
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportToCSV}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedIds([])}
+                >
+                  <XSquare className="h-4 w-4 mr-2" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filters */}
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
-              <Input
-                placeholder="Search by name or email..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+          <div className="space-y-4">
+            {/* Primary Filters */}
+            <div className="flex gap-4 flex-wrap items-center">
+              <div className="flex-1 min-w-[200px]">
+                <Input
+                  placeholder="Search by name or email..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <Tabs value={filter} onValueChange={setFilter}>
+                <TabsList>
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="SUBMITTED">New</TabsTrigger>
+                  <TabsTrigger value="UNDER_REVIEW">In Review</TabsTrigger>
+                  <TabsTrigger value="ACCEPTED">Accepted</TabsTrigger>
+                  <TabsTrigger value="REJECTED">Rejected</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
-            <Tabs value={filter} onValueChange={setFilter}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="SUBMITTED">New</TabsTrigger>
-                <TabsTrigger value="UNDER_REVIEW">In Review</TabsTrigger>
-                <TabsTrigger value="ACCEPTED">Accepted</TabsTrigger>
-                <TabsTrigger value="REJECTED">Rejected</TabsTrigger>
-              </TabsList>
-            </Tabs>
+
+            {/* Advanced Filters */}
+            <div className="flex gap-4 flex-wrap items-center border-t pt-4">
+              <div className="w-[200px]">
+                <Label className="text-xs text-muted-foreground mb-1">Program</Label>
+                <Select value={programFilter} onValueChange={setProgramFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Programs" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Programs</SelectItem>
+                    {uniquePrograms.map(program => (
+                      <SelectItem key={program} value={program}>{program}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="w-[200px]">
+                <Label className="text-xs text-muted-foreground mb-1">Submitted</Label>
+                <Select value={dateFilter} onValueChange={setDateFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="w-[200px]">
+                <Label className="text-xs text-muted-foreground mb-1">Sort By</Label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date-desc">Newest First</SelectItem>
+                    <SelectItem value="date-asc">Oldest First</SelectItem>
+                    <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                    <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-2 ml-auto">
+                {(search || filter !== "all" || programFilter !== "all" || dateFilter !== "all" || sortBy !== "date-desc") && (
+                  <Button variant="outline" size="sm" onClick={clearFilters}>
+                    Clear Filters
+                  </Button>
+                )}
+                {filteredApplications.length > 0 && (
+                  <Button variant="outline" size="sm" onClick={exportToCSV}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Filter Summary */}
+            {filteredApplications.length !== applications.length && (
+              <div className="text-sm text-muted-foreground">
+                Showing {filteredApplications.length} of {applications.length} applications
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -168,43 +477,68 @@ export default function SchoolApplicationsPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredApplications.map((app) => (
-            <Card key={app.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1 flex-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-lg">{app.applicantName}</h3>
-                      <Badge className={getStatusColor(app.status)}>
-                        {app.status.replace("_", " ")}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{app.applicantEmail}</p>
-                    <p className="text-sm">
-                      <span className="font-medium">Program:</span> {app.program}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Submitted: {new Date(app.submittedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/schools/dashboard/applications/${app.id}`}>
-                        View Details
-                      </Link>
-                    </Button>
-                    {app.status === "SUBMITTED" && (
-                      <Button size="sm" asChild>
-                        <Link href={`/schools/dashboard/applications/${app.id}`}>
-                          Start Review
-                        </Link>
-                      </Button>
-                    )}
-                  </div>
+          <>
+            {/* Select All Header */}
+            <Card className="bg-muted/50">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedIds.length === filteredApplications.length && filteredApplications.length > 0}
+                    onCheckedChange={toggleSelectAll}
+                    id="select-all"
+                  />
+                  <Label htmlFor="select-all" className="cursor-pointer font-medium">
+                    Select All ({filteredApplications.length})
+                  </Label>
                 </div>
               </CardContent>
             </Card>
-          ))
+
+            {filteredApplications.map((app) => (
+              <Card key={app.id} className={`hover:shadow-md transition-shadow ${selectedIds.includes(app.id) ? 'border-primary' : ''}`}>
+                <CardContent className="pt-6">
+                  <div className="flex gap-4 items-start">
+                    <Checkbox
+                      checked={selectedIds.includes(app.id)}
+                      onCheckedChange={() => toggleSelect(app.id)}
+                      id={`select-${app.id}`}
+                    />
+                    <div className="flex justify-between items-start flex-1">
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-lg">{app.applicantName}</h3>
+                          <Badge className={getStatusColor(app.status)}>
+                            {app.status.replace("_", " ")}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{app.applicantEmail}</p>
+                        <p className="text-sm">
+                          <span className="font-medium">Program:</span> {app.program}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Submitted: {new Date(app.submittedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/schools/dashboard/applications/${app.id}`}>
+                            View Details
+                          </Link>
+                        </Button>
+                        {app.status === "SUBMITTED" && (
+                          <Button size="sm" asChild>
+                            <Link href={`/schools/dashboard/applications/${app.id}`}>
+                              Start Review
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </>
         )}
       </div>
 
@@ -224,6 +558,83 @@ export default function SchoolApplicationsPage() {
           </div>
         </div>
       )}
+
+      {/* Bulk Status Update Dialog */}
+      <Dialog open={bulkActionDialog === 'status'} onOpenChange={(open) => !open && setBulkActionDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Status for {selectedIds.length} Applications</DialogTitle>
+            <DialogDescription>
+              Choose a new status to apply to all selected applications.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="bulk-status">New Status</Label>
+              <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                <SelectTrigger id="bulk-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
+                  <SelectItem value="ACCEPTED">Accepted</SelectItem>
+                  <SelectItem value="REJECTED">Rejected</SelectItem>
+                  <SelectItem value="WAITLISTED">Waitlisted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkActionDialog(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkStatusUpdate} disabled={processing}>
+              {processing ? 'Updating...' : `Update ${selectedIds.length} Applications`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Email Dialog */}
+      <Dialog open={bulkActionDialog === 'email'} onOpenChange={(open) => !open && setBulkActionDialog(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Send Email to {selectedIds.length} Applicants</DialogTitle>
+            <DialogDescription>
+              Compose a message to send to all selected applicants.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="email-subject">Subject</Label>
+              <Input
+                id="email-subject"
+                value={bulkEmailSubject}
+                onChange={(e) => setBulkEmailSubject(e.target.value)}
+                placeholder="Enter email subject..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="email-message">Message</Label>
+              <Textarea
+                id="email-message"
+                value={bulkEmailMessage}
+                onChange={(e) => setBulkEmailMessage(e.target.value)}
+                placeholder="Enter your message..."
+                rows={8}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkActionDialog(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkEmail} disabled={processing || !bulkEmailSubject || !bulkEmailMessage}>
+              {processing ? 'Sending...' : `Send to ${selectedIds.length} Applicants`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

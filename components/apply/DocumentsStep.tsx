@@ -12,8 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, Upload, FileText, Trash2 } from "lucide-react";
+import { CheckCircle2, XCircle, Upload, FileText, Trash2, Eye, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface DocumentsStepProps {
   onNext: () => void;
@@ -33,12 +34,26 @@ const DOCUMENT_TYPES = [
   { value: "CV", label: "CV/Resume", required: false },
 ];
 
+// File size limits
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_TYPES = {
+  'application/pdf': 'PDF',
+  'image/jpeg': 'JPG',
+  'image/jpg': 'JPG', 
+  'image/png': 'PNG',
+  'application/msword': 'DOC',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX'
+};
+
 export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
   const t = useTranslations("apply.documents");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [documents, setDocuments] = useState<any[]>([]);
   const [documentKind, setDocumentKind] = useState<string>("BIRTH_CERTIFICATE");
+  const [previewFile, setPreviewFile] = useState<{ url: string; name: string; type: string } | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDocuments();
@@ -65,36 +80,61 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
     const user = auth.currentUser;
     if (!user) return;
 
-    // Validate file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-      alert("File size must be less than 10MB");
+    // Reset errors
+    setFileError(null);
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setFileError(`File size must be less than ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`);
+      e.target.value = "";
       return;
     }
 
     // Validate file type
-    const allowedTypes = [
-      'application/pdf',
-      'image/jpeg',
-      'image/jpg', 
-      'image/png',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
-    
-    if (!allowedTypes.includes(file.type)) {
-      alert("Please upload PDF, JPG, PNG, or DOC files only");
+    if (!ALLOWED_TYPES[file.type as keyof typeof ALLOWED_TYPES]) {
+      setFileError(`Invalid file type. Allowed: ${Object.values(ALLOWED_TYPES).join(', ')}`);
+      e.target.value = "";
       return;
     }
+
+    // Set selected file for preview
+    setSelectedFile(file);
+    
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewFile({
+          url: e.target?.result as string,
+          name: file.name,
+          type: file.type
+        });
+      };
+      reader.readAsDataURL(file);
+    } else if (file.type === 'application/pdf') {
+      setPreviewFile({
+        url: URL.createObjectURL(file),
+        name: file.name,
+        type: file.type
+      });
+    }
+  };
+
+  const confirmUpload = async () => {
+    if (!selectedFile) return;
+
+    const user = auth.currentUser;
+    if (!user) return;
 
     setUploading(true);
     setUploadProgress(0);
 
     try {
-      const docId = `${Date.now()}_${file.name}`;
+      const docId = `${Date.now()}_${selectedFile.name}`;
       const storagePath = `users/${user.uid}/docs/${docId}`;
       const storageRef = ref(storage, storagePath);
 
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
       uploadTask.on(
         "state_changed",
@@ -104,7 +144,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
         },
         (error) => {
           console.error("Upload error:", error);
-          alert("Upload failed. Please try again.");
+          setFileError("Upload failed. Please try again.");
           setUploading(false);
         },
         async () => {
@@ -114,9 +154,9 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
           await addDoc(collection(db, "documents"), {
             ownerUid: user.uid,
             kind: documentKind,
-            filename: file.name,
-            mimeType: file.type,
-            sizeBytes: file.size,
+            filename: selectedFile.name,
+            mimeType: selectedFile.type,
+            sizeBytes: selectedFile.size,
             storagePath,
             downloadURL,
             createdAt: new Date(),
@@ -125,16 +165,28 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
           await loadDocuments();
           setUploading(false);
           setUploadProgress(0);
+          setSelectedFile(null);
+          setPreviewFile(null);
+          setFileError(null);
           
-          // Reset file input
-          e.target.value = "";
+          // Clear file input
+          const fileInput = document.getElementById('file') as HTMLInputElement;
+          if (fileInput) fileInput.value = "";
         }
       );
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("An error occurred during upload");
+      setFileError("An error occurred during upload");
       setUploading(false);
     }
+  };
+
+  const cancelUpload = () => {
+    setSelectedFile(null);
+    setPreviewFile(null);
+    setFileError(null);
+    const fileInput = document.getElementById('file') as HTMLInputElement;
+    if (fileInput) fileInput.value = "";
   };
 
   const handleDeleteDocument = async (docId: string, storagePath: string) => {
@@ -154,6 +206,14 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
     }
   };
 
+  const handleReplaceDocument = (docType: string) => {
+    setDocumentKind(docType);
+    const fileInput = document.getElementById('file') as HTMLInputElement;
+    if (fileInput) fileInput.click();
+  };
+
+  const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string; type: string } | null>(null);
+
   const getDocumentsByType = (type: string) => {
     return documents.filter(doc => doc.kind === type);
   };
@@ -169,79 +229,136 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Required Documents</CardTitle>
-        <CardDescription>
-          Upload all required documents for your application. Documents marked with * are mandatory for Haitian universities.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Missing Documents Alert */}
-        {!hasRequiredDocuments() && (
-          <Alert>
-            <AlertDescription>
-              <strong>Missing Required Documents:</strong>
-              <ul className="list-disc list-inside mt-2">
-                {getMissingRequiredDocs().map(doc => (
-                  <li key={doc.value}>{doc.label}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Required Documents</CardTitle>
+          <CardDescription>
+            Upload all required documents for your application. Documents marked with * are mandatory for Haitian universities.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Missing Documents Alert */}
+          {!hasRequiredDocuments() && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Missing Required Documents:</strong>
+                <ul className="list-disc list-inside mt-2">
+                  {getMissingRequiredDocs().map(doc => (
+                    <li key={doc.value}>{doc.label}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {/* Upload Section */}
-        <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            Upload New Document
-          </h3>
-          
-          <div>
-            <Label htmlFor="documentKind">Document Type *</Label>
-            <Select value={documentKind} onValueChange={setDocumentKind}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DOCUMENT_TYPES.map((docType) => (
-                  <SelectItem key={docType.value} value={docType.value}>
-                    {docType.label} {docType.required && "*"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1">
-              {DOCUMENT_TYPES.find(d => d.value === documentKind)?.required 
-                ? "This document is required" 
-                : "This document is optional"}
-            </p>
-          </div>
+          {/* File Error Alert */}
+          {fileError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{fileError}</AlertDescription>
+            </Alert>
+          )}
 
-          <div>
-            <Label htmlFor="file">Choose File</Label>
-            <Input
-              id="file"
-              type="file"
-              onChange={handleFileUpload}
-              disabled={uploading}
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Accepted formats: PDF, JPG, PNG, DOC. Max size: 10MB
-            </p>
-          </div>
-
-          {uploading && (
+          {/* Upload Section */}
+          <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
+            <h3 className="font-semibold flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              Upload New Document
+            </h3>
+            
             <div>
-              <Progress value={uploadProgress} />
-              <p className="text-sm text-muted-foreground mt-2">
-                Uploading... {Math.round(uploadProgress)}%
+              <Label htmlFor="documentKind">Document Type *</Label>
+              <Select value={documentKind} onValueChange={setDocumentKind} disabled={uploading}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DOCUMENT_TYPES.map((docType) => (
+                    <SelectItem key={docType.value} value={docType.value}>
+                      {docType.label} {docType.required && "*"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                {DOCUMENT_TYPES.find(d => d.value === documentKind)?.required 
+                  ? "This document is required" 
+                  : "This document is optional"}
               </p>
             </div>
-          )}
-        </div>
+
+            <div>
+              <Label htmlFor="file">Choose File</Label>
+              <Input
+                id="file"
+                type="file"
+                onChange={handleFileUpload}
+                disabled={uploading}
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Accepted: {Object.values(ALLOWED_TYPES).join(', ')} • Max: {(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB
+              </p>
+            </div>
+
+            {/* File Preview */}
+            {selectedFile && !uploading && (
+              <div className="border rounded-lg p-4 bg-background space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm mb-1">Preview</h4>
+                    <p className="text-sm text-muted-foreground">{selectedFile.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(selectedFile.size / 1024).toFixed(1)} KB • {ALLOWED_TYPES[selectedFile.type as keyof typeof ALLOWED_TYPES]}
+                    </p>
+                  </div>
+                </div>
+                
+                {previewFile && (
+                  <div className="mt-2">
+                    {previewFile.type.startsWith('image/') ? (
+                      <img 
+                        src={previewFile.url} 
+                        alt="Preview" 
+                        className="max-w-full h-auto max-h-64 rounded border"
+                      />
+                    ) : previewFile.type === 'application/pdf' ? (
+                      <div className="bg-muted p-4 rounded text-center">
+                        <FileText className="h-16 w-16 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm">PDF Document</p>
+                      </div>
+                    ) : (
+                      <div className="bg-muted p-4 rounded text-center">
+                        <FileText className="h-16 w-16 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm">Document Ready</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <Button onClick={confirmUpload} className="flex-1">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Document
+                  </Button>
+                  <Button onClick={cancelUpload} variant="outline">
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {uploading && (
+              <div>
+                <Progress value={uploadProgress} />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Uploading... {Math.round(uploadProgress)}%
+                </p>
+              </div>
+            )}
+          </div>
 
         {/* Documents by Category */}
         <div className="space-y-4">
@@ -286,15 +403,21 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        {doc.downloadURL && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => window.open(doc.downloadURL, '_blank')}
-                          >
-                            View
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setViewingDoc({ url: doc.downloadURL, name: doc.filename, type: doc.mimeType })}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleReplaceDocument(docType.value)}
+                        >
+                          Replace
+                        </Button>
                         <Button
                           size="sm"
                           variant="destructive"
@@ -346,5 +469,40 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
         </div>
       </CardContent>
     </Card>
+
+    {/* Document Viewer Dialog */}
+    <Dialog open={!!viewingDoc} onOpenChange={() => setViewingDoc(null)}>
+      <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>{viewingDoc?.name}</DialogTitle>
+        </DialogHeader>
+        <div className="overflow-auto max-h-[75vh]">
+          {viewingDoc?.type.startsWith('image/') ? (
+            <img 
+              src={viewingDoc.url} 
+              alt={viewingDoc.name}
+              className="max-w-full h-auto"
+            />
+          ) : viewingDoc?.type === 'application/pdf' ? (
+            <iframe
+              src={viewingDoc.url}
+              className="w-full h-[70vh]"
+              title={viewingDoc.name}
+            />
+          ) : (
+            <div className="text-center py-12">
+              <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-4">
+                This file type cannot be previewed
+              </p>
+              <Button onClick={() => window.open(viewingDoc?.url, '_blank')}>
+                Download File
+              </Button>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

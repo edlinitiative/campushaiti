@@ -8,9 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle, XCircle, Clock, FileText, DollarSign, AlertCircle, Download, User, GraduationCap, MapPin, Phone, Mail, Calendar } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Clock, FileText, DollarSign, AlertCircle, Download, User, GraduationCap, MapPin, Phone, Mail, Calendar, FileCheck, Activity, Upload } from "lucide-react";
 import JSZip from "jszip";
 import jsPDF from "jspdf";
+import { 
+  generateAcceptanceLetter, 
+  generateRejectionLetter, 
+  generatePaymentReceipt, 
+  generateInvoice 
+} from "@/lib/pdf-templates";
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -22,12 +28,81 @@ export default function ApplicationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
+  const [activityLog, setActivityLog] = useState<any[]>([]);
 
   useEffect(() => {
     if (applicationId) {
       loadApplication();
     }
   }, [applicationId]);
+
+  // Generate activity log from application data
+  const generateActivityLog = (app: any) => {
+    const activities = [];
+
+    // Application submitted
+    activities.push({
+      id: 1,
+      type: 'submission',
+      title: 'Application Submitted',
+      description: `${app.applicantName} submitted application for ${app.program}`,
+      timestamp: app.submittedAt || app.createdAt,
+      icon: FileText,
+      color: 'blue'
+    });
+
+    // Documents uploaded
+    if (app.documentIds && app.documentIds.length > 0) {
+      activities.push({
+        id: 2,
+        type: 'documents',
+        title: 'Documents Uploaded',
+        description: `${app.documentIds.length} document(s) uploaded`,
+        timestamp: app.submittedAt || app.createdAt,
+        icon: Upload,
+        color: 'purple'
+      });
+    }
+
+    // Payment received
+    if (app.checklist?.paymentReceived) {
+      activities.push({
+        id: 3,
+        type: 'payment',
+        title: 'Payment Received',
+        description: `Application fee paid: ${(app.feePaidCents / 100).toFixed(2)} ${app.feePaidCurrency || 'USD'}`,
+        timestamp: app.updatedAt || app.createdAt,
+        icon: DollarSign,
+        color: 'green'
+      });
+    }
+
+    // Status changes
+    if (app.status !== 'SUBMITTED') {
+      const statusConfig: any = {
+        'UNDER_REVIEW': { title: 'Under Review', color: 'amber', icon: Clock },
+        'ACCEPTED': { title: 'Application Accepted', color: 'green', icon: CheckCircle },
+        'REJECTED': { title: 'Application Rejected', color: 'red', icon: XCircle },
+        'WAITLISTED': { title: 'Added to Waitlist', color: 'orange', icon: Clock }
+      };
+
+      const config = statusConfig[app.status] || {};
+      activities.push({
+        id: 4,
+        type: 'status',
+        title: config.title || 'Status Updated',
+        description: `Application status changed to ${app.status.replace('_', ' ')}`,
+        timestamp: app.updatedAt || app.createdAt,
+        icon: config.icon || Activity,
+        color: config.color || 'gray'
+      });
+    }
+
+    // Sort by timestamp descending
+    return activities.sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  };
 
   const loadApplication = async () => {
     try {
@@ -124,6 +199,7 @@ export default function ApplicationDetailPage() {
             feePaidCurrency: app.feePaidCurrency || "HTG",
           });
           setReviewNotes(app.reviewNotes || "");
+          setActivityLog(generateActivityLog(app));
           setDemoMode(false);
           setLoading(false);
           return;
@@ -170,6 +246,18 @@ export default function ApplicationDetailPage() {
         reviewNotes: "",
       });
       setReviewNotes("");
+      setActivityLog(generateActivityLog({
+        applicantName: "Jean Baptiste",
+        program: "Computer Science - Bachelor",
+        submittedAt: "2025-11-10T14:30:00Z",
+        createdAt: "2025-11-10T14:30:00Z",
+        updatedAt: "2025-11-10T16:00:00Z",
+        status: "UNDER_REVIEW",
+        documentIds: ["doc1", "doc2"],
+        checklist: { paymentReceived: true },
+        feePaidCents: 5000,
+        feePaidCurrency: "HTG"
+      }));
     } catch (err) {
       console.error("Error loading application:", err);
       setDemoMode(true);
@@ -197,8 +285,34 @@ export default function ApplicationDetailPage() {
       });
 
       if (response.ok) {
-        setApplication({ ...application, status: newStatus });
+        const updatedApp = { ...application, status: newStatus };
+        setApplication(updatedApp);
+        setActivityLog(generateActivityLog(updatedApp));
         alert(`Application status updated to ${newStatus.replace(/_/g, ' ')}`);
+        
+        // Send status update email to student
+        try {
+          const dashboardUrl = `${window.location.origin}/dashboard`;
+          await fetch('/api/email/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: application.personalInfo.email,
+              template: 'applicationStatusUpdate',
+              data: {
+                studentName: application.personalInfo.fullName,
+                programName: application.program,
+                universityName: application.universityName,
+                status: newStatus,
+                message: reviewNotes || undefined,
+                dashboardUrl
+              }
+            })
+          });
+        } catch (emailErr) {
+          console.error('Failed to send status update email:', emailErr);
+          // Don't block status update if email fails
+        }
       } else {
         const error = await response.json();
         alert(`Failed to update application: ${error.error || 'Unknown error'}`);
@@ -923,6 +1037,71 @@ export default function ApplicationDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Activity Timeline */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Activity Timeline
+              </CardTitle>
+              <CardDescription>
+                Complete history of this application
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {activityLog.length > 0 ? (
+                <div className="space-y-4">
+                  {activityLog.map((activity, index) => {
+                    const IconComponent = activity.icon;
+                    const colorClasses: any = {
+                      blue: 'bg-blue-100 text-blue-600 border-blue-200',
+                      green: 'bg-green-100 text-green-600 border-green-200',
+                      red: 'bg-red-100 text-red-600 border-red-200',
+                      amber: 'bg-amber-100 text-amber-600 border-amber-200',
+                      orange: 'bg-orange-100 text-orange-600 border-orange-200',
+                      purple: 'bg-purple-100 text-purple-600 border-purple-200',
+                      gray: 'bg-gray-100 text-gray-600 border-gray-200'
+                    };
+
+                    return (
+                      <div key={activity.id} className="relative flex gap-4">
+                        {/* Timeline line */}
+                        {index < activityLog.length - 1 && (
+                          <div className="absolute left-5 top-12 w-0.5 h-full bg-gray-200" />
+                        )}
+                        
+                        {/* Icon */}
+                        <div className={`relative z-10 flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center ${colorClasses[activity.color] || colorClasses.gray}`}>
+                          <IconComponent className="w-5 h-5" />
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="flex-1 pb-4">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-semibold text-sm">{activity.title}</h4>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {activity.description}
+                              </p>
+                            </div>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                              {new Date(activity.timestamp).toLocaleDateString()} {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>No activity recorded yet</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Sidebar */}
@@ -970,6 +1149,152 @@ export default function ApplicationDetailPage() {
               >
                 <Clock className="w-4 h-4 mr-2" />
                 Mark Under Review
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Document Templates */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileCheck className="w-5 h-5" />
+                Generate Documents
+              </CardTitle>
+              <CardDescription>
+                Create official documents for this application
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button
+                className="w-full"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const pdf = generateAcceptanceLetter(
+                    {
+                      name: application.universityName || "University",
+                      address: "Port-au-Prince, Haiti",
+                      email: "admissions@university.edu.ht",
+                      phone: "+509 1234 5678"
+                    },
+                    {
+                      name: application.personalInfo?.fullName || application.applicantName,
+                      email: application.personalInfo?.email || application.applicantEmail,
+                      address: application.address?.fullAddress || ""
+                    },
+                    {
+                      name: application.program,
+                      degree: application.programDegree || "",
+                      startDate: "September 2026"
+                    },
+                    application.id
+                  );
+                  pdf.save(`acceptance-letter-${application.id}.pdf`);
+                }}
+                disabled={application.status !== "ACCEPTED"}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Acceptance Letter
+              </Button>
+
+              <Button
+                className="w-full"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const pdf = generateRejectionLetter(
+                    {
+                      name: application.universityName || "University",
+                      address: "Port-au-Prince, Haiti",
+                      email: "admissions@university.edu.ht",
+                      phone: "+509 1234 5678"
+                    },
+                    {
+                      name: application.personalInfo?.fullName || application.applicantName,
+                      email: application.personalInfo?.email || application.applicantEmail,
+                      address: application.address?.fullAddress || ""
+                    },
+                    {
+                      name: application.program,
+                      degree: application.programDegree || ""
+                    },
+                    application.id
+                  );
+                  pdf.save(`rejection-letter-${application.id}.pdf`);
+                }}
+                disabled={application.status !== "REJECTED"}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Rejection Letter
+              </Button>
+
+              <Button
+                className="w-full"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const pdf = generateInvoice(
+                    {
+                      name: application.universityName || "University",
+                      address: "Port-au-Prince, Haiti",
+                      email: "admissions@university.edu.ht",
+                      phone: "+509 1234 5678"
+                    },
+                    {
+                      name: application.personalInfo?.fullName || application.applicantName,
+                      email: application.personalInfo?.email || application.applicantEmail,
+                      address: application.address?.fullAddress || ""
+                    },
+                    {
+                      name: application.program,
+                      degree: application.programDegree || ""
+                    },
+                    `INV-${application.id}`,
+                    50.00,
+                    "USD",
+                    new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString()
+                  );
+                  pdf.save(`invoice-${application.id}.pdf`);
+                }}
+              >
+                <DollarSign className="w-4 h-4 mr-2" />
+                Generate Invoice
+              </Button>
+
+              <Button
+                className="w-full"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const pdf = generatePaymentReceipt(
+                    {
+                      name: application.universityName || "University",
+                      address: "Port-au-Prince, Haiti",
+                      email: "admissions@university.edu.ht",
+                      phone: "+509 1234 5678"
+                    },
+                    {
+                      name: application.personalInfo?.fullName || application.applicantName,
+                      email: application.personalInfo?.email || application.applicantEmail
+                    },
+                    {
+                      name: application.program,
+                      degree: application.programDegree || ""
+                    },
+                    {
+                      amount: 50.00,
+                      currency: "USD",
+                      transactionId: `TXN-${application.id}`,
+                      date: new Date().toLocaleDateString(),
+                      method: "Online Payment"
+                    }
+                  );
+                  pdf.save(`receipt-${application.id}.pdf`);
+                }}
+                disabled={!application.checklist?.paymentReceived}
+              >
+                <FileCheck className="w-4 h-4 mr-2" />
+                Payment Receipt
               </Button>
             </CardContent>
           </Card>

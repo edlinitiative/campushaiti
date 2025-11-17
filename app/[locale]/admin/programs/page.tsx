@@ -6,7 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, GraduationCap, Building2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Search, GraduationCap, Building2, Plus, Edit, Trash2, DollarSign, Calendar } from "lucide-react";
 
 interface Program {
   id: string;
@@ -17,17 +22,47 @@ interface Program {
   feeCents: number;
   currency: string;
   deadline: any;
+  description?: string;
+  isActive?: boolean;
+  requirements?: string[];
 }
 
 export default function AdminProgramsPage() {
   const [loading, setLoading] = useState(true);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [universities, setUniversities] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [demoMode, setDemoMode] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    degree: "BACHELOR",
+    universityId: "",
+    feeCents: 0,
+    currency: "HTG",
+    deadline: "",
+    description: "",
+    isActive: true,
+  });
 
   useEffect(() => {
     loadPrograms();
+    loadUniversities();
   }, []);
+
+  const loadUniversities = async () => {
+    try {
+      const response = await fetch('/api/admin/universities');
+      if (response.ok) {
+        const data = await response.json();
+        setUniversities(data.universities || []);
+      }
+    } catch (err) {
+      console.error("Error loading universities:", err);
+    }
+  };
 
   const loadPrograms = async () => {
     try {
@@ -82,6 +117,129 @@ export default function AdminProgramsPage() {
     }
   };
 
+  const handleCreateProgram = async () => {
+    if (!formData.name || !formData.universityId) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/programs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Program created successfully!");
+        setShowCreateDialog(false);
+        setFormData({
+          name: "",
+          degree: "BACHELOR",
+          universityId: "",
+          feeCents: 0,
+          currency: "HTG",
+          deadline: "",
+          description: "",
+          isActive: true,
+        });
+        loadPrograms();
+      } else {
+        const error = await response.json();
+        alert(`Failed to create program: ${error.error}`);
+      }
+    } catch (err) {
+      console.error("Error creating program:", err);
+      alert("An error occurred while creating the program");
+    }
+  };
+
+  const handleEditProgram = async () => {
+    if (!selectedProgram || !formData.name || !formData.universityId) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/programs/${selectedProgram.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Program updated successfully!");
+        setShowEditDialog(false);
+        setSelectedProgram(null);
+        loadPrograms();
+      } else {
+        const error = await response.json();
+        alert(`Failed to update program: ${error.error}`);
+      }
+    } catch (err) {
+      console.error("Error updating program:", err);
+      alert("An error occurred while updating the program");
+    }
+  };
+
+  const handleDeleteProgram = async (program: Program) => {
+    if (!confirm(`Are you sure you want to delete ${program.name}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/programs/${program.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        alert("Program deleted successfully!");
+        loadPrograms();
+      } else {
+        const error = await response.json();
+        alert(`Failed to delete program: ${error.error}`);
+      }
+    } catch (err) {
+      console.error("Error deleting program:", err);
+      alert("An error occurred while deleting the program");
+    }
+  };
+
+  const handleToggleActive = async (program: Program) => {
+    try {
+      const response = await fetch(`/api/admin/programs/${program.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !program.isActive }),
+      });
+
+      if (response.ok) {
+        loadPrograms();
+      } else {
+        const error = await response.json();
+        alert(`Failed to update program status: ${error.error}`);
+      }
+    } catch (err) {
+      console.error("Error updating program status:", err);
+      alert("An error occurred while updating the program status");
+    }
+  };
+
+  const openEditDialog = (program: Program) => {
+    setSelectedProgram(program);
+    setFormData({
+      name: program.name || "",
+      degree: program.degree || "BACHELOR",
+      universityId: program.universityId || "",
+      feeCents: program.feeCents || 0,
+      currency: program.currency || "HTG",
+      deadline: program.deadline ? new Date(program.deadline).toISOString().split('T')[0] : "",
+      description: program.description || "",
+      isActive: program.isActive !== false,
+    });
+    setShowEditDialog(true);
+  };
+
   const filteredPrograms = programs.filter(program =>
     program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     program.universityName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -127,21 +285,24 @@ export default function AdminProgramsPage() {
         </div>
       )}
 
-      <div className="mb-6">
-        <Link href="/admin">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-        </Link>
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">All Programs</h1>
+          <h1 className="text-3xl font-bold">Program Management</h1>
           <p className="text-muted-foreground">
             {programs.length} programs across all universities
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Program
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/admin">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Admin Dashboard
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -159,48 +320,80 @@ export default function AdminProgramsPage() {
       </div>
 
       {/* Programs Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPrograms.map((program) => (
-          <Card key={program.id}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-blue-600" />
-                  <Badge variant="outline">{getDegreeLabel(program.degree)}</Badge>
-                </div>
-              </div>
-              <CardTitle className="text-lg mt-2">{program.name}</CardTitle>
-              <CardDescription className="flex items-center gap-2">
-                <Building2 className="w-4 h-4" />
-                {program.universityName}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Application Fee:</span>
-                  <span className="font-medium">
-                    {program.feeCents / 100} {program.currency}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Deadline:</span>
-                  <span className="font-medium">
-                    {new Date(program.deadline).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredPrograms.length === 0 && (
+      {filteredPrograms.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No programs found</p>
+            <GraduationCap className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <p className="text-muted-foreground mb-4">No programs found</p>
+            {programs.length === 0 && (
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Program
+              </Button>
+            )}
           </CardContent>
         </Card>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPrograms.map((program) => (
+            <Card key={program.id} className={program.isActive === false ? "opacity-60" : ""}>
+              <CardHeader>
+                <div className="flex items-start justify-between mb-2">
+                  <Badge variant="outline">{getDegreeLabel(program.degree)}</Badge>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => openEditDialog(program)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => handleDeleteProgram(program)}>
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                </div>
+                <CardTitle className="text-lg">{program.name}</CardTitle>
+                <CardDescription className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  {program.universityName}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <DollarSign className="h-3 w-3" />
+                      Application Fee:
+                    </span>
+                    <span className="font-semibold">
+                      {program.feeCents / 100} {program.currency}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      Deadline:
+                    </span>
+                    <span className="font-medium">
+                      {new Date(program.deadline).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                {program.description && (
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {program.description}
+                  </p>
+                )}
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <span className="text-sm font-medium">
+                    {program.isActive === false ? "Inactive" : "Active"}
+                  </span>
+                  <Switch
+                    checked={program.isActive !== false}
+                    onCheckedChange={() => handleToggleActive(program)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
       {/* Summary Stats */}
@@ -209,10 +402,16 @@ export default function AdminProgramsPage() {
           <CardTitle>Program Statistics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-5 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Programs</p>
               <p className="text-2xl font-bold">{programs.length}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Active</p>
+              <p className="text-2xl font-bold text-green-600">
+                {programs.filter(p => p.isActive !== false).length}
+              </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Bachelor&apos;s</p>
@@ -235,6 +434,261 @@ export default function AdminProgramsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Create Program Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Program</DialogTitle>
+            <DialogDescription>
+              Create a new academic program
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="program-name">Program Name *</Label>
+              <Input
+                id="program-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Bachelor of Science in Computer Science"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="degree">Degree Type *</Label>
+                <Select value={formData.degree} onValueChange={(value) => setFormData({ ...formData, degree: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BACHELOR">Bachelor's</SelectItem>
+                    <SelectItem value="MASTER">Master's</SelectItem>
+                    <SelectItem value="DOCTORATE">PhD/Doctorate</SelectItem>
+                    <SelectItem value="ASSOCIATE">Associate</SelectItem>
+                    <SelectItem value="CERTIFICATE">Certificate</SelectItem>
+                    <SelectItem value="DIPLOMA">Diploma</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="university">University *</Label>
+                <Select value={formData.universityId} onValueChange={(value) => setFormData({ ...formData, universityId: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select university" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {universities.map((uni) => (
+                      <SelectItem key={uni.id} value={uni.id}>
+                        {uni.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fee">Application Fee (cents) *</Label>
+                <Input
+                  id="fee"
+                  type="number"
+                  value={formData.feeCents}
+                  onChange={(e) => setFormData({ ...formData, feeCents: parseInt(e.target.value) || 0 })}
+                  placeholder="50000"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency</Label>
+                <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HTG">HTG (Gourde)</SelectItem>
+                    <SelectItem value="USD">USD (Dollar)</SelectItem>
+                    <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="deadline">Application Deadline</Label>
+                <Input
+                  id="deadline"
+                  type="date"
+                  value={formData.deadline}
+                  onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Brief description of the program..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Program Status</Label>
+                <p className="text-sm text-muted-foreground">
+                  {formData.isActive ? "Active and accepting applications" : "Inactive"}
+                </p>
+              </div>
+              <Switch
+                checked={formData.isActive}
+                onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateProgram}>
+                Create Program
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Program Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Program</DialogTitle>
+            <DialogDescription>
+              Update program information and fees
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-program-name">Program Name *</Label>
+              <Input
+                id="edit-program-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-degree">Degree Type *</Label>
+                <Select value={formData.degree} onValueChange={(value) => setFormData({ ...formData, degree: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BACHELOR">Bachelor's</SelectItem>
+                    <SelectItem value="MASTER">Master's</SelectItem>
+                    <SelectItem value="DOCTORATE">PhD/Doctorate</SelectItem>
+                    <SelectItem value="ASSOCIATE">Associate</SelectItem>
+                    <SelectItem value="CERTIFICATE">Certificate</SelectItem>
+                    <SelectItem value="DIPLOMA">Diploma</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-university">University *</Label>
+                <Select value={formData.universityId} onValueChange={(value) => setFormData({ ...formData, universityId: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select university" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {universities.map((uni) => (
+                      <SelectItem key={uni.id} value={uni.id}>
+                        {uni.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-fee">Application Fee (cents) *</Label>
+                <Input
+                  id="edit-fee"
+                  type="number"
+                  value={formData.feeCents}
+                  onChange={(e) => setFormData({ ...formData, feeCents: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-currency">Currency</Label>
+                <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HTG">HTG (Gourde)</SelectItem>
+                    <SelectItem value="USD">USD (Dollar)</SelectItem>
+                    <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-deadline">Application Deadline</Label>
+                <Input
+                  id="edit-deadline"
+                  type="date"
+                  value={formData.deadline}
+                  onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Program Status</Label>
+                <p className="text-sm text-muted-foreground">
+                  {formData.isActive ? "Active and accepting applications" : "Inactive"}
+                </p>
+              </div>
+              <Switch
+                checked={formData.isActive}
+                onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditProgram}>
+                Update Program
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
