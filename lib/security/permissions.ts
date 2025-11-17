@@ -66,22 +66,24 @@ export enum Permission {
 /**
  * Role-Permission mapping
  */
+const applicantPermissions = [
+  Permission.VIEW_OWN_APPLICATIONS,
+  Permission.CREATE_APPLICATION,
+  Permission.EDIT_OWN_APPLICATION,
+  Permission.DELETE_OWN_APPLICATION,
+  Permission.UPLOAD_DOCUMENTS,
+  Permission.VIEW_OWN_DOCUMENTS,
+  Permission.DELETE_OWN_DOCUMENTS,
+  Permission.VIEW_UNIVERSITIES,
+  Permission.VIEW_PROGRAMS,
+];
+
 const rolePermissions: Record<Role, Permission[]> = {
-  [Role.APPLICANT]: [
-    Permission.VIEW_OWN_APPLICATIONS,
-    Permission.CREATE_APPLICATION,
-    Permission.EDIT_OWN_APPLICATION,
-    Permission.DELETE_OWN_APPLICATION,
-    Permission.UPLOAD_DOCUMENTS,
-    Permission.VIEW_OWN_DOCUMENTS,
-    Permission.DELETE_OWN_DOCUMENTS,
-    Permission.VIEW_UNIVERSITIES,
-    Permission.VIEW_PROGRAMS,
-  ],
+  [Role.APPLICANT]: applicantPermissions,
   
   [Role.SCHOOL_ADMIN]: [
     // All applicant permissions
-    ...rolePermissions[Role.APPLICANT] || [],
+    ...applicantPermissions,
     
     // School-specific permissions
     Permission.VIEW_ALL_APPLICATIONS,

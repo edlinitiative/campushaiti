@@ -21,11 +21,11 @@ const store = new Map<string, RateLimitStore>();
  */
 setInterval(() => {
   const now = Date.now();
-  for (const [key, value] of store.entries()) {
+  store.forEach((value, key) => {
     if (now > value.resetTime) {
       store.delete(key);
     }
-  }
+  });
 }, 5 * 60 * 1000);
 
 export class RateLimiter {

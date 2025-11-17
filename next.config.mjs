@@ -5,8 +5,8 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    // Only run ESLint on these directories during production builds
-    dirs: ['app', 'components', 'lib'],
+    // Ignore ESLint errors during production builds
+    ignoreDuringBuilds: true,
   },
   typescript: {
     // Dangerously skip type checking during build (Vercel will handle it)

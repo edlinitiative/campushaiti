@@ -46,7 +46,7 @@ export class GDPRService {
       const documents = documentsSnap.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })) as any[];
       const auditLogs = auditLogsSnap.docs.map((doc) => doc.data());
 
       // Get payment data from applications

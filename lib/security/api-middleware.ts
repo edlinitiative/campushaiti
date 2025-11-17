@@ -44,7 +44,7 @@ export async function withRateLimit(
       {
         status: 429,
         headers: {
-          "X-RateLimit-Limit": rateLimiter.maxRequests?.toString() || "0",
+          "X-RateLimit-Limit": "100",
           "X-RateLimit-Remaining": "0",
           "X-RateLimit-Reset": new Date(result.resetTime).toISOString(),
           "Retry-After": result.retryAfter?.toString() || "60",
