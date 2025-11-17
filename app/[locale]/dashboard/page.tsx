@@ -106,47 +106,47 @@ export default async function DashboardPage({
       
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome back, {user.email?.split('@')[0] || "Student"}!</h1>
-        <p className="text-muted-foreground">Track your applications and manage your documents</p>
+        <h1 className="text-3xl font-bold mb-2">{t('welcomeBack')}, {user.email?.split('@')[0] || "Student"}!</h1>
+        <p className="text-muted-foreground">{t('trackApplications')}</p>
       </div>
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-4 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalApplications')}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalApplications}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.pending} pending review
+              {stats.pending} {t('underReview')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Accepted</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('accepted')}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.accepted}</div>
             <p className="text-xs text-muted-foreground">
-              Congratulations!
+              {t('status.ACCEPTED')}!
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Documents</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('myDocuments')}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.documentsUploaded}</div>
             <p className="text-xs text-muted-foreground">
-              Files uploaded
+              {t('documentsNeeded')}
             </p>
           </CardContent>
         </Card>
@@ -177,9 +177,9 @@ export default async function DashboardPage({
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" />
-                    Application Tracker
+                    {t('applicationTracker')}
                   </CardTitle>
-                  <CardDescription>Monitor your application progress</CardDescription>
+                  <CardDescription>{t('trackApplications')}</CardDescription>
                 </div>
                 <Link href="/apply">
                   <Button size="sm">New Application</Button>
@@ -291,9 +291,9 @@ export default async function DashboardPage({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
-                Payment History
+                {t('paymentHistory')}
               </CardTitle>
-              <CardDescription>Your application fee payments</CardDescription>
+              <CardDescription>{t('myApplications')}</CardDescription>
             </CardHeader>
             <CardContent>
               {applications.filter(app => app.feePaidCents > 0).length === 0 ? (
@@ -331,7 +331,7 @@ export default async function DashboardPage({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                Notifications
+                {t('notificationCenter')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -390,7 +390,7 @@ export default async function DashboardPage({
           {/* Quick Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle>{t('quickActions')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Link href="/apply">
