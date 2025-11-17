@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Shield, Download, Trash2, AlertTriangle, CheckCircle, Info } from "lucide-react";
 
 export default function PrivacySettingsPage() {
+  const t = useTranslations("privacy");
   const [loading, setLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showExportSuccess, setShowExportSuccess] = useState(false);
@@ -86,10 +88,10 @@ export default function PrivacySettingsPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
           <Shield className="h-8 w-8" />
-          Privacy & Data Control
+          {t('title')}
         </h1>
         <p className="text-muted-foreground">
-          Manage your personal data and privacy settings
+          {t('subtitle')}
         </p>
       </div>
 
@@ -97,7 +99,7 @@ export default function PrivacySettingsPage() {
         <Alert className="mb-6 border-green-500 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-900">
-            Your data has been exported successfully and downloaded to your device.
+            {t('exportSuccess')}
           </AlertDescription>
         </Alert>
       )}
@@ -105,9 +107,9 @@ export default function PrivacySettingsPage() {
       {/* GDPR Rights Information */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Your Privacy Rights</CardTitle>
+          <CardTitle>{t('yourRights')}</CardTitle>
           <CardDescription>
-            Under GDPR and privacy regulations, you have the following rights
+            {t('rightsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -115,9 +117,9 @@ export default function PrivacySettingsPage() {
             <div className="flex gap-3">
               <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium">Right to Access</p>
+                <p className="font-medium">{t('rightToAccess')}</p>
                 <p className="text-sm text-muted-foreground">
-                  You can request a copy of all personal data we hold about you.
+                  {t('rightToAccessDesc')}
                 </p>
               </div>
             </div>
@@ -148,20 +150,19 @@ export default function PrivacySettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
-            Export Your Data
+            {t('exportData')}
           </CardTitle>
           <CardDescription>
-            Download a complete copy of your personal information
+            {t('exportDataDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            This will include your profile information, applications, documents metadata,
-            payment history, and activity logs. The data will be provided in JSON format.
+            {t('exportDataDetails')}
           </p>
           <Button onClick={handleExportData} disabled={loading}>
             <Download className="h-4 w-4 mr-2" />
-            {loading ? "Exporting..." : "Export My Data"}
+            {loading ? t('exporting') : t('exportMyData')}
           </Button>
         </CardContent>
       </Card>
@@ -171,18 +172,17 @@ export default function PrivacySettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-red-600">
             <Trash2 className="h-5 w-5" />
-            Delete My Account
+            {t('deleteAccount')}
           </CardTitle>
           <CardDescription>
-            Permanently remove your account and associated data
+            {t('deleteAccountDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Warning:</strong> This action cannot be undone. Some data may be retained
-              for legal and compliance purposes.
+              <strong>{t('deleteWarning')}:</strong> {t('deleteWarningText')}
             </AlertDescription>
           </Alert>
           <p className="text-sm text-muted-foreground mb-4">
@@ -200,7 +200,7 @@ export default function PrivacySettingsPage() {
             disabled={loading}
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete My Account
+            {t('deleteAccount')}
           </Button>
         </CardContent>
       </Card>
@@ -209,9 +209,9 @@ export default function PrivacySettingsPage() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-red-600">Confirm Account Deletion</DialogTitle>
+            <DialogTitle className="text-red-600">{t('confirmDeletion')}</DialogTitle>
             <DialogDescription>
-              This is a permanent action. Please review your options carefully.
+              {t('confirmDeletionDesc')}
             </DialogDescription>
           </DialogHeader>
 
@@ -219,7 +219,7 @@ export default function PrivacySettingsPage() {
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>This action cannot be undone.</strong> Your account will be permanently deleted.
+                <strong>{t('cannotBeUndone')}</strong> {t('accountWillBeDeleted')}
               </AlertDescription>
             </Alert>
 
@@ -233,7 +233,7 @@ export default function PrivacySettingsPage() {
                   }
                 />
                 <Label htmlFor="delete-applications" className="text-sm font-normal">
-                  Delete all my applications (otherwise they will be anonymized)
+                  {t('deleteAllApplications')}
                 </Label>
               </div>
 
@@ -246,7 +246,7 @@ export default function PrivacySettingsPage() {
                   }
                 />
                 <Label htmlFor="delete-documents" className="text-sm font-normal">
-                  Delete all my uploaded documents
+                  {t('deleteAllDocuments')}
                 </Label>
               </div>
 
@@ -260,7 +260,7 @@ export default function PrivacySettingsPage() {
                   disabled
                 />
                 <Label htmlFor="anonymize-logs" className="text-sm font-normal text-muted-foreground">
-                  Anonymize audit logs (required for compliance)
+                  {t('anonymizeAuditLogs')}
                 </Label>
               </div>
             </div>
@@ -271,14 +271,14 @@ export default function PrivacySettingsPage() {
                 onClick={() => setShowDeleteDialog(false)}
                 disabled={loading}
               >
-                Cancel
+                {t('cancel', { defaultValue: 'Cancel' })}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteData}
                 disabled={loading}
               >
-                {loading ? "Deleting..." : "Permanently Delete My Account"}
+                {loading ? t('deleting') : t('permanentlyDelete')}
               </Button>
             </div>
           </div>
