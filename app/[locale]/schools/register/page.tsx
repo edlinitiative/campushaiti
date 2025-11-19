@@ -13,7 +13,7 @@ import { db } from "@/lib/firebase/client";
 import { collection, addDoc } from "firebase/firestore";
 
 export default function RegisterSchoolPage() {
-  const t = useTranslations("school");
+  const t = useTranslations("schools.register");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -88,14 +88,14 @@ export default function RegisterSchoolPage() {
       <div className="container max-w-2xl mx-auto px-4 py-16">
         <Card>
           <CardHeader>
-            <CardTitle className="text-green-600">✓ Registration Submitted!</CardTitle>
+            <CardTitle className="text-green-600">✓ {t("registrationSubmitted")}</CardTitle>
             <CardDescription>
-              Thank you for registering your university. Our team will review your application and contact you within 2-3 business days.
+              {t("thankYouMessage")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              You will receive an email at <strong>{formData.contactEmail}</strong> once your registration is approved.
+              {t("emailNotification", { email: formData.contactEmail })}
             </p>
           </CardContent>
         </Card>
@@ -106,9 +106,9 @@ export default function RegisterSchoolPage() {
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Register Your University</h1>
+        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Join Campus Haiti to reach qualified applicants across Haiti and the diaspora.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -122,13 +122,13 @@ export default function RegisterSchoolPage() {
         {/* University Information */}
         <Card>
           <CardHeader>
-            <CardTitle>University Information</CardTitle>
-            <CardDescription>Basic information about your institution</CardDescription>
+            <CardTitle>{t("universityInformation")}</CardTitle>
+            <CardDescription>{t("universityInformationDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">University Name *</Label>
+                <Label htmlFor="name">{t("universityName")} *</Label>
                 <Input
                   id="name"
                   name="name"
@@ -140,7 +140,7 @@ export default function RegisterSchoolPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug">URL Slug *</Label>
+                <Label htmlFor="slug">{t("urlSlug")} *</Label>
                 <Input
                   id="slug"
                   name="slug"
@@ -150,14 +150,14 @@ export default function RegisterSchoolPage() {
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  Will appear in URL: campushaiti.com/universities/{formData.slug}
+                  {t("urlSlugHint", { slug: formData.slug })}
                 </p>
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="city">City *</Label>
+                <Label htmlFor="city">{t("city")} *</Label>
                 <Input
                   id="city"
                   name="city"
@@ -169,7 +169,7 @@ export default function RegisterSchoolPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="country">Country *</Label>
+                <Label htmlFor="country">{t("country")} *</Label>
                 <Input
                   id="country"
                   name="country"
@@ -181,20 +181,20 @@ export default function RegisterSchoolPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("description")}</Label>
               <Textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Brief description of your university..."
+                placeholder={t("descriptionPlaceholder")}
                 rows={4}
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="websiteUrl">Website URL</Label>
+                <Label htmlFor="websiteUrl">{t("websiteUrl")}</Label>
                 <Input
                   id="websiteUrl"
                   name="websiteUrl"
@@ -206,7 +206,7 @@ export default function RegisterSchoolPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact Email *</Label>
+                <Label htmlFor="contactEmail">{t("contactEmail")} *</Label>
                 <Input
                   id="contactEmail"
                   name="contactEmail"
@@ -220,7 +220,7 @@ export default function RegisterSchoolPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contactPhone">Contact Phone</Label>
+              <Label htmlFor="contactPhone">{t("contactPhone")}</Label>
               <Input
                 id="contactPhone"
                 name="contactPhone"
@@ -236,13 +236,13 @@ export default function RegisterSchoolPage() {
         {/* Contact Person */}
         <Card>
           <CardHeader>
-            <CardTitle>Contact Person</CardTitle>
-            <CardDescription>Primary contact for this registration</CardDescription>
+            <CardTitle>{t("contactPerson")}</CardTitle>
+            <CardDescription>{t("contactPersonDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="contactPersonName">Full Name *</Label>
+                <Label htmlFor="contactPersonName">{t("fullName")} *</Label>
                 <Input
                   id="contactPersonName"
                   name="contactPersonName"
@@ -254,7 +254,7 @@ export default function RegisterSchoolPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contactPersonTitle">Title/Position</Label>
+                <Label htmlFor="contactPersonTitle">{t("titlePosition")}</Label>
                 <Input
                   id="contactPersonTitle"
                   name="contactPersonTitle"
@@ -267,7 +267,7 @@ export default function RegisterSchoolPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="contactPersonEmail">Email *</Label>
+                <Label htmlFor="contactPersonEmail">{t("email")} *</Label>
                 <Input
                   id="contactPersonEmail"
                   name="contactPersonEmail"
@@ -280,7 +280,7 @@ export default function RegisterSchoolPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contactPersonPhone">Phone</Label>
+                <Label htmlFor="contactPersonPhone">{t("phone")}</Label>
                 <Input
                   id="contactPersonPhone"
                   name="contactPersonPhone"
@@ -297,13 +297,13 @@ export default function RegisterSchoolPage() {
         {/* Legal Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Legal Information</CardTitle>
-            <CardDescription>Official registration details (optional)</CardDescription>
+            <CardTitle>{t("legalInformation")}</CardTitle>
+            <CardDescription>{t("legalInformationDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="registrationNumber">Registration Number</Label>
+                <Label htmlFor="registrationNumber">{t("registrationNumber")}</Label>
                 <Input
                   id="registrationNumber"
                   name="registrationNumber"
@@ -314,7 +314,7 @@ export default function RegisterSchoolPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="taxId">Tax ID / NIF</Label>
+                <Label htmlFor="taxId">{t("taxId")}</Label>
                 <Input
                   id="taxId"
                   name="taxId"
@@ -330,15 +330,15 @@ export default function RegisterSchoolPage() {
         {/* Submit */}
         <div className="flex justify-end space-x-4">
           <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? "Submitting..." : "Submit Registration"}
+            {loading ? t("submitting") : t("submitRegistration")}
           </Button>
         </div>
 
         <p className="text-sm text-muted-foreground text-center">
-          By submitting this form, you agree to our Terms of Service and acknowledge that your information will be reviewed by our team.
+          {t("agreementText")}
         </p>
       </form>
     </div>

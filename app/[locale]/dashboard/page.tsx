@@ -25,7 +25,7 @@ export default async function DashboardPage({
     redirect(signinPath);
   }
 
-  const t = await getTranslations("dashboard");
+  const t = await getTranslations("userDashboard");
 
   // Fetch applications and calculate stats
   let applications: any[] = [];
@@ -153,7 +153,7 @@ export default async function DashboardPage({
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalPaid')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -161,7 +161,7 @@ export default async function DashboardPage({
               {(stats.totalPaid / 100).toFixed(2)} HTG
             </div>
             <p className="text-xs text-muted-foreground">
-              Application fees
+              {t('applicationFees')}
             </p>
           </CardContent>
         </Card>
@@ -182,7 +182,7 @@ export default async function DashboardPage({
                   <CardDescription>{t('trackApplications')}</CardDescription>
                 </div>
                 <Link href="/apply">
-                  <Button size="sm">New Application</Button>
+                  <Button size="sm">{t('newApplication')}</Button>
                 </Link>
               </div>
             </CardHeader>
@@ -190,9 +190,9 @@ export default async function DashboardPage({
               {applications.length === 0 ? (
                 <div className="text-center py-12">
                   <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <p className="text-muted-foreground mb-4">No applications yet</p>
+                  <p className="text-muted-foreground mb-4">{t('noApplicationsYet')}</p>
                   <Link href="/apply">
-                    <Button>Start Your First Application</Button>
+                    <Button>{t('startFirstApplication')}</Button>
                   </Link>
                 </div>
               ) : (
@@ -221,7 +221,7 @@ export default async function DashboardPage({
                         {/* Progress Bar */}
                         <div className="mb-3">
                           <div className="flex items-center justify-between text-xs mb-1">
-                            <span className="opacity-80">Application Progress</span>
+                            <span className="opacity-80">{t('applicationProgress')}</span>
                             <span className="font-medium">{Math.round(completionPercentage)}%</span>
                           </div>
                           <Progress value={completionPercentage} className="h-2" />
@@ -236,7 +236,7 @@ export default async function DashboardPage({
                               ) : (
                                 <Clock className="h-3 w-3 opacity-50" />
                               )}
-                              <span className="opacity-80">Profile</span>
+                              <span className="opacity-80">{t('profile')}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               {app.checklist.documentsUploaded ? (
@@ -244,7 +244,7 @@ export default async function DashboardPage({
                               ) : (
                                 <Clock className="h-3 w-3 opacity-50" />
                               )}
-                              <span className="opacity-80">Documents</span>
+                              <span className="opacity-80">{t('documents')}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               {app.checklist.essaysSubmitted ? (
@@ -252,7 +252,7 @@ export default async function DashboardPage({
                               ) : (
                                 <Clock className="h-3 w-3 opacity-50" />
                               )}
-                              <span className="opacity-80">Essays</span>
+                              <span className="opacity-80">{t('essays')}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               {app.checklist.paymentReceived ? (
@@ -260,7 +260,7 @@ export default async function DashboardPage({
                               ) : (
                                 <Clock className="h-3 w-3 opacity-50" />
                               )}
-                              <span className="opacity-80">Payment</span>
+                              <span className="opacity-80">{t('payment')}</span>
                             </div>
                           </div>
                         )}
@@ -269,12 +269,12 @@ export default async function DashboardPage({
                         <div className="flex items-center justify-between text-xs opacity-80">
                           <span>
                             {app.submittedAt && 
-                              `Submitted: ${new Date(app.submittedAt.seconds * 1000 || app.submittedAt).toLocaleDateString()}`
+                              `${t('submitted')}: ${new Date(app.submittedAt.seconds * 1000 || app.submittedAt).toLocaleDateString()}`
                             }
                           </span>
                           {app.feePaidCents > 0 && (
                             <span className="font-medium">
-                              Paid: {(app.feePaidCents / 100).toFixed(2)} {app.feePaidCurrency || "HTG"}
+                              {t('paid')}: {(app.feePaidCents / 100).toFixed(2)} {app.feePaidCurrency || "HTG"}
                             </span>
                           )}
                         </div>
@@ -298,7 +298,7 @@ export default async function DashboardPage({
             <CardContent>
               {applications.filter(app => app.feePaidCents > 0).length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No payments recorded yet
+                  {t('noPaymentsRecorded')}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -314,7 +314,7 @@ export default async function DashboardPage({
                         <p className="font-semibold text-green-600">
                           {(app.feePaidCents / 100).toFixed(2)} {app.feePaidCurrency || "HTG"}
                         </p>
-                        <p className="text-xs text-muted-foreground">Paid</p>
+                        <p className="text-xs text-muted-foreground">{t('paid')}</p>
                       </div>
                     </div>
                   ))}
@@ -341,10 +341,14 @@ export default async function DashboardPage({
                     <Clock className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-blue-900">
-                        Applications Under Review
+                        {t('applicationsUnderReview')}
                       </p>
                       <p className="text-xs text-blue-700">
-                        {stats.pending} application{stats.pending > 1 ? 's are' : ' is'} being reviewed
+                        {t('applicationsBeingReviewed', { 
+                          count: stats.pending,
+                          plural: stats.pending > 1 ? 's' : '',
+                          verb: stats.pending > 1 ? 'are' : 'is'
+                        })}
                       </p>
                     </div>
                   </div>
@@ -355,10 +359,13 @@ export default async function DashboardPage({
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-green-900">
-                        Congratulations!
+                        {t('congratulations')}
                       </p>
                       <p className="text-xs text-green-700">
-                        You've been accepted to {stats.accepted} program{stats.accepted > 1 ? 's' : ''}
+                        {t('acceptedToPrograms', { 
+                          count: stats.accepted,
+                          plural: stats.accepted > 1 ? 's' : ''
+                        })}
                       </p>
                     </div>
                   </div>
@@ -369,10 +376,10 @@ export default async function DashboardPage({
                     <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-amber-900">
-                        Payment Required
+                        {t('paymentRequired')}
                       </p>
                       <p className="text-xs text-amber-700">
-                        Some applications need payment to complete
+                        {t('paymentsNeeded')}
                       </p>
                     </div>
                   </div>
@@ -380,7 +387,7 @@ export default async function DashboardPage({
 
                 {stats.totalApplications === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No new notifications
+                    {t('noNewNotifications')}
                   </p>
                 )}
               </div>
@@ -396,18 +403,18 @@ export default async function DashboardPage({
               <Link href="/apply">
                 <Button className="w-full" variant="default">
                   <FileText className="h-4 w-4 mr-2" />
-                  New Application
+                  {t('newApplication')}
                 </Button>
               </Link>
               <Link href="/dashboard/documents">
                 <Button className="w-full" variant="outline">
                   <FileText className="h-4 w-4 mr-2" />
-                  Manage Documents
+                  {t('manageDocuments')}
                 </Button>
               </Link>
               <Link href="/dashboard/profile">
                 <Button className="w-full" variant="outline">
-                  Edit Profile
+                  {t('editProfile')}
                 </Button>
               </Link>
             </CardContent>
@@ -416,16 +423,16 @@ export default async function DashboardPage({
           {/* Document Checklist */}
           <Card>
             <CardHeader>
-              <CardTitle>Required Documents</CardTitle>
-              <CardDescription>For your applications</CardDescription>
+              <CardTitle>{t('requiredDocuments')}</CardTitle>
+              <CardDescription>{t('requiredDocumentsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
                 {[
-                  { name: "Birth Certificate", uploaded: documents.some(d => d.kind === "BIRTH_CERTIFICATE") },
-                  { name: "Baccalauréat", uploaded: documents.some(d => d.kind === "BACCALAUREAT") },
-                  { name: "Transcript", uploaded: documents.some(d => d.kind === "TRANSCRIPT") },
-                  { name: "Passport Photo", uploaded: documents.some(d => d.kind === "PASSPORT_PHOTO") },
+                  { name: t('birthCertificate'), uploaded: documents.some(d => d.kind === "BIRTH_CERTIFICATE") },
+                  { name: t('baccalaureat'), uploaded: documents.some(d => d.kind === "BACCALAUREAT") },
+                  { name: t('transcript'), uploaded: documents.some(d => d.kind === "TRANSCRIPT") },
+                  { name: t('passportPhoto'), uploaded: documents.some(d => d.kind === "PASSPORT_PHOTO") },
                 ].map((doc, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     {doc.uploaded ? (

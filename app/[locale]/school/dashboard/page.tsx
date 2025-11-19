@@ -33,6 +33,7 @@ import { Link } from "@/lib/navigation";
 
 export default function SchoolDashboard() {
   const router = useRouter();
+  const t = useTranslations("schoolDashboard");
   const [loading, setLoading] = useState(true);
   const [school, setSchool] = useState<School | null>(null);
   const [applications, setApplications] = useState<SchoolApplication[]>([]);
@@ -105,7 +106,7 @@ export default function SchoolDashboard() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <p>Loading...</p>
+        <p>{t('loading')}</p>
       </div>
     );
   }
@@ -130,7 +131,7 @@ export default function SchoolDashboard() {
           <Link href="/school/settings">
             <Button variant="outline">
               <SettingsIcon className="w-4 h-4 mr-2" />
-              Settings
+              {t('settings')}
             </Button>
           </Link>
         </div>
@@ -141,7 +142,7 @@ export default function SchoolDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Applications
+              {t('totalApplications')}
             </CardTitle>
             <FileText className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
@@ -152,7 +153,7 @@ export default function SchoolDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('pending')}</CardTitle>
             <Clock className="w-4 h-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
@@ -162,7 +163,7 @@ export default function SchoolDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Accepted</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('approved')}</CardTitle>
             <CheckCircle className="w-4 h-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -172,7 +173,7 @@ export default function SchoolDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('rejected')}</CardTitle>
             <XCircle className="w-4 h-4 text-red-600" />
           </CardHeader>
           <CardContent>
@@ -184,24 +185,24 @@ export default function SchoolDashboard() {
       {/* Main Content */}
       <Tabs defaultValue="applications" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="applications">Applications</TabsTrigger>
-          <TabsTrigger value="programs">Programs</TabsTrigger>
-          <TabsTrigger value="questions">Custom Questions</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="applications">{t('overview')}</TabsTrigger>
+          <TabsTrigger value="programs">{t('managePrograms')}</TabsTrigger>
+          <TabsTrigger value="questions">{t('viewApplications')}</TabsTrigger>
+          <TabsTrigger value="analytics">{t('platformSettings')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="applications" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Recent Applications</h2>
+            <h2 className="text-xl font-semibold">{t('recentApplications')}</h2>
             <Link href="/school/applications">
-              <Button variant="outline">View All</Button>
+              <Button variant="outline">{t('viewAllApplications')}</Button>
             </Link>
           </div>
 
           {applications.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                No applications yet. Students will see your school once you create programs.
+                {t('noApplicationsYet')}
               </CardContent>
             </Card>
           ) : (

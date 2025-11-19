@@ -18,7 +18,7 @@ import { auth } from "@/lib/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
 
 export default function SchoolRegisterPage() {
-  const t = useTranslations("school");
+  const t = useTranslations("schoolRegister");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -78,9 +78,9 @@ export default function SchoolRegisterPage() {
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Register Your School</CardTitle>
+          <CardTitle className="text-2xl">{t('title')}</CardTitle>
           <CardDescription>
-            Join Campus Haiti as a partner school. Your application will be reviewed by our team.
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -93,7 +93,7 @@ export default function SchoolRegisterPage() {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">School Name *</Label>
+                <Label htmlFor="name">{t('schoolName')} *</Label>
                 <Input
                   id="name"
                   name="name"
@@ -105,21 +105,21 @@ export default function SchoolRegisterPage() {
               </div>
 
               <div>
-                <Label htmlFor="description">Description *</Label>
+                <Label htmlFor="description">{t('description')} *</Label>
                 <Textarea
                   id="description"
                   name="description"
                   required
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Tell us about your school, its mission, and programs..."
+                  placeholder={t('descriptionPlaceholder')}
                   rows={4}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="city">City *</Label>
+                  <Label htmlFor="city">{t('city')} *</Label>
                   <Input
                     id="city"
                     name="city"
@@ -131,7 +131,7 @@ export default function SchoolRegisterPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="country">Country *</Label>
+                  <Label htmlFor="country">{t('country')} *</Label>
                   <Input
                     id="country"
                     name="country"
@@ -143,7 +143,7 @@ export default function SchoolRegisterPage() {
               </div>
 
               <div>
-                <Label htmlFor="website">Website</Label>
+                <Label htmlFor="website">{t('website')}</Label>
                 <Input
                   id="website"
                   name="website"
@@ -156,7 +156,7 @@ export default function SchoolRegisterPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="email">Contact Email *</Label>
+                  <Label htmlFor="email">{t('contactEmail')} *</Label>
                   <Input
                     id="email"
                     name="email"
@@ -169,7 +169,7 @@ export default function SchoolRegisterPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">{t('phoneNumber')}</Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -182,7 +182,7 @@ export default function SchoolRegisterPage() {
               </div>
 
               <div>
-                <Label htmlFor="street">Street Address</Label>
+                <Label htmlFor="street">{t('streetAddress')}</Label>
                 <Input
                   id="street"
                   name="street"
@@ -194,7 +194,7 @@ export default function SchoolRegisterPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="state">State/Province</Label>
+                  <Label htmlFor="state">{t('stateProvince')}</Label>
                   <Input
                     id="state"
                     name="state"
@@ -205,7 +205,7 @@ export default function SchoolRegisterPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="postalCode">Postal Code</Label>
+                  <Label htmlFor="postalCode">{t('postalCode')}</Label>
                   <Input
                     id="postalCode"
                     name="postalCode"
@@ -219,23 +219,22 @@ export default function SchoolRegisterPage() {
 
             <div className="bg-blue-50 border border-blue-200 p-4 rounded">
               <p className="text-sm text-blue-900">
-                <strong>What happens next?</strong>
+                <strong>{t('whatHappensNext')}</strong>
                 <br />
-                Our team will review your application within 3-5 business days. Once approved, 
-                you&apos;ll be able to create programs, customize application questions, and manage applicants.
+                {t('reviewMessage')}
               </p>
             </div>
 
             <div className="flex gap-4">
               <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? "Submitting..." : "Submit Application"}
+                {loading ? t('submitting') : t('submitApplication')}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
               >
-                Cancel
+                {t('cancel')}
               </Button>
             </div>
           </form>
