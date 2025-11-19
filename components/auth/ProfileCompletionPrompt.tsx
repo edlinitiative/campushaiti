@@ -62,24 +62,23 @@ export default function ProfileCompletionPrompt() {
         throw new Error(t("passkeyRequired"));
       }
 
-      // Update user profile with phone number
-      // Note: Firebase Auth doesn't directly support updating phoneNumber via updateProfile
-      // We'll store it in Firestore instead
-      const { getFirestore, doc, setDoc } = await import("firebase/firestore");
-      const db = getFirestore();
-      
-      await setDoc(
-        doc(db, "users", user.uid),
-        {
+      // Update user profile via API
+      const response = await fetch("/api/user/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.uid,
           phoneNumber,
           fullName,
-          email: user.email,
-          updatedAt: new Date(),
-        },
-        { merge: true }
-      );
+        }),
+      });
 
-      // Update display name if provided
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update profile");
+      }
+
+      // Update local display name if changed
       if (fullName && fullName !== user.displayName) {
         await updateProfile(user, { displayName: fullName });
       }
