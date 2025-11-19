@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { auth } from "@/lib/firebase/client";
 import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 
 export default function VerifyEmailPage() {
+  const t = useTranslations("auth.verify");
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string || "en";
@@ -16,7 +18,7 @@ export default function VerifyEmailPage() {
     const verifyEmail = async () => {
       if (!isSignInWithEmailLink(auth, window.location.href)) {
         setStatus("error");
-        setError("Invalid verification link. Please request a new one.");
+        setError(t("invalidLink"));
         return;
       }
 
@@ -24,11 +26,11 @@ export default function VerifyEmailPage() {
         let email = window.localStorage.getItem("emailForSignIn");
         
         if (!email) {
-          email = window.prompt("Please provide your email for confirmation");
+          email = window.prompt(t("emailPrompt"));
         }
 
         if (!email) {
-          throw new Error("Email is required to verify your account");
+          throw new Error(t("emailRequired"));
         }
 
         const result = await signInWithEmailLink(auth, email, window.location.href);
@@ -44,7 +46,7 @@ export default function VerifyEmailPage() {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          const errorMsg = errorData.error || errorData.details || "Failed to create session. Please add Firebase Admin credentials to Vercel.";
+          const errorMsg = errorData.error || errorData.details || t("sessionError");
           console.error("Session creation failed:", errorData);
           throw new Error(errorMsg);
         }
@@ -56,18 +58,18 @@ export default function VerifyEmailPage() {
       } catch (err: any) {
         console.error("Verification error:", err);
         setStatus("error");
-        setError(err.message || "An unexpected error occurred. Please try again.");
+        setError(err.message || t("unexpectedError"));
       }
     };
 
     verifyEmail();
-  }, [router, locale]);
+  }, [router, locale, t]);
 
   return (
     <div className="container mx-auto px-4 py-16 text-center">
-      {status === "verifying" && <p>Verifying your email...</p>}
-      {status === "success" && <p className="text-green-600">Success! Redirecting...</p>}
-      {status === "error" && <p className="text-red-600">Error: {error}</p>}
+      {status === "verifying" && <p>{t("verifying")}</p>}
+      {status === "success" && <p className="text-green-600">{t("success")}</p>}
+      {status === "error" && <p className="text-red-600">{t("error")}: {error}</p>}
     </div>
   );
 }

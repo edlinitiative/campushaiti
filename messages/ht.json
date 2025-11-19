@@ -51,7 +51,32 @@
     "welcome": "Byenveni sou Campus Ayiti",
     "signInToAccount": "Konekte nan kont ou",
     "emailLink": "Lyen Imel",
-    "passkey": "Kle Aksè"
+    "passkey": "Kle Aksè",
+    "verify": {
+      "verifying": "N ap verifye imel ou...",
+      "success": "Siksè! N ap redireksyone...",
+      "error": "Erè",
+      "invalidLink": "Lyen verifikasyon pa valab. Tanpri mande yon nouvo.",
+      "emailRequired": "Imel obligatwa pou verifye kont ou",
+      "sessionError": "Echwe kreye sesyon. Tanpri ajoute idantifyan Firebase Admin nan Vercel.",
+      "unexpectedError": "Yon erè inatandi rive. Tanpri eseye ankò.",
+      "emailPrompt": "Tanpri bay imel ou pou konfime"
+    }
+  },
+  "school": {
+    "pending": {
+      "title": "Aplikasyon Soumèt!",
+      "subtitle": "Mèsi pou enterè w nan fè patenarya ak Campus Ayiti",
+      "applicationReceived": "Aplikasyon Resevwa",
+      "applicationReceivedDesc": "Nou resevwa aplikasyon anrejistreman lekòl ou a",
+      "underReview": "Nan Revizyon",
+      "underReviewDesc": "Ekip nou ap revize aplikasyon w nan 3-5 jou travay",
+      "notification": "Notifikasyon",
+      "notificationDesc": "W ap resevwa yon imel lè aplikasyon w apwouve",
+      "questionsTitle": "Kesyon?",
+      "contactUs": "Kontakte nou nan",
+      "returnHome": "Retounen Lakay"
+    }
   },
   "apply": {
     "title": "Aplike nan inivèsite yo",

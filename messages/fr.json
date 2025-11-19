@@ -51,7 +51,32 @@
     "welcome": "Bienvenue sur Campus Haïti",
     "signInToAccount": "Connectez-vous à votre compte",
     "emailLink": "Lien email",
-    "passkey": "Clé d'accès"
+    "passkey": "Clé d'accès",
+    "verify": {
+      "verifying": "Vérification de votre email...",
+      "success": "Succès! Redirection...",
+      "error": "Erreur",
+      "invalidLink": "Lien de vérification invalide. Veuillez en demander un nouveau.",
+      "emailRequired": "L'email est requis pour vérifier votre compte",
+      "sessionError": "Échec de création de session. Veuillez ajouter les identifiants Firebase Admin à Vercel.",
+      "unexpectedError": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "emailPrompt": "Veuillez fournir votre email pour confirmation"
+    }
+  },
+  "school": {
+    "pending": {
+      "title": "Demande soumise!",
+      "subtitle": "Merci de votre intérêt à devenir partenaire de Campus Haïti",
+      "applicationReceived": "Demande reçue",
+      "applicationReceivedDesc": "Nous avons reçu votre demande d'inscription d'établissement",
+      "underReview": "En cours d'examen",
+      "underReviewDesc": "Notre équipe examinera votre demande dans un délai de 3 à 5 jours ouvrables",
+      "notification": "Notification",
+      "notificationDesc": "Vous recevrez un email une fois votre demande approuvée",
+      "questionsTitle": "Questions?",
+      "contactUs": "Contactez-nous à",
+      "returnHome": "Retour à l'accueil"
+    }
   },
   "apply": {
     "title": "Postuler aux universités",

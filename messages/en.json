@@ -51,7 +51,32 @@
     "welcome": "Welcome to Campus Haiti",
     "signInToAccount": "Sign in to your account",
     "emailLink": "Email Link",
-    "passkey": "Passkey"
+    "passkey": "Passkey",
+    "verify": {
+      "verifying": "Verifying your email...",
+      "success": "Success! Redirecting...",
+      "error": "Error",
+      "invalidLink": "Invalid verification link. Please request a new one.",
+      "emailRequired": "Email is required to verify your account",
+      "sessionError": "Failed to create session. Please add Firebase Admin credentials to Vercel.",
+      "unexpectedError": "An unexpected error occurred. Please try again.",
+      "emailPrompt": "Please provide your email for confirmation"
+    }
+  },
+  "school": {
+    "pending": {
+      "title": "Application Submitted!",
+      "subtitle": "Thank you for your interest in partnering with Campus Haiti",
+      "applicationReceived": "Application Received",
+      "applicationReceivedDesc": "We've received your school registration application",
+      "underReview": "Under Review",
+      "underReviewDesc": "Our team will review your application within 3-5 business days",
+      "notification": "Notification",
+      "notificationDesc": "You'll receive an email once your application is approved",
+      "questionsTitle": "Questions?",
+      "contactUs": "Contact us at",
+      "returnHome": "Return to Home"
+    }
   },
   "apply": {
     "title": "Apply to Universities",
