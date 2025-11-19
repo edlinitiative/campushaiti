@@ -589,12 +589,12 @@ export default function SchoolAnalyticsPage() {
 
       {/* Key Metrics Summary */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Key Insights</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("keyInsights.title")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
-              <CardTitle>Acceptance Rate</CardTitle>
-              <CardDescription>Percentage of applications accepted</CardDescription>
+              <CardTitle>{t("keyInsights.acceptanceRate")}</CardTitle>
+              <CardDescription>{t("keyInsights.acceptanceRateDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold text-green-600">
@@ -603,22 +603,28 @@ export default function SchoolAnalyticsPage() {
                   : '0%'}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                {analytics.applications.accepted} accepted out of {analytics.financial.totalApplications} total
+                {t("keyInsights.acceptanceRateDetail", { 
+                  accepted: analytics.applications.accepted, 
+                  total: analytics.financial.totalApplications 
+                })}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Applications Pending Review</CardTitle>
-              <CardDescription>Applications waiting for action</CardDescription>
+              <CardTitle>{t("keyInsights.pendingReview")}</CardTitle>
+              <CardDescription>{t("keyInsights.pendingReviewDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold text-amber-600">
                 {analytics.applications.submitted + analytics.applications.underReview}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                {analytics.applications.submitted} new + {analytics.applications.underReview} under review
+                {t("keyInsights.pendingReviewDetail", { 
+                  submitted: analytics.applications.submitted, 
+                  underReview: analytics.applications.underReview 
+                })}
               </p>
             </CardContent>
           </Card>

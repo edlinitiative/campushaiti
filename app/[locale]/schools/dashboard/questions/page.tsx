@@ -111,7 +111,7 @@ export default function CustomQuestionsPage() {
   };
 
   const handleDeleteQuestion = (id: string) => {
-    if (confirm("Are you sure you want to delete this question?")) {
+    if (confirm(t("confirmDelete"))) {
       setQuestions(questions.filter(q => q.id !== id));
     }
   };
@@ -387,10 +387,10 @@ export default function CustomQuestionsPage() {
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setShowDialog(false)}>
-                Cancel
+                {t("cancel")}
               </Button>
               <Button onClick={handleSaveQuestion} disabled={!formData.question.trim()}>
-                {editingQuestion ? "Update Question" : "Add Question"}
+                {editingQuestion ? t("updateQuestion") : t("addQuestionButton")}
               </Button>
             </div>
           </div>

@@ -797,7 +797,37 @@
       "applicationChecklist": "Lis Verifikasyon",
       "demoModeStatus": "Mòd Demo: Chanjman pa anrejistre",
       "downloadCompleteDossier": "Telechaje Dosye",
-      "downloadAllMaterials": "Telechaje tout dokiman"
+      "downloadAllMaterials": "Telechaje tout dokiman",
+      "timeline": {
+        "applicationSubmitted": "Aplikasyon Soumèt",
+        "applicationSubmittedDesc": "{name} soumèt aplikasyon pou {program}",
+        "documentsUploaded": "Dokiman Telechaje",
+        "documentsUploadedDesc": "{count} dokiman telechaje",
+        "paymentReceived": "Peman Resevwa",
+        "paymentReceivedDesc": "Frè aplikasyon peye: {amount} {currency}",
+        "statusUnderReview": "Nan Revizyon",
+        "statusAccepted": "Aplikasyon Aksepte",
+        "statusRejected": "Aplikasyon Rejte",
+        "statusWaitlisted": "Ajoute nan Lis Datant",
+        "statusUpdated": "Estati Mete Ajou",
+        "statusChangedDesc": "Estati aplikasyon chanje nan {status}"
+      },
+      "checklist": {
+        "profileComplete": "Profil Konplete",
+        "documentsUploaded": "Dokiman Telechaje",
+        "essaysSubmitted": "Ese Soumèt",
+        "customQuestionsAnswered": "Kesyon Pèsonalize Reponn",
+        "paymentReceived": "Peman Resevwa",
+        "personalInfoCompleted": "Enfòmasyon Pèsonèl Konplete",
+        "educationCompleted": "Edikasyon Konplete"
+      },
+      "status": {
+        "SUBMITTED": "Soumèt",
+        "UNDER_REVIEW": "Nan Revizyon",
+        "ACCEPTED": "Aksepte",
+        "REJECTED": "Rejte",
+        "WAITLISTED": "Lis Datant"
+      }
     },
     "analytics": {
       "title": "Analiz ak Enfòmasyon",
@@ -837,7 +867,16 @@
       "paidApplicationsLabel": "Aplikasyon Peye",
       "underReviewLabel": "Nan Revizyon",
       "acceptedLabel": "Aksepte",
-      "rejectedLabel": "Rejte"
+      "rejectedLabel": "Rejte",
+      "keyInsights": {
+        "title": "Apèsi Kle",
+        "acceptanceRate": "To Akseptasyon",
+        "acceptanceRateDesc": "Pousantaj aplikasyon aksepte",
+        "acceptanceRateDetail": "{accepted} aksepte sou {total} an total",
+        "pendingReview": "Aplikasyon Ann Atant Revizyon",
+        "pendingReviewDesc": "Aplikasyon k ap tann aksyon",
+        "pendingReviewDetail": "{submitted} nouvo + {underReview} nan revizyon"
+      }
     },
     "questions": {
       "title": "Kesyon Pèsonalize",
@@ -883,7 +922,10 @@
       "optionsLabel": "Opsyon (youn pa liy) *",
       "optionsPlaceholder": "Opsyon 1\nOpsyon 2\nOpsyon 3",
       "cancel": "Anile",
-      "saveQuestion": "Anrejistre"
+      "saveQuestion": "Anrejistre",
+      "addQuestionButton": "Ajoute Kesyon",
+      "updateQuestion": "Mete Kesyon Ajou",
+      "confirmDelete": "Ou sèten ou vle efase kesyon sa a?"
     },
     "settings": {
       "title": "Paramèt Lekòl",

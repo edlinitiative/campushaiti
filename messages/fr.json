@@ -797,7 +797,37 @@
       "applicationChecklist": "Liste de vérification",
       "demoModeStatus": "Mode Démo : Les changements ne sont pas enregistrés",
       "downloadCompleteDossier": "Télécharger dossier",
-      "downloadAllMaterials": "Télécharger tous les documents"
+      "downloadAllMaterials": "Télécharger tous les documents",
+      "timeline": {
+        "applicationSubmitted": "Candidature soumise",
+        "applicationSubmittedDesc": "{name} a soumis une candidature pour {program}",
+        "documentsUploaded": "Documents téléchargés",
+        "documentsUploadedDesc": "{count} document(s) téléchargé(s)",
+        "paymentReceived": "Paiement reçu",
+        "paymentReceivedDesc": "Frais de candidature payés : {amount} {currency}",
+        "statusUnderReview": "En examen",
+        "statusAccepted": "Candidature acceptée",
+        "statusRejected": "Candidature rejetée",
+        "statusWaitlisted": "Ajouté à la liste d'attente",
+        "statusUpdated": "Statut mis à jour",
+        "statusChangedDesc": "Statut de la candidature changé à {status}"
+      },
+      "checklist": {
+        "profileComplete": "Profil complété",
+        "documentsUploaded": "Documents téléchargés",
+        "essaysSubmitted": "Essais soumis",
+        "customQuestionsAnswered": "Questions personnalisées répondues",
+        "paymentReceived": "Paiement reçu",
+        "personalInfoCompleted": "Informations personnelles complétées",
+        "educationCompleted": "Éducation complétée"
+      },
+      "status": {
+        "SUBMITTED": "Soumise",
+        "UNDER_REVIEW": "En examen",
+        "ACCEPTED": "Acceptée",
+        "REJECTED": "Rejetée",
+        "WAITLISTED": "Liste d'attente"
+      }
     },
     "analytics": {
       "title": "Analyses et statistiques",
@@ -837,7 +867,16 @@
       "paidApplicationsLabel": "Candidatures payées",
       "underReviewLabel": "En examen",
       "acceptedLabel": "Acceptées",
-      "rejectedLabel": "Rejetées"
+      "rejectedLabel": "Rejetées",
+      "keyInsights": {
+        "title": "Aperçus clés",
+        "acceptanceRate": "Taux d'acceptation",
+        "acceptanceRateDesc": "Pourcentage de candidatures acceptées",
+        "acceptanceRateDetail": "{accepted} acceptées sur {total} au total",
+        "pendingReview": "Candidatures en attente d'examen",
+        "pendingReviewDesc": "Candidatures en attente d'action",
+        "pendingReviewDetail": "{submitted} nouvelles + {underReview} en examen"
+      }
     },
     "questions": {
       "title": "Questions personnalisées",
@@ -883,7 +922,10 @@
       "optionsLabel": "Options (une par ligne) *",
       "optionsPlaceholder": "Option 1\nOption 2\nOption 3",
       "cancel": "Annuler",
-      "saveQuestion": "Enregistrer"
+      "saveQuestion": "Enregistrer",
+      "addQuestionButton": "Ajouter une question",
+      "updateQuestion": "Mettre à jour la question",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette question ?"
     },
     "settings": {
       "title": "Paramètres de l'école",

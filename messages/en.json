@@ -797,7 +797,37 @@
       "applicationChecklist": "Application Checklist",
       "demoModeStatus": "Demo Mode: Status changes are not saved. Please sign in to manage real applications.",
       "downloadCompleteDossier": "Download Complete Dossier",
-      "downloadAllMaterials": "Download all application materials as a ZIP file"
+      "downloadAllMaterials": "Download all application materials as a ZIP file",
+      "timeline": {
+        "applicationSubmitted": "Application Submitted",
+        "applicationSubmittedDesc": "{name} submitted application for {program}",
+        "documentsUploaded": "Documents Uploaded",
+        "documentsUploadedDesc": "{count} document(s) uploaded",
+        "paymentReceived": "Payment Received",
+        "paymentReceivedDesc": "Application fee paid: {amount} {currency}",
+        "statusUnderReview": "Under Review",
+        "statusAccepted": "Application Accepted",
+        "statusRejected": "Application Rejected",
+        "statusWaitlisted": "Added to Waitlist",
+        "statusUpdated": "Status Updated",
+        "statusChangedDesc": "Application status changed to {status}"
+      },
+      "checklist": {
+        "profileComplete": "Profile Completed",
+        "documentsUploaded": "Documents Uploaded",
+        "essaysSubmitted": "Essays Submitted",
+        "customQuestionsAnswered": "Custom Questions Answered",
+        "paymentReceived": "Payment Received",
+        "personalInfoCompleted": "Personal Info Completed",
+        "educationCompleted": "Education Completed"
+      },
+      "status": {
+        "SUBMITTED": "Submitted",
+        "UNDER_REVIEW": "Under Review",
+        "ACCEPTED": "Accepted",
+        "REJECTED": "Rejected",
+        "WAITLISTED": "Waitlisted"
+      }
     },
     "analytics": {
       "title": "Analytics & Insights",
@@ -837,7 +867,16 @@
       "paidApplicationsLabel": "Paid Applications",
       "underReviewLabel": "Under Review",
       "acceptedLabel": "Accepted",
-      "rejectedLabel": "Rejected"
+      "rejectedLabel": "Rejected",
+      "keyInsights": {
+        "title": "Key Insights",
+        "acceptanceRate": "Acceptance Rate",
+        "acceptanceRateDesc": "Percentage of applications accepted",
+        "acceptanceRateDetail": "{accepted} accepted out of {total} total",
+        "pendingReview": "Applications Pending Review",
+        "pendingReviewDesc": "Applications waiting for action",
+        "pendingReviewDetail": "{submitted} new + {underReview} under review"
+      }
     },
     "questions": {
       "title": "Custom Application Questions",
@@ -883,7 +922,10 @@
       "optionsLabel": "Options (one per line) *",
       "optionsPlaceholder": "Option 1\nOption 2\nOption 3",
       "cancel": "Cancel",
-      "saveQuestion": "Save Question"
+      "saveQuestion": "Save Question",
+      "addQuestionButton": "Add Question",
+      "updateQuestion": "Update Question",
+      "confirmDelete": "Are you sure you want to delete this question?"
     },
     "settings": {
       "title": "School Settings",

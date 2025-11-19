@@ -46,8 +46,8 @@ export default function ApplicationDetailPage() {
     activities.push({
       id: 1,
       type: 'submission',
-      title: 'Application Submitted',
-      description: `${app.applicantName} submitted application for ${app.program}`,
+      title: t("timeline.applicationSubmitted"),
+      description: t("timeline.applicationSubmittedDesc", { name: app.applicantName, program: app.program }),
       timestamp: app.submittedAt || app.createdAt,
       icon: FileText,
       color: 'blue'
@@ -58,8 +58,8 @@ export default function ApplicationDetailPage() {
       activities.push({
         id: 2,
         type: 'documents',
-        title: 'Documents Uploaded',
-        description: `${app.documentIds.length} document(s) uploaded`,
+        title: t("timeline.documentsUploaded"),
+        description: t("timeline.documentsUploadedDesc", { count: app.documentIds.length }),
         timestamp: app.submittedAt || app.createdAt,
         icon: Upload,
         color: 'purple'
@@ -71,8 +71,11 @@ export default function ApplicationDetailPage() {
       activities.push({
         id: 3,
         type: 'payment',
-        title: 'Payment Received',
-        description: `Application fee paid: ${(app.feePaidCents / 100).toFixed(2)} ${app.feePaidCurrency || 'USD'}`,
+        title: t("timeline.paymentReceived"),
+        description: t("timeline.paymentReceivedDesc", { 
+          amount: (app.feePaidCents / 100).toFixed(2), 
+          currency: app.feePaidCurrency || 'USD' 
+        }),
         timestamp: app.updatedAt || app.createdAt,
         icon: DollarSign,
         color: 'green'
@@ -82,18 +85,18 @@ export default function ApplicationDetailPage() {
     // Status changes
     if (app.status !== 'SUBMITTED') {
       const statusConfig: any = {
-        'UNDER_REVIEW': { title: 'Under Review', color: 'amber', icon: Clock },
-        'ACCEPTED': { title: 'Application Accepted', color: 'green', icon: CheckCircle },
-        'REJECTED': { title: 'Application Rejected', color: 'red', icon: XCircle },
-        'WAITLISTED': { title: 'Added to Waitlist', color: 'orange', icon: Clock }
+        'UNDER_REVIEW': { titleKey: 'timeline.statusUnderReview', color: 'amber', icon: Clock },
+        'ACCEPTED': { titleKey: 'timeline.statusAccepted', color: 'green', icon: CheckCircle },
+        'REJECTED': { titleKey: 'timeline.statusRejected', color: 'red', icon: XCircle },
+        'WAITLISTED': { titleKey: 'timeline.statusWaitlisted', color: 'orange', icon: Clock }
       };
 
-      const config = statusConfig[app.status] || {};
+      const config = statusConfig[app.status] || { titleKey: 'timeline.statusUpdated' };
       activities.push({
         id: 4,
         type: 'status',
-        title: config.title || 'Status Updated',
-        description: `Application status changed to ${app.status.replace('_', ' ')}`,
+        title: t(config.titleKey),
+        description: t("timeline.statusChangedDesc", { status: t(`status.${app.status}`) }),
         timestamp: app.updatedAt || app.createdAt,
         icon: config.icon || Activity,
         color: config.color || 'gray'
@@ -658,7 +661,7 @@ export default function ApplicationDetailPage() {
                   <CardDescription>{application.program}</CardDescription>
                 </div>
                 <Badge className={getStatusColor(application.status)}>
-                  {application.status}
+                  {t(`status.${application.status}`)}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -1357,18 +1360,31 @@ export default function ApplicationDetailPage() {
               <CardTitle>{t("applicationChecklist")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {Object.entries(application.checklist).map(([key, value]) => (
-                <div key={key} className="flex items-center gap-2">
-                  {value ? (
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <XCircle className="w-4 h-4 text-gray-400" />
-                  )}
-                  <span className="text-sm">
-                    {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
-                  </span>
-                </div>
-              ))}
+              {Object.entries(application.checklist).map(([key, value]) => {
+                // Map checklist keys to translation keys
+                const checklistKeyMap: Record<string, string> = {
+                  'profileComplete': 'checklist.profileComplete',
+                  'documentsUploaded': 'checklist.documentsUploaded',
+                  'essaysSubmitted': 'checklist.essaysSubmitted',
+                  'customQuestionsAnswered': 'checklist.customQuestionsAnswered',
+                  'paymentReceived': 'checklist.paymentReceived',
+                  'personalInfoCompleted': 'checklist.personalInfoCompleted',
+                  'educationCompleted': 'checklist.educationCompleted',
+                };
+                
+                return (
+                  <div key={key} className="flex items-center gap-2">
+                    {value ? (
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-gray-400" />
+                    )}
+                    <span className="text-sm">
+                      {checklistKeyMap[key] ? t(checklistKeyMap[key]) : key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+                    </span>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
         </div>
