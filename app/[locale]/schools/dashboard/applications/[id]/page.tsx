@@ -680,57 +680,57 @@ export default function ApplicationDetailPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <User className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Full Name</p>
+                    <p className="text-sm text-muted-foreground">{t("fullName")}</p>
                   </div>
-                  <p className="font-medium">{application.personalInfo?.fullName || application.applicantName || 'Not provided'}</p>
+                  <p className="font-medium">{application.personalInfo?.fullName || application.applicantName || t("notProvided")}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Mail className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="text-sm text-muted-foreground">{t("email")}</p>
                   </div>
-                  <p className="font-medium">{application.personalInfo?.email || application.applicantEmail || 'Not provided'}</p>
+                  <p className="font-medium">{application.personalInfo?.email || application.applicantEmail || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Gender</p>
-                  <p className="font-medium">{application.gender || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("gender")}</p>
+                  <p className="font-medium">{application.gender || t("notProvided")}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Date of Birth</p>
+                    <p className="text-sm text-muted-foreground">{t("dateOfBirth")}</p>
                   </div>
                   <p className="font-medium">
                     {application.personalInfo?.dateOfBirth 
                       ? new Date(application.personalInfo.dateOfBirth).toLocaleDateString()
-                      : 'Not provided'}
+                      : t("notProvided")}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Place of Birth</p>
-                  <p className="font-medium">{application.birthPlace || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("placeOfBirth")}</p>
+                  <p className="font-medium">{application.birthPlace || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">ID Number</p>
-                  <p className="font-medium">{application.idNumber || 'Not provided'}</p>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                  </div>
-                  <p className="font-medium">{application.personalInfo?.phone || application.applicantPhone || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("idNumber")}</p>
+                  <p className="font-medium">{application.idNumber || t("notProvided")}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">WhatsApp</p>
+                    <p className="text-sm text-muted-foreground">{t("phone")}</p>
                   </div>
-                  <p className="font-medium">{application.whatsapp || 'Not provided'}</p>
+                  <p className="font-medium">{application.personalInfo?.phone || application.applicantPhone || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Nationality</p>
-                  <p className="font-medium">{application.nationality || application.personalInfo?.address || 'Not provided'}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Phone className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">{t("whatsapp")}</p>
+                  </div>
+                  <p className="font-medium">{application.whatsapp || t("notProvided")}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t("nationality")}</p>
+                  <p className="font-medium">{application.nationality || application.personalInfo?.address || t("notProvided")}</p>
                 </div>
               </div>
             </CardContent>
@@ -741,26 +741,26 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="w-5 h-5" />
-                Address Information
+                {t("addressInformation")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <p className="text-sm text-muted-foreground">Street Address</p>
-                  <p className="font-medium">{application.address || application.addressDetails?.street || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("streetAddress")}</p>
+                  <p className="font-medium">{application.address || application.addressDetails?.street || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">City</p>
-                  <p className="font-medium">{application.city || application.addressDetails?.city || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("city")}</p>
+                  <p className="font-medium">{application.city || application.addressDetails?.city || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Department/State</p>
-                  <p className="font-medium">{application.department || application.addressDetails?.department || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("department")}</p>
+                  <p className="font-medium">{application.department || application.addressDetails?.department || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Country</p>
-                  <p className="font-medium">{application.country || application.addressDetails?.country || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("country")}</p>
+                  <p className="font-medium">{application.country || application.addressDetails?.country || t("notProvided")}</p>
                 </div>
               </div>
             </CardContent>
@@ -769,43 +769,43 @@ export default function ApplicationDetailPage() {
           {/* Parent/Guardian Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Parent & Guardian Information</CardTitle>
+              <CardTitle>{t("parentGuardianInfo")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Father */}
               <div className="border-b pb-4">
-                <h4 className="font-semibold mb-3">Father Information</h4>
+                <h4 className="font-semibold mb-3">{t("fatherName")}</h4>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">{application.fatherName || application.parentInfo?.fatherName || 'Not provided'}</p>
+                    <p className="text-sm text-muted-foreground">{t("fullName")}</p>
+                    <p className="font-medium">{application.fatherName || application.parentInfo?.fatherName || t("notProvided")}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <p className="font-medium">{application.fatherPhone || application.parentInfo?.fatherPhone || 'Not provided'}</p>
+                    <p className="text-sm text-muted-foreground">{t("phone")}</p>
+                    <p className="font-medium">{application.fatherPhone || application.parentInfo?.fatherPhone || t("notProvided")}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Occupation</p>
-                    <p className="font-medium">{application.fatherOccupation || application.parentInfo?.fatherOccupation || 'Not provided'}</p>
+                    <p className="text-sm text-muted-foreground">{t("fatherOccupation")}</p>
+                    <p className="font-medium">{application.fatherOccupation || application.parentInfo?.fatherOccupation || t("notProvided")}</p>
                   </div>
                 </div>
               </div>
               
               {/* Mother */}
               <div className="border-b pb-4">
-                <h4 className="font-semibold mb-3">Mother Information</h4>
+                <h4 className="font-semibold mb-3">{t("motherName")}</h4>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">{application.motherName || application.parentInfo?.motherName || 'Not provided'}</p>
+                    <p className="text-sm text-muted-foreground">{t("fullName")}</p>
+                    <p className="font-medium">{application.motherName || application.parentInfo?.motherName || t("notProvided")}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <p className="font-medium">{application.motherPhone || application.parentInfo?.motherPhone || 'Not provided'}</p>
+                    <p className="text-sm text-muted-foreground">{t("phone")}</p>
+                    <p className="font-medium">{application.motherPhone || application.parentInfo?.motherPhone || t("notProvided")}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Occupation</p>
-                    <p className="font-medium">{application.motherOccupation || application.parentInfo?.motherOccupation || 'Not provided'}</p>
+                    <p className="text-sm text-muted-foreground">{t("motherOccupation")}</p>
+                    <p className="font-medium">{application.motherOccupation || application.parentInfo?.motherOccupation || t("notProvided")}</p>
                   </div>
                 </div>
               </div>
@@ -813,19 +813,19 @@ export default function ApplicationDetailPage() {
               {/* Guardian (if applicable) */}
               {(application.guardianName || application.parentInfo?.guardianName) && (
                 <div>
-                  <h4 className="font-semibold mb-3">Guardian Information</h4>
+                  <h4 className="font-semibold mb-3">{t("guardianName")}</h4>
                   <div className="grid md:grid-cols-3 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Name</p>
+                      <p className="text-sm text-muted-foreground">{t("fullName")}</p>
                       <p className="font-medium">{application.guardianName || application.parentInfo?.guardianName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Phone</p>
-                      <p className="font-medium">{application.guardianPhone || application.parentInfo?.guardianPhone || 'Not provided'}</p>
+                      <p className="text-sm text-muted-foreground">{t("phone")}</p>
+                      <p className="font-medium">{application.guardianPhone || application.parentInfo?.guardianPhone || t("notProvided")}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Relationship</p>
-                      <p className="font-medium">{application.guardianRelationship || application.parentInfo?.guardianRelationship || 'Not provided'}</p>
+                      <p className="text-sm text-muted-foreground">{t("relationship")}</p>
+                      <p className="font-medium">{application.guardianRelationship || application.parentInfo?.guardianRelationship || t("notProvided")}</p>
                     </div>
                   </div>
                 </div>
@@ -838,22 +838,22 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
-                Emergency Contact
+                {t("emergencyContact")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
-                  <p className="font-medium">{application.emergencyName || application.emergencyContact?.name || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("emergencyName")}</p>
+                  <p className="font-medium">{application.emergencyName || application.emergencyContact?.name || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium">{application.emergencyPhone || application.emergencyContact?.phone || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("emergencyPhone")}</p>
+                  <p className="font-medium">{application.emergencyPhone || application.emergencyContact?.phone || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Relationship</p>
-                  <p className="font-medium">{application.emergencyRelationship || application.emergencyContact?.relationship || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("relationship")}</p>
+                  <p className="font-medium">{application.emergencyRelationship || application.emergencyContact?.relationship || t("notProvided")}</p>
                 </div>
               </div>
             </CardContent>
@@ -864,42 +864,42 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <GraduationCap className="w-5 h-5" />
-                Education Background
+                {t("educationBackground")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">School Name</p>
-                  <p className="font-medium">{application.education?.schoolName || application.lastSchoolName || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("schoolName")}</p>
+                  <p className="font-medium">{application.education?.schoolName || application.lastSchoolName || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">School City</p>
-                  <p className="font-medium">{application.education?.city || application.lastSchoolCity || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("schoolCity")}</p>
+                  <p className="font-medium">{application.education?.city || application.lastSchoolCity || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Graduation Year</p>
-                  <p className="font-medium">{application.education?.graduationYear || application.graduationYear || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("graduationYear")}</p>
+                  <p className="font-medium">{application.education?.graduationYear || application.graduationYear || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Diploma Type</p>
-                  <p className="font-medium">{application.education?.diplomaType || application.diplomaType || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("diplomaType")}</p>
+                  <p className="font-medium">{application.education?.diplomaType || application.diplomaType || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Field of Study</p>
-                  <p className="font-medium">{application.education?.fieldOfStudy || application.fieldOfStudy || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("fieldOfStudy")}</p>
+                  <p className="font-medium">{application.education?.fieldOfStudy || application.fieldOfStudy || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">GPA / Average</p>
-                  <p className="font-medium">{application.education?.gpa || application.gpa || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("gpaAverage")}</p>
+                  <p className="font-medium">{application.education?.gpa || application.gpa || t("notProvided")}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Baccalauréat</p>
-                  <p className="font-medium">{application.education?.hasBaccalaureat || application.hasBaccalaureat || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">{t("baccalaureat")}</p>
+                  <p className="font-medium">{application.education?.hasBaccalaureat || application.hasBaccalaureat || t("notProvided")}</p>
                 </div>
                 {(application.education?.baccalaureatSeries || application.baccalaureatSeries) && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Baccalauréat Series</p>
+                    <p className="text-sm text-muted-foreground">{t("baccalaureatSeries")}</p>
                     <p className="font-medium">{application.education?.baccalaureatSeries || application.baccalaureatSeries}</p>
                   </div>
                 )}
@@ -911,24 +911,24 @@ export default function ApplicationDetailPage() {
           {(application.personalStatement || application.essays?.personalStatement || application.essays?.careerGoals || application.essays?.whyThisUniversity || application.careerGoals || application.whyThisUniversity) && (
             <Card>
               <CardHeader>
-                <CardTitle>Essays & Personal Statements</CardTitle>
+                <CardTitle>{t("essaysPersonalStatements")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {(application.personalStatement || application.essays?.personalStatement) && (
                   <div>
-                    <h4 className="font-semibold text-sm mb-2">Personal Statement</h4>
+                    <h4 className="font-semibold text-sm mb-2">{t("personalStatement")}</h4>
                     <p className="text-sm whitespace-pre-wrap text-muted-foreground">{application.personalStatement || application.essays?.personalStatement}</p>
                   </div>
                 )}
                 {(application.essays?.careerGoals || application.careerGoals) && (
                   <div className="border-t pt-4">
-                    <h4 className="font-semibold text-sm mb-2">Career Goals</h4>
+                    <h4 className="font-semibold text-sm mb-2">{t("careerGoals")}</h4>
                     <p className="text-sm whitespace-pre-wrap text-muted-foreground">{application.essays?.careerGoals || application.careerGoals}</p>
                   </div>
                 )}
                 {(application.essays?.whyThisUniversity || application.whyThisUniversity) && (
                   <div className="border-t pt-4">
-                    <h4 className="font-semibold text-sm mb-2">Why This University</h4>
+                    <h4 className="font-semibold text-sm mb-2">{t("whyThisUniversity")}</h4>
                     <p className="text-sm whitespace-pre-wrap text-muted-foreground">{application.essays?.whyThisUniversity || application.whyThisUniversity}</p>
                   </div>
                 )}
@@ -940,7 +940,7 @@ export default function ApplicationDetailPage() {
           {application.customAnswers?.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Custom Questions</CardTitle>
+                <CardTitle>{t("customQuestions")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {application.customAnswers.map((item: any, index: number) => (
@@ -957,13 +957,13 @@ export default function ApplicationDetailPage() {
           {application.programAnswers && Object.keys(application.programAnswers).length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Program-Specific Questions</CardTitle>
-                <CardDescription>Additional questions answered for this program</CardDescription>
+                <CardTitle>{t("programSpecificQuestions")}</CardTitle>
+                <CardDescription>{t("programSpecificQuestionsDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {Object.entries(application.programAnswers).map(([questionId, answer]: [string, any]) => (
                   <div key={questionId} className="border-l-2 border-primary pl-4">
-                    <p className="font-medium text-sm mb-1 text-muted-foreground">Question {questionId}</p>
+                    <p className="font-medium text-sm mb-1 text-muted-foreground">{t("question")} {questionId}</p>
                     <p className="text-sm whitespace-pre-wrap">{answer}</p>
                   </div>
                 ))}
@@ -976,7 +976,7 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5" />
-                Application Fee
+                {t("feeInformation")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -984,7 +984,7 @@ export default function ApplicationDetailPage() {
                 {application.feePaidCents ? (
                   <>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Amount:</span>
+                      <span className="text-sm text-muted-foreground">{t("applicationFee")}:</span>
                       <span className="font-semibold">
                         {(application.feePaidCents / 100).toFixed(2)} {application.feePaidCurrency || "HTG"}
                       </span>
@@ -993,18 +993,18 @@ export default function ApplicationDetailPage() {
                       {application.checklist?.paymentReceived ? (
                         <>
                           <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-sm text-green-600 font-medium">Payment Received</span>
+                          <span className="text-sm text-green-600 font-medium">{t("paymentStatus")}</span>
                         </>
                       ) : (
                         <>
                           <Clock className="w-4 h-4 text-amber-600" />
-                          <span className="text-sm text-amber-600 font-medium">Payment Pending</span>
+                          <span className="text-sm text-amber-600 font-medium">{t("paidOn")}</span>
                         </>
                       )}
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No fee information available</p>
+                  <p className="text-sm text-muted-foreground">{t("noFeeInfo")}</p>
                 )}
               </div>
             </CardContent>
@@ -1015,26 +1015,26 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Documents ({application.documentIds?.length || 0})
+                {t("documents")} ({application.documentIds?.length || 0})
               </CardTitle>
             </CardHeader>
             <CardContent>
               {application.documentIds && application.documentIds.length > 0 ? (
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground mb-3">
-                    {application.documentIds.length} document(s) uploaded
+                    {application.documentIds.length} {t("documentsUploaded")}
                   </p>
                   {/* TODO: Fetch and display actual documents */}
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded">
                     <p className="text-sm text-blue-900">
-                      Document viewing will be available soon. Document IDs are stored in the application.
+                      {t("documentViewingSoon")}
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <AlertCircle className="w-4 h-4" />
-                  No documents uploaded
+                  {t("noDocumentsUploaded")}
                 </div>
               )}
             </CardContent>
@@ -1045,10 +1045,10 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5" />
-                Activity Timeline
+                {t("activityTimeline")}
               </CardTitle>
               <CardDescription>
-                Complete history of this application
+                {t("completeHistory")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1099,7 +1099,7 @@ export default function ApplicationDetailPage() {
               ) : (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
                   <AlertCircle className="w-4 h-4" />
-                  <span>No activity recorded yet</span>
+                  <span>{t("noActivityRecorded")}</span>
                 </div>
               )}
             </CardContent>
@@ -1111,7 +1111,7 @@ export default function ApplicationDetailPage() {
           {/* Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>Review Actions</CardTitle>
+              <CardTitle>{t("reviewActions")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Button
@@ -1121,7 +1121,7 @@ export default function ApplicationDetailPage() {
                 disabled={updating || application.status === "ACCEPTED"}
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Accept Application
+                {t("acceptApplication")}
               </Button>
               
               <Button
@@ -1130,7 +1130,7 @@ export default function ApplicationDetailPage() {
                 disabled={updating || application.status === "WAITLISTED"}
               >
                 <Clock className="w-4 h-4 mr-2" />
-                Add to Waitlist
+                {t("addToWaitlist")}
               </Button>
               
               <Button
@@ -1140,7 +1140,7 @@ export default function ApplicationDetailPage() {
                 disabled={updating || application.status === "REJECTED"}
               >
                 <XCircle className="w-4 h-4 mr-2" />
-                Reject Application
+                {t("rejectApplication")}
               </Button>
               
               <Button
@@ -1150,7 +1150,7 @@ export default function ApplicationDetailPage() {
                 disabled={updating || application.status === "UNDER_REVIEW"}
               >
                 <Clock className="w-4 h-4 mr-2" />
-                Mark Under Review
+                {t("markUnderReview")}
               </Button>
             </CardContent>
           </Card>
@@ -1160,10 +1160,10 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileCheck className="w-5 h-5" />
-                Generate Documents
+                {t("generateDocuments")}
               </CardTitle>
               <CardDescription>
-                Create official documents for this application
+                {t("createOfficialDocuments")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -1196,7 +1196,7 @@ export default function ApplicationDetailPage() {
                 disabled={application.status !== "ACCEPTED"}
               >
                 <FileText className="w-4 h-4 mr-2" />
-                Acceptance Letter
+                {t("acceptanceLetter")}
               </Button>
 
               <Button
@@ -1227,7 +1227,7 @@ export default function ApplicationDetailPage() {
                 disabled={application.status !== "REJECTED"}
               >
                 <FileText className="w-4 h-4 mr-2" />
-                Rejection Letter
+                {t("rejectionLetter")}
               </Button>
 
               <Button
@@ -1260,7 +1260,7 @@ export default function ApplicationDetailPage() {
                 }}
               >
                 <DollarSign className="w-4 h-4 mr-2" />
-                Generate Invoice
+                {t("generateInvoice")}
               </Button>
 
               <Button
@@ -1296,7 +1296,7 @@ export default function ApplicationDetailPage() {
                 disabled={!application.checklist?.paymentReceived}
               >
                 <FileCheck className="w-4 h-4 mr-2" />
-                Payment Receipt
+                {t("paymentReceipt")}
               </Button>
             </CardContent>
           </Card>
@@ -1304,13 +1304,13 @@ export default function ApplicationDetailPage() {
           {/* Review Notes */}
           <Card>
             <CardHeader>
-              <CardTitle>Review Notes</CardTitle>
+              <CardTitle>{t("reviewNotes")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Textarea
                 value={reviewNotes}
                 onChange={(e) => setReviewNotes(e.target.value)}
-                placeholder="Add notes about this application..."
+                placeholder={t("addNotesPlaceholder")}
                 rows={5}
               />
               <Button
@@ -1318,7 +1318,7 @@ export default function ApplicationDetailPage() {
                 variant="outline"
                 onClick={async () => {
                   if (demoMode) {
-                    alert("Demo Mode: Notes are not saved. Please sign in to manage real applications.");
+                    alert(t("demoModeNotes"));
                     return;
                   }
                   
@@ -1332,7 +1332,7 @@ export default function ApplicationDetailPage() {
 
                     if (response.ok) {
                       setApplication({ ...application, reviewNotes });
-                      alert("Notes saved successfully");
+                      alert(t("notesSaved"));
                     } else {
                       const error = await response.json();
                       alert(`Failed to save notes: ${error.error || 'Unknown error'}`);
@@ -1346,7 +1346,7 @@ export default function ApplicationDetailPage() {
                 }}
                 disabled={updating}
               >
-                Save Notes
+                {t("saveNotes")}
               </Button>
             </CardContent>
           </Card>
@@ -1354,7 +1354,7 @@ export default function ApplicationDetailPage() {
           {/* Checklist */}
           <Card>
             <CardHeader>
-              <CardTitle>Application Checklist</CardTitle>
+              <CardTitle>{t("applicationChecklist")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {Object.entries(application.checklist).map(([key, value]) => (
