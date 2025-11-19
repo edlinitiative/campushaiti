@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +15,17 @@ import { Badge } from "@/components/ui/badge";
 
 export default function SchoolSettingsPage() {
   const t = useTranslations("schools.settings");
+  const params = useParams();
+  const locale = (params.locale as string) || "en";
   const [demoMode] = useState(true); // Demo mode until API is implemented
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
+
+  // Helper to create locale-aware path
+  const getLocalePath = (path: string) => {
+    if (locale === "en") return path;
+    return `/${locale}${path}`;
+  };
 
   const [universityInfo, setUniversityInfo] = useState({
     name: "Université d'État d'Haïti",
@@ -91,9 +100,9 @@ export default function SchoolSettingsPage() {
               <h3 className="font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-2">
                 {t("demoModeMessage")}{' '}
-                <Link href="/auth/signin" className="underline font-medium">{t("signIn")}</Link>
+                <Link href={getLocalePath("/auth/signin")} className="underline font-medium">{t("signIn")}</Link>
                 {' '}{t("or")}{' '}
-                <Link href="/schools/register" className="underline font-medium">{t("registerInstitution")}</Link>
+                <Link href={getLocalePath("/schools/register")} className="underline font-medium">{t("registerInstitution")}</Link>
                 {' '}{t("toManageSettings")}
               </p>
               <p className="text-xs text-amber-700">
@@ -112,7 +121,7 @@ export default function SchoolSettingsPage() {
           </p>
         </div>
         <Button variant="outline" asChild>
-          <Link href="/schools/dashboard">← {t("dashboard")}</Link>
+          <Link href={getLocalePath("/schools/dashboard")}>{t("dashboard")}</Link>
         </Button>
       </div>
 

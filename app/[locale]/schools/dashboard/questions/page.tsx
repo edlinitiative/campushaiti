@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,15 @@ interface CustomQuestion {
 
 export default function CustomQuestionsPage() {
   const t = useTranslations("schools.questions");
+  const params = useParams();
+  const locale = (params.locale as string) || "en";
+  
+  // Helper to create locale-aware path
+  const getLocalePath = (path: string) => {
+    if (locale === "en") return path;
+    return `/${locale}${path}`;
+  };
+  
   const [demoMode] = useState(true); // Demo mode until API is implemented
   const [questions, setQuestions] = useState<CustomQuestion[]>([
     {
@@ -153,9 +163,9 @@ export default function CustomQuestionsPage() {
               <h3 className="font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-2">
                 {t("demoModeMessage")}{' '}
-                <Link href="/auth/signin" className="underline font-medium">{t("signIn")}</Link>
+                <Link href={getLocalePath("/auth/signin")} className="underline font-medium">{t("signIn")}</Link>
                 {' '}{t("or")}{' '}
-                <Link href="/schools/register" className="underline font-medium">{t("registerInstitution")}</Link>.
+                <Link href={getLocalePath("/schools/register")} className="underline font-medium">{t("registerInstitution")}</Link>.
               </p>
               <p className="text-xs text-amber-700">
                 {t("demoModeDescription")}
@@ -174,7 +184,7 @@ export default function CustomQuestionsPage() {
         </div>
         <div className="space-x-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">{t("dashboard")}</Link>
+            <Link href={getLocalePath("/schools/dashboard")}>{t("dashboard")}</Link>
           </Button>
           <Button onClick={handleAddQuestion}>
             {t("addQuestion")}

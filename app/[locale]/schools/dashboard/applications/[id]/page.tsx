@@ -24,6 +24,13 @@ export default function ApplicationDetailPage() {
   const params = useParams();
   const router = useRouter();
   const applicationId = params.id as string;
+  const locale = (params.locale as string) || "en";
+  
+  // Helper to create locale-aware path
+  const getLocalePath = (path: string) => {
+    if (locale === "en") return path;
+    return `/${locale}${path}`;
+  };
   
   const [demoMode, setDemoMode] = useState(false);
   const [application, setApplication] = useState<any>(null);
@@ -622,9 +629,9 @@ export default function ApplicationDetailPage() {
               <h3 className="font-semibold text-amber-900 mb-1">Demo Mode</h3>
               <p className="text-sm text-amber-800 mb-2">
                 You&apos;re viewing a sample application. To review real applications, please{' '}
-                <Link href="/auth/signin" className="underline font-medium">sign in</Link>
+                <Link href={getLocalePath("/auth/signin")} className="underline font-medium">sign in</Link>
                 {' '}or{' '}
-                <Link href="/schools/register" className="underline font-medium">register your institution</Link>.
+                <Link href={getLocalePath("/schools/register")} className="underline font-medium">register your institution</Link>.
               </p>
               <p className="text-xs text-amber-700">
                 This demo shows how you can review applications in detail and manage their status.
@@ -637,7 +644,7 @@ export default function ApplicationDetailPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <Button variant="ghost" asChild>
-            <Link href="/schools/dashboard/applications">
+            <Link href={getLocalePath("/schools/dashboard/applications")}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t("backToApplications")}
             </Link>
