@@ -35,6 +35,7 @@ export default function PasswordAuth({ mode = "signin", onSuccess }: PasswordAut
     setError("");
 
     try {
+      let userCredential;
       if (mode === "signup") {
         if (password !== confirmPassword) {
           throw new Error(t("passwordMismatch"));
@@ -42,9 +43,21 @@ export default function PasswordAuth({ mode = "signin", onSuccess }: PasswordAut
         if (password.length < 6) {
           throw new Error(t("passwordTooShort"));
         }
-        await createUserWithEmailAndPassword(auth, email, password);
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      }
+
+      // Create server-side session
+      const idToken = await userCredential.user.getIdToken();
+      const sessionResponse = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error("Failed to create session");
       }
 
       if (onSuccess) {

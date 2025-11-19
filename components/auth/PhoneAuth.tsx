@@ -107,7 +107,20 @@ export default function PhoneAuth() {
         throw new Error(t("noCodeSent"));
       }
 
-      await window.confirmationResult.confirm(verificationCode);
+      const userCredential = await window.confirmationResult.confirm(verificationCode);
+      
+      // Create server-side session
+      const idToken = await userCredential.user.getIdToken();
+      const sessionResponse = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error("Failed to create session");
+      }
+
       window.location.href = locale === "en" ? "/dashboard" : `/${locale}/dashboard`;
     } catch (err: any) {
       let errorMessage = err.message;

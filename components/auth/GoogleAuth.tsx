@@ -25,6 +25,19 @@ export default function GoogleAuth() {
       const result = await signInWithPopup(auth, provider);
       console.log("Google sign-in successful:", result.user.email);
       
+      // Create server-side session
+      const idToken = await result.user.getIdToken();
+      const sessionResponse = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error("Failed to create session");
+      }
+
+      console.log("Session created, redirecting to dashboard...");
       // User is signed in, redirect to dashboard
       window.location.href = locale === "en" ? "/dashboard" : `/${locale}/dashboard`;
     } catch (err: any) {
