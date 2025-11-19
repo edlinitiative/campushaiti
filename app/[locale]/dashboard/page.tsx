@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/navigation";
 import { ClientAuthSync } from "@/components/ClientAuthSync";
+import PasskeyPrompt from "@/components/auth/PasskeyPrompt";
 import { FileText, DollarSign, Bell, CheckCircle, Clock, AlertCircle, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -103,6 +104,7 @@ export default async function DashboardPage({
   return (
     <div className="container mx-auto px-4 py-8">
       <ClientAuthSync />
+      <PasskeyPrompt />
       
       {/* Header */}
       <div className="mb-8">
