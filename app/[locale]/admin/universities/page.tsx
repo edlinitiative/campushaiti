@@ -110,7 +110,7 @@ export default function AdminUniversitiesPage() {
   };
 
   const handleApprove = async (registration: any) => {
-    if (!confirm(`Approve ${registration.universityName}?`)) return;
+    if (!confirm(t("confirmApproval", { name: registration.universityName }))) return;
 
     try {
       const response = await fetch(`/api/admin/registrations/${registration.id}/approve`, {
@@ -118,15 +118,15 @@ export default function AdminUniversitiesPage() {
       });
 
       if (response.ok) {
-        alert(`${registration.universityName} has been approved!`);
+        alert(t("approvalSuccess", { name: registration.universityName }));
         loadRegistrations(); // Reload the list
       } else {
         const error = await response.json();
-        alert(`Failed to approve: ${error.error}`);
+        alert(t("approvalError", { error: error.error }));
       }
     } catch (err) {
       console.error("Error approving registration:", err);
-      alert("An error occurred while approving the registration");
+      alert(t("approvalErrorGeneric"));
     }
   };
 
@@ -141,18 +141,18 @@ export default function AdminUniversitiesPage() {
       });
 
       if (response.ok) {
-        alert(`Registration rejected`);
+        alert(t("registrationRejected"));
         setShowRejectDialog(false);
         setSelectedRegistration(null);
         setRejectionReason("");
         loadRegistrations(); // Reload the list
       } else {
         const error = await response.json();
-        alert(`Failed to reject: ${error.error}`);
+        alert(t("rejectionError", { error: error.error }));
       }
     } catch (err) {
       console.error("Error rejecting registration:", err);
-      alert("An error occurred while rejecting the registration");
+      alert(t("rejectionErrorGeneric"));
     }
   };
 
@@ -163,7 +163,7 @@ export default function AdminUniversitiesPage() {
 
   const handleCreateUniversity = async () => {
     if (!formData.name || !formData.slug || !formData.contactEmail) {
-      alert("Please fill in all required fields");
+      alert(t("requiredFields"));
       return;
     }
 
@@ -175,7 +175,7 @@ export default function AdminUniversitiesPage() {
       });
 
       if (response.ok) {
-        alert("University created successfully!");
+        alert(t("createSuccess"));
         setShowCreateDialog(false);
         setFormData({
           name: "",
@@ -190,11 +190,11 @@ export default function AdminUniversitiesPage() {
         loadUniversities();
       } else {
         const error = await response.json();
-        alert(`Failed to create university: ${error.error}`);
+        alert(t("createError", { error: error.error }));
       }
     } catch (err) {
       console.error("Error creating university:", err);
-      alert("An error occurred while creating the university");
+      alert(t("createErrorGeneric"));
     }
   };
 
@@ -301,16 +301,16 @@ export default function AdminUniversitiesPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">University Management</h1>
-          <p className="text-muted-foreground">Review registrations and manage universities</p>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Add University
+            {t("addUniversity")}
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/admin">← Admin Dashboard</Link>
+            <Link href="/admin">{t("adminDashboard")}</Link>
           </Button>
         </div>
       </div>
@@ -318,13 +318,13 @@ export default function AdminUniversitiesPage() {
       <Tabs defaultValue="pending" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="pending">
-            Pending Approval ({registrations.filter(r => r.status === "PENDING").length})
+            {t("pendingApproval")} ({registrations.filter(r => r.status === "PENDING").length})
           </TabsTrigger>
           <TabsTrigger value="universities">
-            All Universities ({universities.length})
+            {t("allUniversities")} ({universities.length})
           </TabsTrigger>
-          <TabsTrigger value="approved">Approved</TabsTrigger>
-          <TabsTrigger value="rejected">Rejected</TabsTrigger>
+          <TabsTrigger value="approved">{t("approved")}</TabsTrigger>
+          <TabsTrigger value="rejected">{t("rejected")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">
@@ -344,13 +344,13 @@ export default function AdminUniversitiesPage() {
                   className="h-4 w-4"
                 />
                 <span className="text-sm font-medium">
-                  {selectedForBulk.size > 0 ? `${selectedForBulk.size} selected` : 'Select all'}
+                  {selectedForBulk.size > 0 ? t("selected", { count: selectedForBulk.size }) : t("selectAll")}
                 </span>
               </div>
               {selectedForBulk.size > 0 && (
                 <Button size="sm" onClick={() => setShowBulkApprovalDialog(true)}>
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Approve Selected ({selectedForBulk.size})
+                  {t("approveSelected", { count: selectedForBulk.size })}
                 </Button>
               )}
             </div>
@@ -359,7 +359,7 @@ export default function AdminUniversitiesPage() {
           {registrations.filter(r => r.status === "PENDING").length === 0 ? (
             <Card>
               <CardContent className="text-center py-12">
-                <p className="text-muted-foreground">No pending registrations</p>
+                <p className="text-muted-foreground">{t("noPendingRegistrations")}</p>
               </CardContent>
             </Card>
           ) : (
@@ -383,27 +383,27 @@ export default function AdminUniversitiesPage() {
                           </CardDescription>
                         </div>
                       </div>
-                      <Badge variant="outline">Pending</Badge>
+                      <Badge variant="outline">{t("pending")}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <h4 className="font-semibold text-sm mb-2">University Details</h4>
+                        <h4 className="font-semibold text-sm mb-2">{t("universityDetails")}</h4>
                         <div className="space-y-1 text-sm">
                           <p>
-                            <span className="text-muted-foreground">Email:</span>{" "}
+                            <span className="text-muted-foreground">{t("email")}:</span>{" "}
                             {registration.contactEmail}
                           </p>
                           {registration.contactPhone && (
                             <p>
-                              <span className="text-muted-foreground">Phone:</span>{" "}
+                              <span className="text-muted-foreground">{t("phone")}:</span>{" "}
                               {registration.contactPhone}
                             </p>
                           )}
                           {registration.websiteUrl && (
                             <p>
-                              <span className="text-muted-foreground">Website:</span>{" "}
+                              <span className="text-muted-foreground">{t("website")}:</span>{" "}
                               <a
                                 href={registration.websiteUrl}
                                 target="_blank"
@@ -418,14 +418,14 @@ export default function AdminUniversitiesPage() {
                       </div>
 
                       <div>
-                        <h4 className="font-semibold text-sm mb-2">Contact Person</h4>
+                        <h4 className="font-semibold text-sm mb-2">{t("contactPerson")}</h4>
                         <div className="space-y-1 text-sm">
                           <p>
-                            <span className="text-muted-foreground">Name:</span>{" "}
+                            <span className="text-muted-foreground">{t("name")}:</span>{" "}
                             {registration.contactPersonName}
                           </p>
                           <p>
-                            <span className="text-muted-foreground">Title:</span>{" "}
+                            <span className="text-muted-foreground">{t("titlePosition")}:</span>{" "}
                             {registration.contactPersonTitle || "N/A"}
                           </p>
                           <p>
@@ -438,7 +438,7 @@ export default function AdminUniversitiesPage() {
 
                     {registration.description && (
                       <div>
-                        <h4 className="font-semibold text-sm mb-2">Description</h4>
+                        <h4 className="font-semibold text-sm mb-2">{t("description")}</h4>
                         <p className="text-sm text-muted-foreground">
                           {registration.description}
                         </p>
@@ -446,7 +446,7 @@ export default function AdminUniversitiesPage() {
                     )}
 
                     <div className="text-xs text-muted-foreground">
-                      Submitted: {new Date(registration.submittedAt).toLocaleString()}
+                      {t("submittedDate")}: {new Date(registration.submittedAt).toLocaleString()}
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
@@ -454,10 +454,10 @@ export default function AdminUniversitiesPage() {
                         variant="outline"
                         onClick={() => openRejectDialog(registration)}
                       >
-                        Reject
+                        {t("reject")}
                       </Button>
                       <Button onClick={() => handleApprove(registration)}>
-                        Approve University
+                        {t("approve")}
                       </Button>
                     </div>
                   </CardContent>
@@ -471,10 +471,10 @@ export default function AdminUniversitiesPage() {
             <Card>
               <CardContent className="text-center py-12">
                 <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground mb-4">No universities yet</p>
+                <p className="text-muted-foreground mb-4">{t("noUniversities")}</p>
                 <Button onClick={() => setShowCreateDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add First University
+                  {t("addUniversity")}
                 </Button>
               </CardContent>
             </Card>
@@ -502,25 +502,25 @@ export default function AdminUniversitiesPage() {
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-muted-foreground">Email:</p>
+                      <p className="text-muted-foreground">{t("email")}:</p>
                       <p className="font-medium">{university.contactEmail}</p>
                     </div>
                     {university.contactPhone && (
                       <div>
-                        <p className="text-muted-foreground">Phone:</p>
+                        <p className="text-muted-foreground">{t("phone")}:</p>
                         <p className="font-medium">{university.contactPhone}</p>
                       </div>
                     )}
                     {university.websiteUrl && (
                       <div>
-                        <p className="text-muted-foreground">Website:</p>
+                        <p className="text-muted-foreground">{t("website")}:</p>
                         <a href={university.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                           {university.websiteUrl}
                         </a>
                       </div>
                     )}
                     <div>
-                      <p className="text-muted-foreground">Slug:</p>
+                      <p className="text-muted-foreground">{t("urlSlug")}:</p>
                       <p className="font-medium font-mono text-xs">{university.slug}</p>
                     </div>
                   </div>
@@ -558,46 +558,46 @@ export default function AdminUniversitiesPage() {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add New University</DialogTitle>
+            <DialogTitle>{t("createUniversity")}</DialogTitle>
             <DialogDescription>
-              Create a new university in the system
+              {t("createUniversityManually")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">University Name *</Label>
+                <Label htmlFor="name">{t("universityName")} *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Université d'État d'Haïti"
+                  placeholder={t("universityNamePlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="slug">Slug (URL) *</Label>
+                <Label htmlFor="slug">{t("urlSlug")} *</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
-                  placeholder="ueh"
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  placeholder={t("urlSlugPlaceholder")}
                 />
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city">{t("city")}</Label>
                 <Input
                   id="city"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  placeholder="Port-au-Prince"
+                  placeholder={t("cityPlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country">{t("country")}</Label>
                 <Input
                   id="country"
                   value={formData.country}
@@ -609,54 +609,54 @@ export default function AdminUniversitiesPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact Email *</Label>
+                <Label htmlFor="contactEmail">{t("contactEmail")} *</Label>
                 <Input
                   id="contactEmail"
                   type="email"
                   value={formData.contactEmail}
                   onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                  placeholder="admissions@university.edu.ht"
+                  placeholder={t("contactEmailPlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contactPhone">Contact Phone</Label>
+                <Label htmlFor="contactPhone">{t("contactPhone")}</Label>
                 <Input
                   id="contactPhone"
                   value={formData.contactPhone}
                   onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                  placeholder="+509 1234 5678"
+                  placeholder={t("contactPhonePlaceholder")}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="websiteUrl">Website URL</Label>
+              <Label htmlFor="websiteUrl">{t("websiteUrl")}</Label>
               <Input
                 id="websiteUrl"
                 type="url"
                 value={formData.websiteUrl}
                 onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
-                placeholder="https://www.university.edu.ht"
+                placeholder={t("websiteUrlPlaceholder")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("description")}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of the university..."
+                placeholder={t("descriptionPlaceholder")}
                 rows={3}
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                Cancel
+                {t("cancel")}
               </Button>
               <Button onClick={handleCreateUniversity}>
-                Create University
+                {t("create")}
               </Button>
             </div>
           </div>
@@ -667,7 +667,7 @@ export default function AdminUniversitiesPage() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit University</DialogTitle>
+            <DialogTitle>{t("editUniversity")}</DialogTitle>
             <DialogDescription>
               Update university information
             </DialogDescription>
@@ -768,19 +768,19 @@ export default function AdminUniversitiesPage() {
       <Dialog open={showBulkApprovalDialog} onOpenChange={setShowBulkApprovalDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Bulk Approval</DialogTitle>
+            <DialogTitle>{t("bulkApprovalTitle")}</DialogTitle>
             <DialogDescription>
-              You are about to approve {selectedForBulk.size} university registration(s). This will activate them in the system.
+              {t("bulkApprovalMessage", { count: selectedForBulk.size, plural: selectedForBulk.size > 1 ? "s" : "" })} {t("bulkApprovalWarning")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setShowBulkApprovalDialog(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button onClick={handleBulkApproval}>
               <CheckCircle className="h-4 w-4 mr-2" />
-              Approve {selectedForBulk.size} Registration(s)
+              {t("confirmBulkApproval", { count: selectedForBulk.size })}
             </Button>
           </div>
         </DialogContent>
@@ -790,20 +790,20 @@ export default function AdminUniversitiesPage() {
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject University Registration</DialogTitle>
+            <DialogTitle>{t("rejectRegistration")}</DialogTitle>
             <DialogDescription>
-              Please provide a reason for rejecting {selectedRegistration?.name}
+              {t("reasonRequired")} {selectedRegistration?.name}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="reason">Rejection Reason *</Label>
+              <Label htmlFor="rejectionReason">{t("rejectionReason")}</Label>
               <Textarea
-                id="reason"
+                id="rejectionReason"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Explain why this registration is being rejected..."
+                placeholder={t("reasonPlaceholder")}
                 rows={4}
               />
             </div>
@@ -817,14 +817,14 @@ export default function AdminUniversitiesPage() {
                   setRejectionReason("");
                 }}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleReject}
                 disabled={!rejectionReason.trim()}
               >
-                Reject Registration
+                {t("confirmRejection")}
               </Button>
             </div>
           </div>
