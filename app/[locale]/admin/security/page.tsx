@@ -76,13 +76,13 @@ export default function AdminSecurityPage() {
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case "CRITICAL":
-        return <Badge className="bg-red-600">Critical</Badge>;
+        return <Badge className="bg-red-600">{t("critical")}</Badge>;
       case "ERROR":
-        return <Badge className="bg-red-500">Error</Badge>;
+        return <Badge className="bg-red-500">{t("error")}</Badge>;
       case "WARNING":
-        return <Badge className="bg-amber-500">Warning</Badge>;
+        return <Badge className="bg-amber-500">{t("warning")}</Badge>;
       default:
-        return <Badge variant="secondary">Info</Badge>;
+        return <Badge variant="secondary">{t("info")}</Badge>;
     }
   };
 
@@ -122,20 +122,20 @@ export default function AdminSecurityPage() {
         <Button variant="ghost" asChild className="mb-4">
           <Link href="/admin">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("backToDashboard")}
           </Link>
         </Button>
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
               <Shield className="h-8 w-8" />
-              Security & Audit Logs
+              {t("title")}
             </h1>
-            <p className="text-muted-foreground">Monitor system security and user activity</p>
+            <p className="text-muted-foreground">{t("subtitle")}</p>
           </div>
           <Button onClick={exportLogs} disabled={filteredLogs.length === 0}>
             <Download className="h-4 w-4 mr-2" />
-            Export Logs
+            {t("exportLogs")}
           </Button>
         </div>
       </div>
@@ -144,49 +144,49 @@ export default function AdminSecurityPage() {
       <div className="grid md:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Events</CardDescription>
+            <CardDescription>{t("totalEvents")}</CardDescription>
             <CardTitle className="text-3xl">{logs.length}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Last {dateRange === "7d" ? "7 days" : dateRange === "30d" ? "30 days" : "all time"}</p>
+            <p className="text-xs text-muted-foreground">{t(dateRange === "7d" ? "last7Days" : dateRange === "30d" ? "last30Days" : "allTime")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Successful</CardDescription>
+            <CardDescription>{t("successful")}</CardDescription>
             <CardTitle className="text-3xl text-green-600">
               {logs.filter(l => l.success).length}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {logs.length > 0 ? ((logs.filter(l => l.success).length / logs.length) * 100).toFixed(1) : 0}% success rate
+              {logs.length > 0 ? ((logs.filter(l => l.success).length / logs.length) * 100).toFixed(1) : 0}% {t("successRate")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Failures</CardDescription>
+            <CardDescription>{t("failures")}</CardDescription>
             <CardTitle className="text-3xl text-red-600">
               {logs.filter(l => !l.success).length}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Requires attention</p>
+            <p className="text-xs text-muted-foreground">{t("requiresAttention")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Security Warnings</CardDescription>
+            <CardDescription>{t("securityWarnings")}</CardDescription>
             <CardTitle className="text-3xl text-amber-600">
               {logs.filter(l => ["WARNING", "CRITICAL", "ERROR"].includes(l.severity)).length}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Elevated severity</p>
+            <p className="text-xs text-muted-foreground">{t("elevatedSeverity")}</p>
           </CardContent>
         </Card>
       </div>
@@ -194,14 +194,14 @@ export default function AdminSecurityPage() {
       {/* Filters */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Filter Logs</CardTitle>
+          <CardTitle>{t("filterLogs")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search user or IP..."
+                placeholder={t("searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -213,28 +213,28 @@ export default function AdminSecurityPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1d">Last 24 hours</SelectItem>
-                <SelectItem value="7d">Last 7 days</SelectItem>
-                <SelectItem value="30d">Last 30 days</SelectItem>
-                <SelectItem value="all">All time</SelectItem>
+                <SelectItem value="1d">{t("last24Hours")}</SelectItem>
+                <SelectItem value="7d">{t("last7Days")}</SelectItem>
+                <SelectItem value="30d">{t("last30Days")}</SelectItem>
+                <SelectItem value="all">{t("allTime")}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={filterSeverity} onValueChange={setFilterSeverity}>
               <SelectTrigger>
-                <SelectValue placeholder="All severities" />
+                <SelectValue placeholder={t("allSeverities")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Severities</SelectItem>
-                <SelectItem value="INFO">Info</SelectItem>
-                <SelectItem value="WARNING">Warning</SelectItem>
-                <SelectItem value="ERROR">Error</SelectItem>
-                <SelectItem value="CRITICAL">Critical</SelectItem>
+                <SelectItem value="all">{t("allSeverities")}</SelectItem>
+                <SelectItem value="INFO">{t("info")}</SelectItem>
+                <SelectItem value="WARNING">{t("warning")}</SelectItem>
+                <SelectItem value="ERROR">{t("error")}</SelectItem>
+                <SelectItem value="CRITICAL">{t("critical")}</SelectItem>
               </SelectContent>
             </Select>
 
             <Button variant="outline" onClick={loadAuditLogs}>
-              Refresh
+              {t("refresh")}
             </Button>
           </div>
         </CardContent>
@@ -243,16 +243,16 @@ export default function AdminSecurityPage() {
       {/* Audit Log List */}
       <Card>
         <CardHeader>
-          <CardTitle>Audit Log Entries</CardTitle>
+          <CardTitle>{t("auditLogEntries")}</CardTitle>
           <CardDescription>
-            Showing {filteredLogs.length} of {logs.length} events
+            {t("showing", { count: filteredLogs.length, total: logs.length })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-center py-8 text-muted-foreground">Loading audit logs...</p>
+            <p className="text-center py-8 text-muted-foreground">{t("loading")}</p>
           ) : filteredLogs.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">No audit logs found</p>
+            <p className="text-center py-8 text-muted-foreground">{t("noLogsFound")}</p>
           ) : (
             <div className="space-y-2">
               {filteredLogs.map((log, index) => (

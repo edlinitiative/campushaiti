@@ -84,11 +84,11 @@ export default function AdminApplicationsPage() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { label: string; className: string }> = {
-      SUBMITTED: { label: "Submitted", className: "bg-blue-100 text-blue-800" },
-      UNDER_REVIEW: { label: "Under Review", className: "bg-amber-100 text-amber-800" },
-      ACCEPTED: { label: "Accepted", className: "bg-green-100 text-green-800" },
-      REJECTED: { label: "Rejected", className: "bg-red-100 text-red-800" },
-      WAITLISTED: { label: "Waitlisted", className: "bg-purple-100 text-purple-800" },
+      SUBMITTED: { label: t("submitted"), className: "bg-blue-100 text-blue-800" },
+      UNDER_REVIEW: { label: t("underReview"), className: "bg-amber-100 text-amber-800" },
+      ACCEPTED: { label: t("accepted"), className: "bg-green-100 text-green-800" },
+      REJECTED: { label: t("rejected"), className: "bg-red-100 text-red-800" },
+      WAITLISTED: { label: t("waitlisted"), className: "bg-purple-100 text-purple-800" },
     };
     return variants[status] || { label: status, className: "" };
   };
@@ -116,7 +116,7 @@ export default function AdminApplicationsPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p>Loading applications...</p>
+        <p>{t("loading")}</p>
       </div>
     );
   }
@@ -132,9 +132,9 @@ export default function AdminApplicationsPage() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800">
-                Viewing sample application data. Sign in as admin to see real applications.
+                {t("demoModeMessage")}
               </p>
             </div>
           </div>
@@ -145,16 +145,16 @@ export default function AdminApplicationsPage() {
         <Link href="/admin">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("backToDashboard")}
           </Button>
         </Link>
       </div>
 
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">All Applications</h1>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Monitor applications across all universities
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -163,37 +163,37 @@ export default function AdminApplicationsPage() {
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Total</p>
+            <p className="text-sm text-muted-foreground">{t("total")}</p>
             <p className="text-2xl font-bold">{stats.total}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Submitted</p>
+            <p className="text-sm text-muted-foreground">{t("submitted")}</p>
             <p className="text-2xl font-bold text-blue-600">{stats.submitted}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Reviewing</p>
+            <p className="text-sm text-muted-foreground">{t("reviewing")}</p>
             <p className="text-2xl font-bold text-amber-600">{stats.underReview}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Accepted</p>
+            <p className="text-sm text-muted-foreground">{t("accepted")}</p>
             <p className="text-2xl font-bold text-green-600">{stats.accepted}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Waitlisted</p>
+            <p className="text-sm text-muted-foreground">{t("waitlisted")}</p>
             <p className="text-2xl font-bold text-purple-600">{stats.waitlisted}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Rejected</p>
+            <p className="text-sm text-muted-foreground">{t("rejected")}</p>
             <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
           </CardContent>
         </Card>
@@ -204,7 +204,7 @@ export default function AdminApplicationsPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search applications..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -215,10 +215,10 @@ export default function AdminApplicationsPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-          <TabsTrigger value="SUBMITTED">Submitted ({stats.submitted})</TabsTrigger>
-          <TabsTrigger value="UNDER_REVIEW">Under Review ({stats.underReview})</TabsTrigger>
-          <TabsTrigger value="ACCEPTED">Accepted ({stats.accepted})</TabsTrigger>
+          <TabsTrigger value="all">{t("all")} ({stats.total})</TabsTrigger>
+          <TabsTrigger value="SUBMITTED">{t("submitted")} ({stats.submitted})</TabsTrigger>
+          <TabsTrigger value="UNDER_REVIEW">{t("underReview")} ({stats.underReview})</TabsTrigger>
+          <TabsTrigger value="ACCEPTED">{t("accepted")} ({stats.accepted})</TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-6">
@@ -246,15 +246,15 @@ export default function AdminApplicationsPage() {
                   <CardContent>
                     <div className="grid md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <p className="text-muted-foreground">Program</p>
+                        <p className="text-muted-foreground">{t("program")}</p>
                         <p className="font-medium">{app.programName}</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">University</p>
+                        <p className="text-muted-foreground">{t("university")}</p>
                         <p className="font-medium">{app.universityName}</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Submitted</p>
+                        <p className="text-muted-foreground">{t("submittedDate")}</p>
                         <p className="font-medium">
                           {new Date(app.submittedAt).toLocaleDateString()}
                         </p>
@@ -270,7 +270,7 @@ export default function AdminApplicationsPage() {
             <Card>
               <CardContent className="py-12 text-center">
                 <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No applications found</p>
+                <p className="text-muted-foreground">{t("noApplications")}</p>
               </CardContent>
             </Card>
           )}
