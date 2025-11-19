@@ -18,12 +18,14 @@
   "nav": {
     "home": "Akèy",
     "apply": "Aplike",
-    "dashboard": "Tablo de bò",
+    "dashboard": "Tablo debò",
     "admin": "Admin",
-    "partners": "Pateè",
+    "partners": "Patenè",
     "help": "Èd",
     "signIn": "Konekte",
-    "signOut": "Dekonekte"
+    "signOut": "Dekonekte",
+    "forSchools": "Pou lekòl yo",
+    "schoolPortal": "Pòtal lekòl"
   },
   "home": {
     "tagline": "Pòt ou pou edikasyon siperyè ann Ayiti",
@@ -46,7 +48,10 @@
     "checkEmail": "Gade imel ou pou yon lyen koneksyon",
     "signInWithPasskey": "Konekte ak Passkey",
     "registerPasskey": "Anrejistre Passkey",
-    "welcome": "Byenveni sou Campus Ayiti"
+    "welcome": "Byenveni sou Campus Ayiti",
+    "signInToAccount": "Konekte nan kont ou",
+    "emailLink": "Lyen Imel",
+    "passkey": "Kle Aksè"
   },
   "apply": {
     "title": "Aplike nan inivèsite yo",

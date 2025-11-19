@@ -13,13 +13,13 @@ export default function SignInPage() {
         <Card>
           <CardHeader>
             <CardTitle>{t("welcome")}</CardTitle>
-            <CardDescription>Sign in to your account</CardDescription>
+            <CardDescription>{t("signInToAccount")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="email" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="email">Email Link</TabsTrigger>
-                <TabsTrigger value="passkey">Passkey</TabsTrigger>
+                <TabsTrigger value="email">{t("emailLink")}</TabsTrigger>
+                <TabsTrigger value="passkey">{t("passkey")}</TabsTrigger>
               </TabsList>
               <TabsContent value="email" className="mt-4">
                 <EmailLinkAuth />

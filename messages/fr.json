@@ -23,7 +23,9 @@
     "partners": "Partenaires",
     "help": "Aide",
     "signIn": "Se connecter",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "forSchools": "Pour les écoles",
+    "schoolPortal": "Portail scolaire"
   },
   "home": {
     "tagline": "Votre porte d'entrée vers l'enseignement supérieur en Haïti",
@@ -46,7 +48,10 @@
     "checkEmail": "Vérifiez votre email pour un lien de connexion",
     "signInWithPasskey": "Se connecter avec Passkey",
     "registerPasskey": "Enregistrer Passkey",
-    "welcome": "Bienvenue sur Campus Haïti"
+    "welcome": "Bienvenue sur Campus Haïti",
+    "signInToAccount": "Connectez-vous à votre compte",
+    "emailLink": "Lien email",
+    "passkey": "Clé d'accès"
   },
   "apply": {
     "title": "Postuler aux universités",

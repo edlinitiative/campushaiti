@@ -71,7 +71,7 @@ export default function Navigation() {
               {t("partners")}
             </Link>
             <Link href={getLocalePath("/schools/register")} className="text-sm hover:underline">
-              For Schools
+              {t("forSchools")}
             </Link>
             <Link href={getLocalePath("/help")} className="text-sm hover:underline">
               {t("help")}
@@ -99,7 +99,7 @@ export default function Navigation() {
                   {userRole === "SCHOOL_ADMIN" && (
                     <Link href={getLocalePath("/schools/dashboard")}>
                       <Button variant="ghost" size="sm">
-                        School Portal
+                        {t("schoolPortal")}
                       </Button>
                     </Link>
                   )}

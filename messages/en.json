@@ -23,7 +23,9 @@
     "partners": "Partners",
     "help": "Help",
     "signIn": "Sign In",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "forSchools": "For Schools",
+    "schoolPortal": "School Portal"
   },
   "home": {
     "tagline": "Your gateway to higher education in Haiti",
@@ -46,7 +48,10 @@
     "checkEmail": "Check your email for a sign-in link",
     "signInWithPasskey": "Sign in with Passkey",
     "registerPasskey": "Register Passkey",
-    "welcome": "Welcome to Campus Haiti"
+    "welcome": "Welcome to Campus Haiti",
+    "signInToAccount": "Sign in to your account",
+    "emailLink": "Email Link",
+    "passkey": "Passkey"
   },
   "apply": {
     "title": "Apply to Universities",
