@@ -6,15 +6,15 @@ import Link from "next/link";
 import { Mail, MessageCircle, Book, Phone } from "lucide-react";
 
 export default function HelpPage() {
-  const t = useTranslations();
+  const t = useTranslations("help");
 
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Help Center</h1>
+          <h1 className="text-4xl font-bold mb-4">{t("title")}</h1>
           <p className="text-xl text-muted-foreground">
-            Find answers to common questions and get the support you need
+            {t("subtitle")}
           </p>
         </div>
 
@@ -22,7 +22,7 @@ export default function HelpPage() {
         <div className="mb-12">
           <div className="relative">
             <Input 
-              placeholder="Search for help articles..." 
+              placeholder={t("searchPlaceholder")} 
               className="pl-12 py-6 text-lg"
             />
             <svg 
@@ -41,14 +41,14 @@ export default function HelpPage() {
           <Card>
             <CardHeader>
               <Book className="h-8 w-8 text-blue-600 mb-2" />
-              <CardTitle>Getting Started Guide</CardTitle>
+              <CardTitle>{t("gettingStarted")}</CardTitle>
               <CardDescription>
-                New to Campus Haiti? Learn how to create an account and submit your first application.
+                {t("gettingStartedDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button variant="outline" asChild className="w-full">
-                <Link href="/help/getting-started">Read Guide</Link>
+                <Link href="/help/getting-started">{t("readGuide")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -56,14 +56,14 @@ export default function HelpPage() {
           <Card>
             <CardHeader>
               <MessageCircle className="h-8 w-8 text-blue-600 mb-2" />
-              <CardTitle>Contact Support</CardTitle>
+              <CardTitle>{t("contactSupport")}</CardTitle>
               <CardDescription>
-                Can&apos;t find what you&apos;re looking for? Our support team is here to help.
+                {t("contactSupportDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button variant="outline" asChild className="w-full">
-                <Link href="mailto:support@campushaiti.org">Email Support</Link>
+                <Link href="mailto:support@campushaiti.org">{t("emailSupport")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -72,87 +72,87 @@ export default function HelpPage() {
         {/* FAQs */}
         <Card>
           <CardHeader>
-            <CardTitle>Frequently Asked Questions</CardTitle>
-            <CardDescription>Browse common questions and answers</CardDescription>
+            <CardTitle>{t("faqTitle")}</CardTitle>
+            <CardDescription>{t("faqSubtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <h3 className="font-semibold mb-2">How do I apply to universities?</h3>
+              <h3 className="font-semibold mb-2">{t("q1")}</h3>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <p>To apply to universities through Campus Haiti:</p>
+                <p>{t("a1Intro")}</p>
                 <ol className="list-decimal pl-5 space-y-1">
-                  <li>Create an account and sign in</li>
-                  <li>Complete your profile with personal information</li>
-                  <li>Upload required documents (transcripts, ID, etc.)</li>
-                  <li>Browse universities and select programs</li>
-                  <li>Pay application fees securely</li>
-                  <li>Submit your application and track its status</li>
+                  <li>{t("a1Step1")}</li>
+                  <li>{t("a1Step2")}</li>
+                  <li>{t("a1Step3")}</li>
+                  <li>{t("a1Step4")}</li>
+                  <li>{t("a1Step5")}</li>
+                  <li>{t("a1Step6")}</li>
                 </ol>
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-2">What payment methods are accepted?</h3>
+              <h3 className="font-semibold mb-2">{t("q2")}</h3>
               <div className="text-sm text-muted-foreground">
-                We accept two secure payment methods:
+                {t("a2Intro")}
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li><strong>Stripe:</strong> Credit/debit cards (Visa, Mastercard, American Express)</li>
-                  <li><strong>MonCash:</strong> Mobile money for local payments in Haiti</li>
+                  <li><strong>Stripe:</strong> {t("a2Stripe").replace('Stripe: ', '')}</li>
+                  <li><strong>MonCash:</strong> {t("a2MonCash").replace('MonCash: ', '')}</li>
                 </ul>
-                <p className="mt-2">All transactions are encrypted and secure.</p>
+                <p className="mt-2">{t("a2Security")}</p>
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-2">How do I track my application status?</h3>
+              <h3 className="font-semibold mb-2">{t("q3")}</h3>
               <div className="text-sm text-muted-foreground">
-                After submitting your application:
+                {t("a3Intro")}
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>Sign in to your dashboard</li>
-                  <li>View all your applications in one place</li>
-                  <li>See real-time status updates (Submitted, Under Review, Accepted, Rejected)</li>
-                  <li>Receive email notifications for important updates</li>
-                  <li>Access additional information or requirements from universities</li>
-                </ul>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-2">What documents do I need?</h3>
-              <div className="text-sm text-muted-foreground">
-                Common required documents include:
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>Copy of valid ID or passport</li>
-                  <li>High school transcripts and diplomas (Baccalauréat)</li>
-                  <li>Recent passport-sized photograph</li>
-                  <li>Birth certificate (for some programs)</li>
-                  <li>Recommendation letters (for graduate programs)</li>
-                </ul>
-                <p className="mt-2">Specific requirements may vary by university and program.</p>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-2">Can I apply to multiple universities?</h3>
-              <div className="text-sm text-muted-foreground">
-                Yes! One of the main benefits of Campus Haiti is the ability to apply to multiple universities and programs with a single application. You can:
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>Select as many programs as you want</li>
-                  <li>Reuse your profile and documents across applications</li>
-                  <li>Pay all fees in one transaction</li>
-                  <li>Track all applications from one dashboard</li>
+                  <li>{t("a3Step1")}</li>
+                  <li>{t("a3Step2")}</li>
+                  <li>{t("a3Step3")}</li>
+                  <li>{t("a3Step4")}</li>
+                  <li>{t("a3Step5")}</li>
                 </ul>
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-2">How long does the application process take?</h3>
+              <h3 className="font-semibold mb-2">{t("q4")}</h3>
               <div className="text-sm text-muted-foreground">
-                The timeline varies:
+                {t("a4Intro")}
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li><strong>Completing application:</strong> 30-60 minutes if you have all documents ready</li>
-                  <li><strong>University review:</strong> Typically 2-6 weeks, depending on the institution</li>
-                  <li><strong>Admission decision:</strong> You&apos;ll be notified via email and dashboard</li>
+                  <li>{t("a4Doc1")}</li>
+                  <li>{t("a4Doc2")}</li>
+                  <li>{t("a4Doc3")}</li>
+                  <li>{t("a4Doc4")}</li>
+                  <li>{t("a4Doc5")}</li>
+                </ul>
+                <p className="mt-2">{t("a4Note")}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">{t("q5")}</h3>
+              <div className="text-sm text-muted-foreground">
+                {t("a5Intro")}
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li>{t("a5Benefit1")}</li>
+                  <li>{t("a5Benefit2")}</li>
+                  <li>{t("a5Benefit3")}</li>
+                  <li>{t("a5Benefit4")}</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">{t("q6")}</h3>
+              <div className="text-sm text-muted-foreground">
+                {t("a6Intro")}
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li><strong>{t("a6Completing").split(':')[0]}:</strong> {t("a6Completing").split(':')[1]}</li>
+                  <li><strong>{t("a6Review").split(':')[0]}:</strong> {t("a6Review").split(':')[1]}</li>
+                  <li><strong>{t("a6Decision").split(':')[0]}:</strong> {t("a6Decision").split(':')[1]}</li>
                 </ul>
               </div>
             </div>
@@ -164,12 +164,12 @@ export default function HelpPage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <Mail className="h-10 w-10 text-blue-600 mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Email Support</h3>
+              <h3 className="font-semibold mb-2">{t("emailSupportTitle")}</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Get help via email
+                {t("emailSupportDesc")}
               </p>
               <a href="mailto:support@campushaiti.org" className="text-blue-600 hover:underline text-sm">
-                support@campushaiti.org
+                {t("emailAddress")}
               </a>
             </CardContent>
           </Card>
@@ -177,12 +177,12 @@ export default function HelpPage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <Phone className="h-10 w-10 text-blue-600 mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Phone Support</h3>
+              <h3 className="font-semibold mb-2">{t("phoneSupportTitle")}</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Call during business hours
+                {t("phoneSupportDesc")}
               </p>
               <a href="tel:+5091234567" className="text-blue-600 hover:underline text-sm">
-                +509 1234 5678
+                {t("phoneNumber")}
               </a>
             </CardContent>
           </Card>
@@ -190,12 +190,12 @@ export default function HelpPage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <MessageCircle className="h-10 w-10 text-blue-600 mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Live Chat</h3>
+              <h3 className="font-semibold mb-2">{t("liveChatTitle")}</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Chat with support team
+                {t("liveChatDesc")}
               </p>
               <Button variant="outline" size="sm">
-                Start Chat
+                {t("startChat")}
               </Button>
             </CardContent>
           </Card>
