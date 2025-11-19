@@ -21,11 +21,14 @@ export default function GoogleAuth() {
 
     try {
       const provider = new GoogleAuthProvider();
+      console.log("Starting Google sign-in...");
       const result = await signInWithPopup(auth, provider);
+      console.log("Google sign-in successful:", result.user.email);
       
       // User is signed in, redirect to dashboard
       window.location.href = locale === "en" ? "/dashboard" : `/${locale}/dashboard`;
     } catch (err: any) {
+      console.error("Google sign-in error:", err.code, err.message);
       let errorMessage = err.message;
       
       // Firebase error code translations
@@ -35,6 +38,10 @@ export default function GoogleAuth() {
         errorMessage = t("popupCancelled");
       } else if (err.code === "auth/popup-blocked") {
         errorMessage = t("popupBlocked");
+      } else if (err.code === "auth/unauthorized-domain") {
+        errorMessage = "This domain is not authorized. Please add it to Firebase Console → Authentication → Settings → Authorized domains";
+      } else if (err.code === "auth/operation-not-allowed") {
+        errorMessage = "Google sign-in is not enabled. Please enable it in Firebase Console → Authentication → Sign-in method";
       } else if (err.code === "auth/account-exists-with-different-credential") {
         errorMessage = t("accountExistsWithDifferentCredential");
       } else if (err.code === "auth/too-many-requests") {
