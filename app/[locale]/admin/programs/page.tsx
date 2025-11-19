@@ -29,6 +29,7 @@ interface Program {
 }
 
 export default function AdminProgramsPage() {
+  const t = useTranslations("admin.programs");
   const [loading, setLoading] = useState(true);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [universities, setUniversities] = useState<any[]>([]);
@@ -248,12 +249,12 @@ export default function AdminProgramsPage() {
 
   const getDegreeLabel = (degree: string) => {
     const labels: Record<string, string> = {
-      BACHELOR: "Bachelor's",
-      MASTER: "Master's",
-      DOCTORATE: "PhD",
-      ASSOCIATE: "Associate",
-      CERTIFICATE: "Certificate",
-      DIPLOMA: "Diploma",
+      BACHELOR: t("bachelor"),
+      MASTER: t("master"),
+      DOCTORATE: t("doctorate"),
+      ASSOCIATE: t("associate"),
+      CERTIFICATE: t("associate"),
+      DIPLOMA: t("associate"),
     };
     return labels[degree] || degree;
   };
@@ -261,7 +262,7 @@ export default function AdminProgramsPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p>Loading programs...</p>
+        <p>{t("loadingPrograms")}</p>
       </div>
     );
   }
@@ -277,9 +278,9 @@ export default function AdminProgramsPage() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800">
-                Viewing sample program data. Sign in as admin to see real programs.
+                {t("demoModeMessage")}
               </p>
             </div>
           </div>
@@ -288,20 +289,20 @@ export default function AdminProgramsPage() {
 
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Program Management</h1>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground">
-            {programs.length} programs across all universities
+            {programs.length} {t("allPrograms").toLowerCase()}
           </p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Program
+            {t("createProgram")}
           </Button>
           <Button variant="outline" asChild>
             <Link href="/admin">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Admin Dashboard
+              {t("backToDashboard")}
             </Link>
           </Button>
         </div>
@@ -312,7 +313,7 @@ export default function AdminProgramsPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search programs or universities..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -325,11 +326,11 @@ export default function AdminProgramsPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <GraduationCap className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground mb-4">No programs found</p>
+            <p className="text-muted-foreground mb-4">{t("noPrograms")}</p>
             {programs.length === 0 && (
               <Button onClick={() => setShowCreateDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add First Program
+                {t("createProgram")}
               </Button>
             )}
           </CardContent>
@@ -361,7 +362,7 @@ export default function AdminProgramsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground flex items-center gap-1">
                       <DollarSign className="h-3 w-3" />
-                      Application Fee:
+                      {t("applicationFee")}:
                     </span>
                     <span className="font-semibold">
                       {program.feeCents / 100} {program.currency}
@@ -370,7 +371,7 @@ export default function AdminProgramsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      Deadline:
+                      {t("deadline")}:
                     </span>
                     <span className="font-medium">
                       {new Date(program.deadline).toLocaleDateString()}
@@ -384,7 +385,7 @@ export default function AdminProgramsPage() {
                 )}
                 <div className="flex items-center justify-between pt-2 border-t">
                   <span className="text-sm font-medium">
-                    {program.isActive === false ? "Inactive" : "Active"}
+                    {program.isActive === false ? t("inactivePrograms") : t("isActive")}
                   </span>
                   <Switch
                     checked={program.isActive !== false}
@@ -400,34 +401,34 @@ export default function AdminProgramsPage() {
       {/* Summary Stats */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Program Statistics</CardTitle>
+          <CardTitle>{t("programDetails")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-5 gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">Total Programs</p>
+              <p className="text-sm text-muted-foreground">{t("allPrograms")}</p>
               <p className="text-2xl font-bold">{programs.length}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Active</p>
+              <p className="text-sm text-muted-foreground">{t("isActive")}</p>
               <p className="text-2xl font-bold text-green-600">
                 {programs.filter(p => p.isActive !== false).length}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Bachelor&apos;s</p>
+              <p className="text-sm text-muted-foreground">{t("bachelor")}</p>
               <p className="text-2xl font-bold">
                 {programs.filter(p => p.degree === "BACHELOR").length}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Master&apos;s</p>
+              <p className="text-sm text-muted-foreground">{t("master")}</p>
               <p className="text-2xl font-bold">
                 {programs.filter(p => p.degree === "MASTER").length}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Other</p>
+              <p className="text-sm text-muted-foreground">{t("doctorate")}</p>
               <p className="text-2xl font-bold">
                 {programs.filter(p => !["BACHELOR", "MASTER"].includes(p.degree)).length}
               </p>
@@ -440,9 +441,9 @@ export default function AdminProgramsPage() {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add New Program</DialogTitle>
+            <DialogTitle>{t("createProgram")}</DialogTitle>
             <DialogDescription>
-              Create a new academic program
+              {t("subtitle")}
             </DialogDescription>
           </DialogHeader>
 

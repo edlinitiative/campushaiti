@@ -69,7 +69,7 @@ export default function AdminPaymentsPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p>Loading payment data...</p>
+        <p>{t("loadingPayment")}</p>
       </div>
     );
   }
@@ -85,9 +85,9 @@ export default function AdminPaymentsPage() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800">
-                Viewing sample payment data. Sign in as admin to see real payment statistics.
+                {t("demoModeMessage")}
               </p>
             </div>
           </div>
@@ -98,15 +98,15 @@ export default function AdminPaymentsPage() {
         <Link href="/admin">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("backToDashboard")}
           </Button>
         </Link>
       </div>
 
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Payment Tracking</h1>
+        <h1 className="text-3xl font-bold">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Monitor application fee revenue and payment trends
+          {t("subtitle")}
         </p>
       </div>
 
@@ -114,20 +114,20 @@ export default function AdminPaymentsPage() {
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Revenue</CardDescription>
+            <CardDescription>{t("totalRevenue")}</CardDescription>
             <CardTitle className="text-3xl flex items-center gap-2">
               <DollarSign className="w-8 h-8 text-green-600" />
               {(stats.total / 100).toLocaleString()} {stats.currency}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">All time application fees</p>
+            <p className="text-xs text-muted-foreground">{t("allTimeApplicationFees")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>This Month</CardDescription>
+            <CardDescription>{t("thisMonth")}</CardDescription>
             <CardTitle className="text-3xl text-blue-600">
               {(stats.thisMonth / 100).toLocaleString()} {stats.currency}
             </CardTitle>
@@ -136,7 +136,7 @@ export default function AdminPaymentsPage() {
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-600" />
               <p className="text-xs text-green-600 font-medium">
-                +{growthRate}% from last month
+                {t("growthFromLastMonth", { rate: growthRate })}
               </p>
             </div>
           </CardContent>
@@ -144,13 +144,13 @@ export default function AdminPaymentsPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Last Month</CardDescription>
+            <CardDescription>{t("lastMonth")}</CardDescription>
             <CardTitle className="text-3xl text-muted-foreground">
               {(stats.lastMonth / 100).toLocaleString()} {stats.currency}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Previous month revenue</p>
+            <p className="text-xs text-muted-foreground">{t("previousMonthRevenue")}</p>
           </CardContent>
         </Card>
       </div>
@@ -158,8 +158,8 @@ export default function AdminPaymentsPage() {
       {/* Payment Methods */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Payment Methods</CardTitle>
-          <CardDescription>Distribution of payment methods used</CardDescription>
+          <CardTitle>{t("paymentMethods")}</CardTitle>
+          <CardDescription>{t("paymentMethodsDistribution")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -167,7 +167,7 @@ export default function AdminPaymentsPage() {
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-blue-600" />
-                  <span className="font-medium">Stripe</span>
+                  <span className="font-medium">{t("stripe")}</span>
                 </div>
                 <span className="text-sm text-muted-foreground">65%</span>
               </div>
@@ -180,7 +180,7 @@ export default function AdminPaymentsPage() {
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-orange-600" />
-                  <span className="font-medium">MonCash</span>
+                  <span className="font-medium">{t("moncash")}</span>
                 </div>
                 <span className="text-sm text-muted-foreground">35%</span>
               </div>
@@ -195,8 +195,8 @@ export default function AdminPaymentsPage() {
       {/* Revenue by University */}
       <Card>
         <CardHeader>
-          <CardTitle>Top Universities by Revenue</CardTitle>
-          <CardDescription>Application fee revenue generated per institution</CardDescription>
+          <CardTitle>{t("topUniversitiesByRevenue")}</CardTitle>
+          <CardDescription>{t("revenuePerInstitution")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -209,7 +209,7 @@ export default function AdminPaymentsPage() {
               <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex-1">
                   <p className="font-medium">{uni.name}</p>
-                  <p className="text-sm text-muted-foreground">{uni.count} applications</p>
+                  <p className="text-sm text-muted-foreground">{uni.count} {t("applications")}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-lg">
@@ -224,16 +224,16 @@ export default function AdminPaymentsPage() {
 
       <Card className="mt-8 bg-blue-50 border-blue-200">
         <CardHeader>
-          <CardTitle className="text-blue-900">Payment Platform Integration</CardTitle>
+          <CardTitle className="text-blue-900">{t("paymentPlatformIntegration")}</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-blue-800">
-          <p className="mb-2">Campus Haiti accepts payments through:</p>
+          <p className="mb-2">{t("acceptsPaymentsThrough")}</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong>Stripe</strong> - International credit/debit cards</li>
-            <li><strong>MonCash</strong> - Mobile money for Haiti</li>
+            <li><strong>{t("stripe")}</strong> - {t("stripeDescription")}</li>
+            <li><strong>{t("moncash")}</strong> - {t("moncashDescription")}</li>
           </ul>
           <p className="mt-3 text-xs text-blue-700">
-            All transactions are secure and encrypted. Payment data is never stored on our servers.
+            {t("secureTransactions")}
           </p>
         </CardContent>
       </Card>
