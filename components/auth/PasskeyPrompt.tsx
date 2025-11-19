@@ -54,7 +54,17 @@ export default function PasskeyPrompt() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.uid }),
       });
+      
+      if (!optionsRes.ok) {
+        const errorData = await optionsRes.json();
+        throw new Error(errorData.error || "Failed to get registration options");
+      }
+      
       const options = await optionsRes.json();
+      
+      if (!options || !options.challenge) {
+        throw new Error("Invalid registration options received from server");
+      }
 
       // Start WebAuthn registration
       const attResp = await startRegistration(options);
