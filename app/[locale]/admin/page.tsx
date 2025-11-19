@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ interface AdminStats {
 }
 
 export default function AdminPage() {
+  const t = useTranslations("admin.dashboard");
   const [loading, setLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
   const [stats, setStats] = useState<AdminStats>({
@@ -104,7 +106,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p>Loading dashboard...</p>
+        <p>{t("loadingDashboard")}</p>
       </div>
     );
   }
@@ -120,16 +122,16 @@ export default function AdminPage() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-3">
-                You&apos;re viewing demo data. To access the real admin dashboard, please{" "}
+                {t("demoModeMessage")}{" "}
                 <Link href="/auth/signin" className="underline font-medium">
-                  sign in
+                  {t("signIn")}
                 </Link>{" "}
-                with your admin account.
+                {t("withAdminAccount")}
               </p>
               <div className="text-xs text-amber-700">
-                This demo shows you what the platform admin portal looks like with sample data.
+                {t("demoDescription")}
               </div>
             </div>
           </div>
@@ -137,26 +139,26 @@ export default function AdminPage() {
       )}
       
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Platform Admin Dashboard</h1>
-        <p className="text-muted-foreground">Manage universities, programs, and monitor platform activity</p>
+        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Statistics Overview */}
       <div className="grid md:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Universities</CardDescription>
+            <CardDescription>{t("totalUniversities")}</CardDescription>
             <CardTitle className="text-3xl">{stats.totalUniversities}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle className="w-4 h-4 text-green-600" />
-              <span className="text-muted-foreground">{stats.approvedUniversities} approved</span>
+              <span className="text-muted-foreground">{stats.approvedUniversities} {t("approved")}</span>
             </div>
             {stats.pendingUniversities > 0 && (
               <div className="flex items-center gap-2 text-sm mt-1">
                 <Clock className="w-4 h-4 text-amber-600" />
-                <span className="text-amber-600 font-medium">{stats.pendingUniversities} pending</span>
+                <span className="text-amber-600 font-medium">{stats.pendingUniversities} {t("pending")}</span>
               </div>
             )}
           </CardContent>
@@ -164,33 +166,33 @@ export default function AdminPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Programs</CardDescription>
+            <CardDescription>{t("totalPrograms")}</CardDescription>
             <CardTitle className="text-3xl text-blue-600">{stats.totalPrograms}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              Across {stats.approvedUniversities} universities
+              {t("acrossUniversities").replace("across universities", `${stats.approvedUniversities} universities`)}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Applications</CardDescription>
+            <CardDescription>{t("totalApplications")}</CardDescription>
             <CardTitle className="text-3xl text-purple-600">{stats.totalApplications}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-1 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Accepted:</span>
+                <span className="text-muted-foreground">{t("accepted")}:</span>
                 <span className="text-green-600 font-medium">{stats.acceptedApplications}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">In Review:</span>
+                <span className="text-muted-foreground">{t("underReview")}:</span>
                 <span className="text-amber-600">{stats.underReviewApplications}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">New:</span>
+                <span className="text-muted-foreground">{t("pending")}:</span>
                 <span>{stats.pendingApplications}</span>
               </div>
             </div>
