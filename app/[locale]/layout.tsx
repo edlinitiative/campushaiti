@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Navigation from "@/components/Navigation";
 import { locales } from "@/i18n";
@@ -30,6 +30,7 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
+  const t = await getTranslations("common");
 
   return (
     <html lang={locale}>
@@ -40,7 +41,7 @@ export default async function LocaleLayout({
             <main className="flex-1">{children}</main>
             <footer className="border-t py-6 text-center text-sm text-muted-foreground">
               <div className="container mx-auto px-4">
-                <p>&copy; {new Date().getFullYear()} Campus Haiti. All rights reserved.</p>
+                <p>{t("copyright", { year: new Date().getFullYear() })}</p>
               </div>
             </footer>
           </div>

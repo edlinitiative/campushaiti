@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Campus Ayiti",
+    "copyright": "© {year} Campus Ayiti. Tout dwa rezève.",
     "loading": "Chaje...",
     "submit": "Soumèt",
     "cancel": "Anile",

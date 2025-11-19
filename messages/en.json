@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Campus Haiti",
+    "copyright": "© {year} Campus Haiti. All rights reserved.",
     "loading": "Loading...",
     "submit": "Submit",
     "cancel": "Cancel",
