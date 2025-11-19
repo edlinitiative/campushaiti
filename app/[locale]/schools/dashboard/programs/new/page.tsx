@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function NewProgramPage() {
+  const t = useTranslations("schools.programs");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -66,25 +68,25 @@ export default function NewProgramPage() {
           <Link href="/schools/dashboard/programs">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Programs
+              {t("backToPrograms")}
             </Button>
           </Link>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Create New Program</CardTitle>
+            <CardTitle>{t("newProgramTitle")}</CardTitle>
             <CardDescription>
-              Add a new degree program to your university&apos;s offerings
+              {t("newProgramDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Program Name *</Label>
+                <Label htmlFor="name">{t("programName")} {t("required")}</Label>
                 <Input
                   id="name"
-                  placeholder="e.g., Bachelor of Science in Computer Science"
+                  placeholder={t("programNamePlaceholder")}
                   value={formData.name}
                   onChange={(e) => handleChange("name", e.target.value)}
                   required
@@ -92,42 +94,42 @@ export default function NewProgramPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="degree">Degree Type *</Label>
+                <Label htmlFor="degree">{t("degreeType")} {t("required")}</Label>
                 <Select value={formData.degree} onValueChange={(value) => handleChange("degree", value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="BACHELOR">Bachelor&apos;s Degree</SelectItem>
-                    <SelectItem value="MASTER">Master&apos;s Degree</SelectItem>
-                    <SelectItem value="DOCTORATE">Doctorate (PhD)</SelectItem>
-                    <SelectItem value="ASSOCIATE">Associate Degree</SelectItem>
-                    <SelectItem value="CERTIFICATE">Certificate</SelectItem>
-                    <SelectItem value="DIPLOMA">Diploma</SelectItem>
+                    <SelectItem value="BACHELOR">{t("bachelorDegree")}</SelectItem>
+                    <SelectItem value="MASTER">{t("masterDegree")}</SelectItem>
+                    <SelectItem value="DOCTORATE">{t("doctorateDegree")}</SelectItem>
+                    <SelectItem value="ASSOCIATE">{t("associateDegree")}</SelectItem>
+                    <SelectItem value="CERTIFICATE">{t("certificateProgram")}</SelectItem>
+                    <SelectItem value="DIPLOMA">{t("diplomaProgram")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
+                <Label htmlFor="description">{t("descriptionRequired")} {t("required")}</Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe the program, its curriculum, and what students will learn..."
+                  placeholder={t("descriptionLongPlaceholder")}
                   value={formData.description}
                   onChange={(e) => handleChange("description", e.target.value)}
                   rows={4}
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  This will be shown to prospective students
+                  {t("descriptionHelp")}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="requirements">Admission Requirements *</Label>
+                <Label htmlFor="requirements">{t("requirementsRequired")} {t("required")}</Label>
                 <Textarea
                   id="requirements"
-                  placeholder="List the requirements for admission (e.g., high school diploma, minimum GPA, test scores, etc.)"
+                  placeholder={t("requirementsLongPlaceholder")}
                   value={formData.requirements}
                   onChange={(e) => handleChange("requirements", e.target.value)}
                   rows={4}
@@ -137,7 +139,7 @@ export default function NewProgramPage() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="feeCents">Application Fee *</Label>
+                  <Label htmlFor="feeCents">{t("feeAmount")} {t("required")}</Label>
                   <div className="flex gap-2">
                     <Input
                       id="feeCents"
@@ -159,12 +161,12 @@ export default function NewProgramPage() {
                     </Select>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Amount students will pay to apply
+                    {t("feeHelp")}
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="deadline">Application Deadline *</Label>
+                  <Label htmlFor="deadline">{t("applicationDeadline")} {t("required")}</Label>
                   <Input
                     id="deadline"
                     type="date"
@@ -173,7 +175,7 @@ export default function NewProgramPage() {
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Last day to accept applications
+                    {t("deadlineHelp")}
                   </p>
                 </div>
               </div>
@@ -181,10 +183,10 @@ export default function NewProgramPage() {
               <div className="flex gap-3 pt-4">
                 <Button type="submit" disabled={loading}>
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Create Program
+                  {t("createProgram")}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>
-                  Cancel
+                  {t("cancel")}
                 </Button>
               </div>
             </form>
@@ -193,10 +195,10 @@ export default function NewProgramPage() {
 
         <Card className="mt-6 bg-blue-50 border-blue-200">
           <CardHeader>
-            <CardTitle className="text-blue-900">Next Steps</CardTitle>
+            <CardTitle className="text-blue-900">{t("nextSteps")}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-blue-800">
-            <p className="mb-2">After creating your program, you can:</p>
+            <p className="mb-2">{t("nextStepsIntro")}</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>Add custom application questions specific to this program</li>
               <li>Configure program-specific settings</li>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { getAllDemoPrograms } from "@/lib/demo-data";
 
 export default function SchoolProgramsPage() {
+  const t = useTranslations("schools.programs");
   const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
@@ -100,7 +102,7 @@ export default function SchoolProgramsPage() {
   };
 
   const handleDelete = async (programId: string) => {
-    if (!confirm("Are you sure you want to delete this program?")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     
     try {
       // TODO: Call API to delete program
@@ -129,15 +131,15 @@ export default function SchoolProgramsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div className="flex-1">
-              <h3 className="font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-2">
-                You&apos;re viewing sample program data. To manage real programs, please{' '}
-                <Link href="/auth/signin" className="underline font-medium">sign in</Link>
-                {' '}or{' '}
-                <Link href="/schools/register" className="underline font-medium">register your institution</Link>.
+                {t("demoModeMessage")}{' '}
+                <Link href="/auth/signin" className="underline font-medium">{t("signIn")}</Link>
+                {' '}{t("or")}{' '}
+                <Link href="/schools/register" className="underline font-medium">{t("registerInstitution")}</Link>.
               </p>
               <p className="text-xs text-amber-700">
-                This demo includes sample programs to demonstrate the program management interface.
+                {t("demoDescription")}
               </p>
             </div>
           </div>
@@ -146,31 +148,31 @@ export default function SchoolProgramsPage() {
 
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Programs</h1>
-          <p className="text-muted-foreground">Manage your university programs</p>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">← Dashboard</Link>
+            <Link href="/schools/dashboard">← {t("dashboard")}</Link>
           </Button>
           <Button onClick={() => setShowDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Add Program
+            {t("addProgram")}
           </Button>
         </div>
       </div>
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Loading programs...</p>
+          <p className="text-muted-foreground">{t("loading")}</p>
         </div>
       ) : programs.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No programs yet</p>
+            <p className="text-muted-foreground mb-4">{t("noPrograms")}</p>
             <Button onClick={() => setShowDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Create Your First Program
+              {t("createFirst")}
             </Button>
           </CardContent>
         </Card>
@@ -182,7 +184,7 @@ export default function SchoolProgramsPage() {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <CardTitle className="text-xl">{program.name}</CardTitle>
-                    <CardDescription>{program.degree} Degree</CardDescription>
+                    <CardDescription>{program.degree} {t("degree")}</CardDescription>
                   </div>
                   <div className="flex gap-1">
                     <Button
@@ -213,14 +215,14 @@ export default function SchoolProgramsPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Application Fee</p>
+                    <p className="text-sm text-muted-foreground">{t("applicationFee")}</p>
                     <p className="text-lg font-semibold">
                       {formatCurrency(program.feeCents, program.currency)}
                     </p>
                   </div>
                   
                   <div>
-                    <p className="text-sm text-muted-foreground">Deadline</p>
+                    <p className="text-sm text-muted-foreground">{t("deadline")}</p>
                     <p className="font-medium">
                       {new Date(program.deadline).toLocaleDateString()}
                     </p>
@@ -229,25 +231,25 @@ export default function SchoolProgramsPage() {
 
                 {program.duration && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Duration: <span className="font-medium text-foreground">{program.duration}</span></p>
+                    <p className="text-sm text-muted-foreground">{t("duration")}: <span className="font-medium text-foreground">{program.duration}</span></p>
                   </div>
                 )}
 
                 {program.language && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Language: <span className="font-medium text-foreground">{program.language}</span></p>
+                    <p className="text-sm text-muted-foreground">{t("language")}: <span className="font-medium text-foreground">{program.language}</span></p>
                   </div>
                 )}
 
                 <div className="pt-4 flex gap-2">
                   <Button variant="outline" size="sm" asChild className="flex-1">
                     <Link href={`/schools/dashboard/questions?programId=${program.id}`}>
-                      Custom Questions
+                      {t("customQuestions")}
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild className="flex-1">
                     <Link href={`/schools/dashboard/applications?programId=${program.id}`}>
-                      Applications
+                      {t("applications")}
                     </Link>
                   </Button>
                 </div>
@@ -262,28 +264,28 @@ export default function SchoolProgramsPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingProgram ? "Edit Program" : "Create New Program"}
+              {editingProgram ? t("editProgram") : t("createProgram")}
             </DialogTitle>
             <DialogDescription>
-              Configure program details and application requirements
+              {t("configureDetails")}
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Program Name *</Label>
+                <Label htmlFor="name">{t("programName")} {t("required")}</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., Computer Science"
+                  placeholder={t("programNamePlaceholder")}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="degree">Degree Level *</Label>
+                <Label htmlFor="degree">{t("degreeLevel")} {t("required")}</Label>
                 <select
                   id="degree"
                   value={formData.degree}
@@ -291,54 +293,54 @@ export default function SchoolProgramsPage() {
                   className="w-full rounded-md border border-input bg-background px-3 py-2"
                   required
                 >
-                  <option value="">Select degree</option>
-                  <option value="Certificate">Certificate</option>
-                  <option value="Associate">Associate</option>
-                  <option value="Bachelor">Bachelor</option>
-                  <option value="Master">Master</option>
-                  <option value="Doctorate">Doctorate</option>
+                  <option value="">{t("selectDegree")}</option>
+                  <option value="Certificate">{t("certificate")}</option>
+                  <option value="Associate">{t("associate")}</option>
+                  <option value="Bachelor">{t("bachelor")}</option>
+                  <option value="Master">{t("master")}</option>
+                  <option value="Doctorate">{t("doctorate")}</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("description")}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of the program"
+                placeholder={t("descriptionPlaceholder")}
                 rows={3}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="requirements">Requirements</Label>
+              <Label htmlFor="requirements">{t("requirements")}</Label>
               <Textarea
                 id="requirements"
                 value={formData.requirements}
                 onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                placeholder="Admission requirements"
+                placeholder={t("requirementsPlaceholder")}
                 rows={3}
               />
             </div>
 
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="feeCents">Application Fee (Amount) *</Label>
+                <Label htmlFor="feeCents">{t("feeAmount")} {t("required")}</Label>
                 <Input
                   id="feeCents"
                   type="number"
                   value={formData.feeCents}
                   onChange={(e) => setFormData({ ...formData, feeCents: e.target.value })}
-                  placeholder="1500.00"
+                  placeholder={t("feePlaceholder")}
                   step="0.01"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="currency">Currency *</Label>
+                <Label htmlFor="currency">{t("currency")} {t("required")}</Label>
                 <select
                   id="currency"
                   value={formData.currency}
@@ -346,14 +348,14 @@ export default function SchoolProgramsPage() {
                   className="w-full rounded-md border border-input bg-background px-3 py-2"
                   required
                 >
-                  <option value="HTG">HTG (Gourde)</option>
-                  <option value="USD">USD (Dollar)</option>
+                  <option value="HTG">{t("htgGourde")}</option>
+                  <option value="USD">{t("usdDollar")}</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deadline">Application Deadline *</Label>
+              <Label htmlFor="deadline">{t("applicationDeadline")} {t("required")}</Label>
               <Input
                 id="deadline"
                 type="date"
@@ -369,10 +371,10 @@ export default function SchoolProgramsPage() {
                 variant="outline"
                 onClick={() => setShowDialog(false)}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button type="submit">
-                {editingProgram ? "Save Changes" : "Create Program"}
+                {editingProgram ? t("saveChanges") : t("createProgram")}
               </Button>
             </div>
           </form>
