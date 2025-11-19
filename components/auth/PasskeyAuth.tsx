@@ -62,7 +62,18 @@ export default function PasskeyAuth() {
     try {
       // Get authentication options from server
       const optionsRes = await fetch("/api/auth/passkey/auth-options");
+      
+      if (!optionsRes.ok) {
+        const errorData = await optionsRes.json();
+        throw new Error(errorData.error || "Failed to get authentication options");
+      }
+      
       const options = await optionsRes.json();
+
+      // Validate options
+      if (!options || !options.challenge) {
+        throw new Error("Invalid authentication options received from server");
+      }
 
       // Start WebAuthn authentication
       const asseResp = await startAuthentication(options);
@@ -86,7 +97,8 @@ export default function PasskeyAuth() {
       
       window.location.href = "/dashboard";
     } catch (err: any) {
-      setError(err.message);
+      console.error("Passkey sign-in error:", err);
+      setError(err.message || t("passkeyAuthError"));
     } finally {
       setLoading(false);
     }

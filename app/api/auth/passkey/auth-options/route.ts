@@ -9,11 +9,25 @@ const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
 
 export async function GET() {
   try {
-    // For simplicity, we'll allow any registered passkey
-    // In production, you might want to scope this better
+    // Get all registered passkeys from the database
+    const passkeysSnapshot = await adminDb
+      .collection("passkeys")
+      .where("counter", ">=", 0) // Get all valid passkeys
+      .get();
+
+    const allowCredentials = passkeysSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: data.credentialID,
+        type: "public-key" as const,
+        transports: data.transports || [],
+      };
+    });
+
     const opts: GenerateAuthenticationOptionsOpts = {
       rpID,
       userVerification: "preferred",
+      allowCredentials: allowCredentials.length > 0 ? allowCredentials : undefined,
     };
 
     const options = await generateAuthenticationOptions(opts);
