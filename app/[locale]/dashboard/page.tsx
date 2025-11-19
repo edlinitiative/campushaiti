@@ -9,6 +9,7 @@ import { Link } from "@/lib/navigation";
 import { ClientAuthSync } from "@/components/ClientAuthSync";
 import PasskeyPrompt from "@/components/auth/PasskeyPrompt";
 import ProfileCompletionPrompt from "@/components/auth/ProfileCompletionPrompt";
+import EmailVerificationBanner from "@/components/auth/EmailVerificationBanner";
 import { FileText, DollarSign, Bell, CheckCircle, Clock, AlertCircle, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -107,6 +108,7 @@ export default async function DashboardPage({
       <ClientAuthSync />
       <ProfileCompletionPrompt />
       <PasskeyPrompt />
+      <EmailVerificationBanner />
       
       {/* Header */}
       <div className="mb-8">

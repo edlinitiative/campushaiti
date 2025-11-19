@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ProfileForm from "@/components/settings/ProfileForm";
 import PasskeyManager from "@/components/settings/PasskeyManager";
 import DeleteAccount from "@/components/settings/DeleteAccount";
+import EmailVerificationBanner from "@/components/auth/EmailVerificationBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientAuthSync } from "@/components/ClientAuthSync";
 
@@ -29,6 +30,8 @@ export default async function SettingsPage({
       <ClientAuthSync />
       
       <div className="max-w-4xl mx-auto">
+        <EmailVerificationBanner />
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
