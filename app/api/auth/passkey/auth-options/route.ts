@@ -9,20 +9,28 @@ const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
 
 export async function GET() {
   try {
-    // Get all registered passkeys from the database
-    const passkeysSnapshot = await adminDb
-      .collection("passkeys")
-      .where("counter", ">=", 0) // Get all valid passkeys
-      .get();
+    // Try to get all registered passkeys from the database
+    // If the collection doesn't exist yet, that's okay - we'll just use an empty array
+    let allowCredentials: any[] = [];
+    
+    try {
+      const passkeysSnapshot = await adminDb
+        .collection("passkeys")
+        .where("counter", ">=", 0) // Get all valid passkeys
+        .get();
 
-    const allowCredentials = passkeysSnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: data.credentialID,
-        type: "public-key" as const,
-        transports: data.transports || [],
-      };
-    });
+      allowCredentials = passkeysSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: data.credentialID,
+          type: "public-key" as const,
+          transports: data.transports || [],
+        };
+      });
+    } catch (dbError: any) {
+      console.warn("Could not fetch passkeys (collection may not exist yet):", dbError.message);
+      // Continue with empty allowCredentials
+    }
 
     const opts: GenerateAuthenticationOptionsOpts = {
       rpID,
