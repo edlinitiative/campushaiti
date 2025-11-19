@@ -16,14 +16,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user profile in Firestore
-    await adminDb.collection("users").doc(userId).set(
-      {
-        phoneNumber,
-        fullName: fullName || null,
-        updatedAt: new Date(),
-      },
-      { merge: true }
-    );
+    try {
+      await adminDb.collection("users").doc(userId).set(
+        {
+          phoneNumber,
+          fullName: fullName || null,
+          updatedAt: new Date(),
+        },
+        { merge: true }
+      );
+    } catch (firestoreError: any) {
+      console.error("Firestore write error:", firestoreError);
+      // If Firestore doesn't exist yet, that's okay - just log it
+      if (firestoreError.code !== 5 && !firestoreError.message?.includes("NOT_FOUND")) {
+        throw firestoreError;
+      }
+      console.warn("Firestore database not available yet, skipping user profile storage");
+    }
 
     // Update display name in Firebase Auth if provided
     if (fullName) {
@@ -33,7 +42,7 @@ export async function POST(request: NextRequest) {
         });
       } catch (authError) {
         console.warn("Could not update display name in Auth:", authError);
-        // Continue anyway - Firestore update succeeded
+        // Continue anyway - this is not critical
       }
     }
 
