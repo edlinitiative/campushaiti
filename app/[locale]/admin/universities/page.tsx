@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Edit, Trash2, CheckCircle, XCircle, Building2 } from "lucide-react";
 
 export default function AdminUniversitiesPage() {
+  const t = useTranslations("admin.universities");
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [universities, setUniversities] = useState<any[]>([]);
   const [selectedRegistration, setSelectedRegistration] = useState<any>(null);

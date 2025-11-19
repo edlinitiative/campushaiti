@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/auth/server-auth";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/navigation";

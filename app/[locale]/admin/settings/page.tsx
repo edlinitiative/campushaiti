@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Globe, Mail, Bell, Shield, Database } from "lucide-react";
 
 export default function AdminSettingsPage() {
+  const t = useTranslations("admin.settings");
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
     platformName: "Campus Haiti",
