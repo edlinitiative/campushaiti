@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function SchoolApplicationsPage() {
+  const t = useTranslations("schools.applications");
   const [applications, setApplications] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -288,15 +290,15 @@ export default function SchoolApplicationsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div className="flex-1">
-              <h3 className="font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-2">
-                You&apos;re viewing sample application data. To manage real applications, please{' '}
-                <Link href="/auth/signin" className="underline font-medium">sign in</Link>
-                {' '}or{' '}
-                <Link href="/schools/register" className="underline font-medium">register your institution</Link>.
+                {t("demoModeMessage")}{' '}
+                <Link href="/auth/signin" className="underline font-medium">{t("signIn")}</Link>
+                {' '}{t("or")}{' '}
+                <Link href="/schools/register" className="underline font-medium">{t("registerInstitution")}</Link>.
               </p>
               <p className="text-xs text-amber-700">
-                This demo includes sample applications to demonstrate the application management interface.
+                {t("demoDescription")}
               </p>
             </div>
           </div>
@@ -305,18 +307,18 @@ export default function SchoolApplicationsPage() {
 
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Applications</h1>
-          <p className="text-muted-foreground">Manage and review applications to your programs</p>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/schools/dashboard/analytics">
               <BarChart3 className="w-4 h-4 mr-2" />
-              View Analytics
+              {t("viewAnalytics")}
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">← Back to Dashboard</Link>
+            <Link href="/schools/dashboard">← {t("backToDashboard")}</Link>
           </Button>
         </div>
       </div>
@@ -329,7 +331,7 @@ export default function SchoolApplicationsPage() {
               <div className="flex items-center gap-3">
                 <CheckSquare className="h-5 w-5 text-primary" />
                 <span className="font-semibold">
-                  {selectedIds.length} application{selectedIds.length > 1 ? 's' : ''} selected
+                  {selectedIds.length} {selectedIds.length > 1 ? t("applicationPlural") : t("application")} {t("selected")}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -339,7 +341,7 @@ export default function SchoolApplicationsPage() {
                   onClick={() => setBulkActionDialog('status')}
                   disabled={processing}
                 >
-                  Update Status
+                  {t("updateStatus")}
                 </Button>
                 <Button
                   variant="outline"
@@ -348,7 +350,7 @@ export default function SchoolApplicationsPage() {
                   disabled={processing}
                 >
                   <Mail className="h-4 w-4 mr-2" />
-                  Send Email
+                  {t("sendEmail")}
                 </Button>
                 <Button
                   variant="outline"
@@ -356,7 +358,7 @@ export default function SchoolApplicationsPage() {
                   onClick={exportToCSV}
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Export CSV
+                  {t("exportCSV")}
                 </Button>
                 <Button
                   variant="ghost"
@@ -364,7 +366,7 @@ export default function SchoolApplicationsPage() {
                   onClick={() => setSelectedIds([])}
                 >
                   <XSquare className="h-4 w-4 mr-2" />
-                  Clear
+                  {t("clear")}
                 </Button>
               </div>
             </div>
@@ -380,18 +382,18 @@ export default function SchoolApplicationsPage() {
             <div className="flex gap-4 flex-wrap items-center">
               <div className="flex-1 min-w-[200px]">
                 <Input
-                  placeholder="Search by name or email..."
+                  placeholder={t("searchPlaceholder")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
               <Tabs value={filter} onValueChange={setFilter}>
                 <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="SUBMITTED">New</TabsTrigger>
-                  <TabsTrigger value="UNDER_REVIEW">In Review</TabsTrigger>
-                  <TabsTrigger value="ACCEPTED">Accepted</TabsTrigger>
-                  <TabsTrigger value="REJECTED">Rejected</TabsTrigger>
+                  <TabsTrigger value="all">{t("all")}</TabsTrigger>
+                  <TabsTrigger value="SUBMITTED">{t("new")}</TabsTrigger>
+                  <TabsTrigger value="UNDER_REVIEW">{t("inReview")}</TabsTrigger>
+                  <TabsTrigger value="ACCEPTED">{t("accepted")}</TabsTrigger>
+                  <TabsTrigger value="REJECTED">{t("rejected")}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -399,13 +401,13 @@ export default function SchoolApplicationsPage() {
             {/* Advanced Filters */}
             <div className="flex gap-4 flex-wrap items-center border-t pt-4">
               <div className="w-[200px]">
-                <Label className="text-xs text-muted-foreground mb-1">Program</Label>
+                <Label className="text-xs text-muted-foreground mb-1">{t("program")}</Label>
                 <Select value={programFilter} onValueChange={setProgramFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="All Programs" />
+                    <SelectValue placeholder={t("allPrograms")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Programs</SelectItem>
+                    <SelectItem value="all">{t("allPrograms")}</SelectItem>
                     {uniquePrograms.map(program => (
                       <SelectItem key={program} value={program}>{program}</SelectItem>
                     ))}
@@ -414,31 +416,31 @@ export default function SchoolApplicationsPage() {
               </div>
 
               <div className="w-[200px]">
-                <Label className="text-xs text-muted-foreground mb-1">Submitted</Label>
+                <Label className="text-xs text-muted-foreground mb-1">{t("submitted")}</Label>
                 <Select value={dateFilter} onValueChange={setDateFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="All Time" />
+                    <SelectValue placeholder={t("allTime")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="all">{t("allTime")}</SelectItem>
+                    <SelectItem value="today">{t("today")}</SelectItem>
+                    <SelectItem value="week">{t("thisWeek")}</SelectItem>
+                    <SelectItem value="month">{t("thisMonth")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="w-[200px]">
-                <Label className="text-xs text-muted-foreground mb-1">Sort By</Label>
+                <Label className="text-xs text-muted-foreground mb-1">{t("sortBy")}</Label>
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="date-desc">Newest First</SelectItem>
-                    <SelectItem value="date-asc">Oldest First</SelectItem>
-                    <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-                    <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                    <SelectItem value="date-desc">{t("newestFirst")}</SelectItem>
+                    <SelectItem value="date-asc">{t("oldestFirst")}</SelectItem>
+                    <SelectItem value="name-asc">{t("nameAZ")}</SelectItem>
+                    <SelectItem value="name-desc">{t("nameZA")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -446,13 +448,13 @@ export default function SchoolApplicationsPage() {
               <div className="flex gap-2 ml-auto">
                 {(search || filter !== "all" || programFilter !== "all" || dateFilter !== "all" || sortBy !== "date-desc") && (
                   <Button variant="outline" size="sm" onClick={clearFilters}>
-                    Clear Filters
+                    {t("clearFilters")}
                   </Button>
                 )}
                 {filteredApplications.length > 0 && (
                   <Button variant="outline" size="sm" onClick={exportToCSV}>
                     <Download className="h-4 w-4 mr-2" />
-                    Export
+                    {t("export")}
                   </Button>
                 )}
               </div>
@@ -461,7 +463,7 @@ export default function SchoolApplicationsPage() {
             {/* Filter Summary */}
             {filteredApplications.length !== applications.length && (
               <div className="text-sm text-muted-foreground">
-                Showing {filteredApplications.length} of {applications.length} applications
+                {t("showing")} {filteredApplications.length} {t("of")} {applications.length} {t("applicationPlural")}
               </div>
             )}
           </div>
@@ -473,7 +475,7 @@ export default function SchoolApplicationsPage() {
         {filteredApplications.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
-              <p className="text-muted-foreground">No applications found</p>
+              <p className="text-muted-foreground">{t("noApplicationsFound")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -488,7 +490,7 @@ export default function SchoolApplicationsPage() {
                     id="select-all"
                   />
                   <Label htmlFor="select-all" className="cursor-pointer font-medium">
-                    Select All ({filteredApplications.length})
+                    {t("selectAll")} ({filteredApplications.length})
                   </Label>
                 </div>
               </CardContent>
@@ -522,13 +524,13 @@ export default function SchoolApplicationsPage() {
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/schools/dashboard/applications/${app.id}`}>
-                            View Details
+                            {t("viewDetails")}
                           </Link>
                         </Button>
                         {app.status === "SUBMITTED" && (
                           <Button size="sm" asChild>
                             <Link href={`/schools/dashboard/applications/${app.id}`}>
-                              Start Review
+                              {t("startReview")}
                             </Link>
                           </Button>
                         )}
@@ -547,13 +549,13 @@ export default function SchoolApplicationsPage() {
         <div className="flex justify-center mt-8">
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled>
-              Previous
+              {t("previous")}
             </Button>
             <Button variant="outline" size="sm">
               1
             </Button>
             <Button variant="outline" size="sm" disabled>
-              Next
+              {t("next")}
             </Button>
           </div>
         </div>
@@ -563,33 +565,33 @@ export default function SchoolApplicationsPage() {
       <Dialog open={bulkActionDialog === 'status'} onOpenChange={(open) => !open && setBulkActionDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Status for {selectedIds.length} Applications</DialogTitle>
+            <DialogTitle>{t("updateStatusFor")} {selectedIds.length} {t("applicationPlural")}</DialogTitle>
             <DialogDescription>
-              Choose a new status to apply to all selected applications.
+              {t("chooseNewStatus")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="bulk-status">New Status</Label>
+              <Label htmlFor="bulk-status">{t("newStatus")}</Label>
               <Select value={bulkStatus} onValueChange={setBulkStatus}>
                 <SelectTrigger id="bulk-status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
-                  <SelectItem value="ACCEPTED">Accepted</SelectItem>
-                  <SelectItem value="REJECTED">Rejected</SelectItem>
-                  <SelectItem value="WAITLISTED">Waitlisted</SelectItem>
+                  <SelectItem value="UNDER_REVIEW">{t("underReview")}</SelectItem>
+                  <SelectItem value="ACCEPTED">{t("accepted")}</SelectItem>
+                  <SelectItem value="REJECTED">{t("rejected")}</SelectItem>
+                  <SelectItem value="WAITLISTED">{t("waitlisted")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBulkActionDialog(null)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button onClick={handleBulkStatusUpdate} disabled={processing}>
-              {processing ? 'Updating...' : `Update ${selectedIds.length} Applications`}
+              {processing ? t("updating") : `${t("updateApplications")}`}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -599,38 +601,38 @@ export default function SchoolApplicationsPage() {
       <Dialog open={bulkActionDialog === 'email'} onOpenChange={(open) => !open && setBulkActionDialog(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Send Email to {selectedIds.length} Applicants</DialogTitle>
+            <DialogTitle>{t("sendEmailTo")} {selectedIds.length} {t("applicants")}</DialogTitle>
             <DialogDescription>
-              Compose a message to send to all selected applicants.
+              {t("composeMessage")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="email-subject">Subject</Label>
+              <Label htmlFor="email-subject">{t("subject")}</Label>
               <Input
                 id="email-subject"
                 value={bulkEmailSubject}
                 onChange={(e) => setBulkEmailSubject(e.target.value)}
-                placeholder="Enter email subject..."
+                placeholder={t("emailSubjectPlaceholder")}
               />
             </div>
             <div>
-              <Label htmlFor="email-message">Message</Label>
+              <Label htmlFor="email-message">{t("message")}</Label>
               <Textarea
                 id="email-message"
                 value={bulkEmailMessage}
                 onChange={(e) => setBulkEmailMessage(e.target.value)}
-                placeholder="Enter your message..."
+                placeholder={t("emailMessagePlaceholder")}
                 rows={8}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBulkActionDialog(null)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button onClick={handleBulkEmail} disabled={processing || !bulkEmailSubject || !bulkEmailMessage}>
-              {processing ? 'Sending...' : `Send to ${selectedIds.length} Applicants`}
+              {processing ? t("sending") : `${t("sendTo")} ${selectedIds.length} ${t("applicants")}`}
             </Button>
           </DialogFooter>
         </DialogContent>
