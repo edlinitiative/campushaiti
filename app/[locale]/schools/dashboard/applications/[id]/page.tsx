@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
 } from "@/lib/pdf-templates";
 
 export default function ApplicationDetailPage() {
+  const t = useTranslations("schools.applicationDetail");
   const params = useParams();
   const router = useRouter();
   const applicationId = params.id as string;
@@ -634,12 +636,12 @@ export default function ApplicationDetailPage() {
           <Button variant="ghost" asChild>
             <Link href="/schools/dashboard/applications">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Applications
+              {t("backToApplications")}
             </Link>
           </Button>
           <Button onClick={handleDownloadDossier} variant="outline">
             <Download className="w-4 h-4 mr-2" />
-            Download Dossier (ZIP)
+            {t("downloadCompleteDossier")}
           </Button>
         </div>
       </div>
@@ -660,7 +662,7 @@ export default function ApplicationDetailPage() {
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Submitted: {new Date(application.submittedAt).toLocaleString()}
+                {t("submitted")}: {new Date(application.submittedAt).toLocaleString()}
               </p>
             </CardHeader>
           </Card>
@@ -670,7 +672,7 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5" />
-                Personal Information
+                {t("personalInformation")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
