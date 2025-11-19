@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { demoSchools, getDemoProgramsByUniversity } from "@/lib/demo-data";
 import { MapPin, Mail, Phone, Globe, Calendar, Clock, Languages, BookOpen, ArrowLeft } from "lucide-react";
 
 export default function SchoolProgramsPublicPage() {
+  const t = useTranslations("schools.detail");
   const params = useParams();
   const slug = params.slug as string;
   
@@ -24,10 +26,10 @@ export default function SchoolProgramsPublicPage() {
   if (!school) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">University Not Found</h1>
-        <p className="text-muted-foreground mb-6">The university you&apos;re looking for doesn&apos;t exist.</p>
+        <h1 className="text-2xl font-bold mb-4">{t("universityNotFound")}</h1>
+        <p className="text-muted-foreground mb-6">{t("universityNotFoundMessage")}</p>
         <Button asChild>
-          <Link href="/schools/browse">← Back to Browse</Link>
+          <Link href="/schools/browse">{t("backToBrowse")}</Link>
         </Button>
       </div>
     );
@@ -55,7 +57,7 @@ export default function SchoolProgramsPublicPage() {
         <Button variant="ghost" asChild>
           <Link href="/schools/browse">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Universities
+            {t("backToUniversities")}
           </Link>
         </Button>
       </div>
@@ -72,7 +74,7 @@ export default function SchoolProgramsPublicPage() {
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Location</p>
+                  <p className="text-sm font-medium">{t("location")}</p>
                   <p className="text-sm text-muted-foreground">{school.city}, {school.country}</p>
                 </div>
               </div>
@@ -81,7 +83,7 @@ export default function SchoolProgramsPublicPage() {
                 <div className="flex items-start gap-2">
                   <Mail className="w-4 h-4 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium">Email</p>
+                    <p className="text-sm font-medium">{t("email")}</p>
                     <a href={`mailto:${school.contactEmail}`} className="text-sm text-muted-foreground hover:underline">
                       {school.contactEmail}
                     </a>
@@ -93,7 +95,7 @@ export default function SchoolProgramsPublicPage() {
                 <div className="flex items-start gap-2">
                   <Phone className="w-4 h-4 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium">Phone</p>
+                    <p className="text-sm font-medium">{t("phone")}</p>
                     <a href={`tel:${school.contactPhone}`} className="text-sm text-muted-foreground hover:underline">
                       {school.contactPhone}
                     </a>
@@ -105,14 +107,14 @@ export default function SchoolProgramsPublicPage() {
                 <div className="flex items-start gap-2">
                   <Globe className="w-4 h-4 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium">Website</p>
+                    <p className="text-sm font-medium">{t("website")}</p>
                     <a 
                       href={school.websiteUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-sm text-muted-foreground hover:underline"
                     >
-                      Visit Site
+                      {t("visitSite")}
                     </a>
                   </div>
                 </div>
@@ -124,33 +126,33 @@ export default function SchoolProgramsPublicPage() {
 
       {/* Programs Section */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-4">Available Programs ({allPrograms.length})</h2>
+        <h2 className="text-2xl font-bold mb-4">{t("availablePrograms")} ({allPrograms.length})</h2>
         
         {/* Filters */}
         <div className="flex gap-4 flex-wrap mb-6">
           <div className="flex-1 min-w-[250px]">
             <Input
-              placeholder="Search programs..."
+              placeholder={t("searchProgramsPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <Select value={degreeFilter} onValueChange={setDegreeFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Degree Level" />
+              <SelectValue placeholder={t("degreeLevel")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Degrees</SelectItem>
-              <SelectItem value="Bachelor">Bachelor</SelectItem>
-              <SelectItem value="Master">Master</SelectItem>
-              <SelectItem value="PhD">PhD</SelectItem>
+              <SelectItem value="all">{t("allDegrees")}</SelectItem>
+              <SelectItem value="Bachelor">{t("bachelor")}</SelectItem>
+              <SelectItem value="Master">{t("master")}</SelectItem>
+              <SelectItem value="PhD">{t("phd")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Results */}
         <p className="text-sm text-muted-foreground mb-4">
-          Showing {filteredPrograms.length} {filteredPrograms.length === 1 ? 'program' : 'programs'}
+          {t("showing")} {filteredPrograms.length} {filteredPrograms.length === 1 ? t("program") : t("programs")}
         </p>
       </div>
 
@@ -158,7 +160,7 @@ export default function SchoolProgramsPublicPage() {
       {filteredPrograms.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No programs found matching your criteria.</p>
+            <p className="text-muted-foreground">{t("noProgramsFound")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -169,10 +171,10 @@ export default function SchoolProgramsPublicPage() {
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">
                     <CardTitle className="text-xl mb-2">{program.name}</CardTitle>
-                    <Badge>{program.degree} Degree</Badge>
+                    <Badge>{program.degree} {t("degree")}</Badge>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Application Fee</p>
+                    <p className="text-sm text-muted-foreground">{t("applicationFee")}</p>
                     <p className="text-lg font-bold">{formatCurrency(program.feeCents, program.currency)}</p>
                   </div>
                 </div>
@@ -185,7 +187,7 @@ export default function SchoolProgramsPublicPage() {
                     <div className="flex items-start gap-2">
                       <Clock className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="font-medium">Duration</p>
+                        <p className="font-medium">{t("duration")}</p>
                         <p className="text-muted-foreground">{program.duration}</p>
                       </div>
                     </div>
@@ -195,7 +197,7 @@ export default function SchoolProgramsPublicPage() {
                     <div className="flex items-start gap-2">
                       <Languages className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="font-medium">Language</p>
+                        <p className="font-medium">{t("language")}</p>
                         <p className="text-muted-foreground">{program.language}</p>
                       </div>
                     </div>
@@ -204,7 +206,7 @@ export default function SchoolProgramsPublicPage() {
                   <div className="flex items-start gap-2 col-span-2">
                     <Calendar className="w-4 h-4 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="font-medium">Application Deadline</p>
+                      <p className="font-medium">{t("applicationDeadline")}</p>
                       <p className="text-muted-foreground">
                         {new Date(program.deadline).toLocaleDateString('en-US', {
                           year: 'numeric',
@@ -220,7 +222,7 @@ export default function SchoolProgramsPublicPage() {
                   <div>
                     <div className="flex items-start gap-2 mb-2">
                       <BookOpen className="w-4 h-4 text-muted-foreground mt-0.5" />
-                      <p className="font-medium text-sm">Requirements</p>
+                      <p className="font-medium text-sm">{t("requirements")}</p>
                     </div>
                     <p className="text-sm text-muted-foreground pl-6">{program.requirements}</p>
                   </div>
@@ -228,10 +230,10 @@ export default function SchoolProgramsPublicPage() {
 
                 <div className="pt-4 flex gap-3">
                   <Button className="flex-1" asChild>
-                    <Link href="/apply">Apply Now</Link>
+                    <Link href="/apply">{t("applyNow")}</Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href={`/programs/${program.id}`}>Details</Link>
+                    <Link href={`/programs/${program.id}`}>{t("details")}</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -243,16 +245,16 @@ export default function SchoolProgramsPublicPage() {
       {/* CTA Section */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50">
         <CardContent className="py-12 text-center">
-          <h3 className="text-2xl font-bold mb-2">Ready to Apply?</h3>
+          <h3 className="text-2xl font-bold mb-2">{t("ctaTitle")}</h3>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Create an account to start your application to {school.name} and other Haitian universities
+            {t("ctaMessage", { schoolName: school.name })}
           </p>
           <div className="flex gap-4 justify-center">
             <Button size="lg" asChild>
-              <Link href="/auth/signup">Create Account</Link>
+              <Link href="/auth/signup">{t("createAccount")}</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/auth/signin">Sign In</Link>
+              <Link href="/auth/signin">{t("signIn")}</Link>
             </Button>
           </div>
         </CardContent>
