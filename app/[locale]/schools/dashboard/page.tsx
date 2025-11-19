@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { getServerUser } from "@/lib/auth/server-auth";
 
 export default function SchoolDashboardPage() {
   const router = useRouter();
+  const t = useTranslations("schools.dashboard");
   const [loading, setLoading] = useState(true);
   const [university, setUniversity] = useState<any>(null);
   const [demoMode, setDemoMode] = useState(false);
@@ -78,7 +80,7 @@ export default function SchoolDashboardPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p>Loading dashboard...</p>
+        <p>{t("loadingDashboard")}</p>
       </div>
     );
   }
@@ -94,19 +96,19 @@ export default function SchoolDashboardPage() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-3">
-                You&apos;re viewing demo data. To access your real school dashboard, please{" "}
+                {t("demoModeMessage")}{" "}
                 <Link href="/auth/signin" className="underline font-medium">
-                  sign in
+                  {t("signIn")}
                 </Link>{" "}
-                with your school admin account or{" "}
+                {t("withSchoolAccount")}{" "}
                 <Link href="/schools/register" className="underline font-medium">
-                  register your university
+                  {t("registerUniversity")}
                 </Link>.
               </p>
               <div className="text-xs text-amber-700">
-                This demo shows you what the school portal looks like with sample data.
+                {t("demoDescription")}
               </div>
             </div>
           </div>
@@ -115,17 +117,17 @@ export default function SchoolDashboardPage() {
       
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">School Dashboard</h1>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground">
-            {university?.name || "Manage your applications and programs"}
+            {university?.name || t("manageApplications")}
           </p>
         </div>
         <div className="space-x-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard/programs">Manage Programs</Link>
+            <Link href="/schools/dashboard/programs">{t("managePrograms")}</Link>
           </Button>
           <Button asChild>
-            <Link href="/schools/dashboard/settings">Settings</Link>
+            <Link href="/schools/dashboard/settings">{t("settings")}</Link>
           </Button>
         </div>
       </div>
@@ -134,48 +136,48 @@ export default function SchoolDashboardPage() {
       <div className="grid md:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Applications</CardDescription>
+            <CardDescription>{t("totalApplications")}</CardDescription>
             <CardTitle className="text-3xl">{stats.applications}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              All time
+              {t("allTime")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>New This Week</CardDescription>
+            <CardDescription>{t("newThisWeek")}</CardDescription>
             <CardTitle className="text-3xl text-blue-600">{stats.newApplications}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              +{Math.round((stats.newApplications / stats.applications) * 100)}% of total
+              +{Math.round((stats.newApplications / stats.applications) * 100)}% {t("ofTotal")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Accepted</CardDescription>
+            <CardDescription>{t("accepted")}</CardDescription>
             <CardTitle className="text-3xl text-green-600">{stats.accepted}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {Math.round((stats.accepted / stats.applications) * 100)}% acceptance rate
+              {Math.round((stats.accepted / stats.applications) * 100)}% {t("acceptanceRate")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Pending Review</CardDescription>
+            <CardDescription>{t("pendingReview")}</CardDescription>
             <CardTitle className="text-3xl text-amber-600">{stats.pending}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              Requires action
+              {t("requiresAction")}
             </p>
           </CardContent>
         </Card>
@@ -184,9 +186,9 @@ export default function SchoolDashboardPage() {
       {/* Main Content */}
       <Tabs defaultValue="applications" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="applications">Applications</TabsTrigger>
-          <TabsTrigger value="programs">Programs</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="applications">{t("applications")}</TabsTrigger>
+          <TabsTrigger value="programs">{t("programs")}</TabsTrigger>
+          <TabsTrigger value="analytics">{t("analytics")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="applications" className="space-y-4">
@@ -194,19 +196,19 @@ export default function SchoolDashboardPage() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle>Recent Applications</CardTitle>
-                  <CardDescription>Applications submitted in the last 7 days</CardDescription>
+                  <CardTitle>{t("recentApplications")}</CardTitle>
+                  <CardDescription>{t("submittedLast7Days")}</CardDescription>
                 </div>
                 <Button asChild>
-                  <Link href="/schools/dashboard/applications">View All</Link>
+                  <Link href="/schools/dashboard/applications">{t("viewAll")}</Link>
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">
-                <p>No recent applications</p>
+                <p>{t("noRecentApplications")}</p>
                 <Button variant="link" asChild className="mt-2">
-                  <Link href="/schools/dashboard/applications">View all applications</Link>
+                  <Link href="/schools/dashboard/applications">{t("viewAllApplications")}</Link>
                 </Button>
               </div>
             </CardContent>
@@ -218,19 +220,19 @@ export default function SchoolDashboardPage() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle>Your Programs</CardTitle>
-                  <CardDescription>Degree programs offered by your university</CardDescription>
+                  <CardTitle>{t("yourPrograms")}</CardTitle>
+                  <CardDescription>{t("degreeProgramsOffered")}</CardDescription>
                 </div>
                 <Button asChild>
-                  <Link href="/schools/dashboard/programs/new">Add Program</Link>
+                  <Link href="/schools/dashboard/programs/new">{t("addProgram")}</Link>
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">
-                <p>No programs yet</p>
+                <p>{t("noProgramsYet")}</p>
                 <Button variant="link" asChild className="mt-2">
-                  <Link href="/schools/dashboard/programs/new">Create your first program</Link>
+                  <Link href="/schools/dashboard/programs/new">{t("createFirstProgram")}</Link>
                 </Button>
               </div>
             </CardContent>
@@ -240,14 +242,14 @@ export default function SchoolDashboardPage() {
         <TabsContent value="analytics" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Application Analytics</CardTitle>
-              <CardDescription>Insights into your application process</CardDescription>
+              <CardTitle>{t("applicationAnalytics")}</CardTitle>
+              <CardDescription>{t("insightsIntoProcess")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">Acceptance Rate</span>
+                    <span className="text-sm font-medium">{t("acceptanceRate")}</span>
                     <span className="text-sm text-muted-foreground">
                       {Math.round((stats.accepted / stats.applications) * 100)}%
                     </span>
@@ -262,7 +264,7 @@ export default function SchoolDashboardPage() {
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">Pending Review</span>
+                    <span className="text-sm font-medium">{t("pendingReview")}</span>
                     <span className="text-sm text-muted-foreground">
                       {Math.round((stats.pending / stats.applications) * 100)}%
                     </span>
@@ -283,15 +285,15 @@ export default function SchoolDashboardPage() {
       {/* Quick Actions */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle>{t("quickActions")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
             <Button variant="outline" asChild className="h-auto py-4">
               <Link href="/schools/dashboard/applications?status=pending">
                 <div className="text-left w-full">
-                  <div className="font-semibold">Review Applications</div>
-                  <div className="text-sm text-muted-foreground">{stats.pending} pending</div>
+                  <div className="font-semibold">{t("reviewApplications")}</div>
+                  <div className="text-sm text-muted-foreground">{stats.pending} {t("pending")}</div>
                 </div>
               </Link>
             </Button>
@@ -299,8 +301,8 @@ export default function SchoolDashboardPage() {
             <Button variant="outline" asChild className="h-auto py-4">
               <Link href="/schools/dashboard/programs">
                 <div className="text-left w-full">
-                  <div className="font-semibold">Manage Programs</div>
-                  <div className="text-sm text-muted-foreground">Add or edit programs</div>
+                  <div className="font-semibold">{t("managePrograms")}</div>
+                  <div className="text-sm text-muted-foreground">{t("addOrEditPrograms")}</div>
                 </div>
               </Link>
             </Button>
@@ -308,8 +310,8 @@ export default function SchoolDashboardPage() {
             <Button variant="outline" asChild className="h-auto py-4">
               <Link href="/schools/dashboard/questions">
                 <div className="text-left w-full">
-                  <div className="font-semibold">Custom Questions</div>
-                  <div className="text-sm text-muted-foreground">Customize application</div>
+                  <div className="font-semibold">{t("customQuestions")}</div>
+                  <div className="text-sm text-muted-foreground">{t("customizeApplication")}</div>
                 </div>
               </Link>
             </Button>
