@@ -52,6 +52,12 @@
     "signInToAccount": "Sign in to your account",
     "emailLink": "Email Link",
     "passkey": "Passkey",
+    "loading": "Loading...",
+    "sendEmailError": "Failed to send email. Please try again.",
+    "passkeyRequired": "User must be signed in to register a passkey",
+    "passkeyVerifyError": "Failed to verify passkey registration",
+    "passkeySuccess": "Passkey registered successfully!",
+    "passkeyAuthError": "Failed to verify passkey authentication",
     "verify": {
       "verifying": "Verifying your email...",
       "success": "Success! Redirecting...",

@@ -52,6 +52,12 @@
     "signInToAccount": "Connectez-vous à votre compte",
     "emailLink": "Lien email",
     "passkey": "Clé d'accès",
+    "loading": "Chargement...",
+    "sendEmailError": "Échec de l'envoi de l'e-mail. Veuillez réessayer.",
+    "passkeyRequired": "L'utilisateur doit être connecté pour enregistrer une passkey",
+    "passkeyVerifyError": "Échec de la vérification de l'enregistrement de la passkey",
+    "passkeySuccess": "Passkey enregistrée avec succès !",
+    "passkeyAuthError": "Échec de la vérification de l'authentification par passkey",
     "verify": {
       "verifying": "Vérification de votre email...",
       "success": "Succès! Redirection...",

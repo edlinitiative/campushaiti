@@ -52,6 +52,12 @@
     "signInToAccount": "Konekte nan kont ou",
     "emailLink": "Lyen Imel",
     "passkey": "Kle Aksè",
+    "loading": "Chajman...",
+    "sendEmailError": "Echwe voye imel. Tanpri eseye ankò.",
+    "passkeyRequired": "Itilizatè a dwe konekte pou anrejistre yon passkey",
+    "passkeyVerifyError": "Echwe verifye anrejistreman passkey",
+    "passkeySuccess": "Passkey anrejistre ak siksè!",
+    "passkeyAuthError": "Echwe verifye otantifikasyon passkey",
     "verify": {
       "verifying": "N ap verifye imel ou...",
       "success": "Siksè! N ap redireksyone...",

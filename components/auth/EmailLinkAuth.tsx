@@ -40,7 +40,7 @@ export default function EmailLinkAuth() {
       window.localStorage.setItem("emailForSignIn", email);
       setMessage(t("checkEmail"));
     } catch (err: any) {
-      setError(err.message || "Failed to send email. Please try again.");
+      setError(err.message || t("sendEmailError"));
     } finally {
       setLoading(false);
     }

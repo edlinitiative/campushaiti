@@ -22,7 +22,7 @@ export default function PasskeyAuth() {
     try {
       const user = auth.currentUser;
       if (!user) {
-        throw new Error("User must be signed in to register a passkey");
+        throw new Error(t("passkeyRequired"));
       }
 
       // Get registration options from server
@@ -44,10 +44,10 @@ export default function PasskeyAuth() {
       });
 
       if (!verifyRes.ok) {
-        throw new Error("Failed to verify passkey registration");
+        throw new Error(t("passkeyVerifyError"));
       }
 
-      alert("Passkey registered successfully!");
+      alert(t("passkeySuccess"));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -75,7 +75,7 @@ export default function PasskeyAuth() {
       });
 
       if (!verifyRes.ok) {
-        throw new Error("Failed to verify passkey authentication");
+        throw new Error(t("passkeyAuthError"));
       }
 
       const { customToken } = await verifyRes.json();
