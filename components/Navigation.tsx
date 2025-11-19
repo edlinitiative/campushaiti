@@ -1,28 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { auth } from "@/lib/firebase/client";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { useParams } from "next/navigation";
 
 export default function Navigation() {
   const t = useTranslations("nav");
-  const params = useParams();
-  const locale = (params.locale as string) || "en";
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-
-  // Helper to create locale-aware path (English doesn't need /en prefix)
-  const getLocalePath = (path: string) => {
-    if (locale === "en") return path;
-    return `/${locale}${path}`;
-  };
 
   useEffect(() => {
     setMounted(true);
@@ -47,7 +38,7 @@ export default function Navigation() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       await auth.signOut();
-      window.location.href = getLocalePath("/");
+      window.location.href = "/";
     } catch (error) {
       console.error("Sign out error:", error);
     }
@@ -57,23 +48,23 @@ export default function Navigation() {
     <nav className="border-b">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-6">
-          <Link href={getLocalePath("/")} className="text-xl font-bold">
+          <Link href="/" className="text-xl font-bold">
             Campus Haiti
           </Link>
           <div className="hidden md:flex space-x-4">
-            <Link href={getLocalePath("/")} className="text-sm hover:underline">
+            <Link href="/" className="text-sm hover:underline">
               {t("home")}
             </Link>
-            <Link href={getLocalePath("/apply")} className="text-sm hover:underline">
+            <Link href="/apply" className="text-sm hover:underline">
               {t("apply")}
             </Link>
-            <Link href={getLocalePath("/partners")} className="text-sm hover:underline">
+            <Link href="/partners" className="text-sm hover:underline">
               {t("partners")}
             </Link>
-            <Link href={getLocalePath("/schools/register")} className="text-sm hover:underline">
+            <Link href="/schools/register" className="text-sm hover:underline">
               {t("forSchools")}
             </Link>
-            <Link href={getLocalePath("/help")} className="text-sm hover:underline">
+            <Link href="/help" className="text-sm hover:underline">
               {t("help")}
             </Link>
           </div>
@@ -89,7 +80,7 @@ export default function Navigation() {
             <>
               {user ? (
                 <>
-                  <Link href={getLocalePath("/dashboard")}>
+                  <Link href="/dashboard">
                     <Button variant="ghost" size="sm">
                       {t("dashboard")}
                     </Button>
@@ -97,7 +88,7 @@ export default function Navigation() {
                   
                   {/* Show School Portal link only for SCHOOL_ADMIN users */}
                   {userRole === "SCHOOL_ADMIN" && (
-                    <Link href={getLocalePath("/schools/dashboard")}>
+                    <Link href="/schools/dashboard">
                       <Button variant="ghost" size="sm">
                         {t("schoolPortal")}
                       </Button>
@@ -106,7 +97,7 @@ export default function Navigation() {
                   
                   {/* Show Admin link only for ADMIN users */}
                   {userRole === "ADMIN" && (
-                    <Link href={getLocalePath("/admin")}>
+                    <Link href="/admin">
                       <Button variant="ghost" size="sm">
                         Admin
                       </Button>
@@ -118,7 +109,7 @@ export default function Navigation() {
                   </Button>
                 </>
               ) : (
-                <Link href={getLocalePath("/auth/signin")}>
+                <Link href="/auth/signin">
                   <Button size="sm">{t("signIn")}</Button>
                 </Link>
               )}

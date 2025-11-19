@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { ClientAuthSync } from "@/components/ClientAuthSync";
 import { FileText, DollarSign, Bell, CheckCircle, Clock, AlertCircle, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";

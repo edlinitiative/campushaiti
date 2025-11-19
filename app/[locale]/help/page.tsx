@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { Mail, MessageCircle, Book, Phone } from "lucide-react";
 
 export default function HelpPage() {

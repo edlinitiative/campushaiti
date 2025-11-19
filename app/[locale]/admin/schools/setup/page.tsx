@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/auth/server-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { ArrowLeft, CheckCircle, Clock, XCircle, Building2, Mail, Phone, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
