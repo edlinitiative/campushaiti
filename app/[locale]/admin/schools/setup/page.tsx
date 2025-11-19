@@ -1,5 +1,5 @@
 import { requireRole } from "@/lib/auth/server-auth";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/navigation";
@@ -51,6 +51,7 @@ async function getRecentlyApprovedSchools() {
 export default async function AdminSchoolSetupPage() {
   await requireRole(["ADMIN"]);
   
+  const t = await getTranslations("admin.schools.setup");
   const [pendingSchools, recentlyApproved] = await Promise.all([
     getPendingSchools(),
     getRecentlyApprovedSchools(),
@@ -63,11 +64,11 @@ export default async function AdminSchoolSetupPage() {
         <Button variant="ghost" asChild className="mb-4">
           <Link href="/admin">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("backToDashboard")}
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold mb-2">School Setup & Onboarding</h1>
-        <p className="text-muted-foreground">Guide new schools through platform setup</p>
+        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Pending Approvals */}
@@ -76,9 +77,9 @@ export default async function AdminSchoolSetupPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-600" />
-              <CardTitle>Pending Approvals ({pendingSchools.length})</CardTitle>
+              <CardTitle>{t("pendingApprovalsCount", { count: pendingSchools.length })}</CardTitle>
             </div>
-            <CardDescription>Schools waiting for approval to join the platform</CardDescription>
+            <CardDescription>{t("pendingApprovalsDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -89,7 +90,7 @@ export default async function AdminSchoolSetupPage() {
                       <h3 className="font-semibold text-lg">{school.name}</h3>
                       <p className="text-sm text-muted-foreground">{school.city}, {school.country}</p>
                     </div>
-                    <Badge variant="outline" className="bg-amber-100">Pending</Badge>
+                    <Badge variant="outline" className="bg-amber-100">{t("pending")}</Badge>
                   </div>
                   
                   <div className="grid md:grid-cols-2 gap-3 mb-4 text-sm">
@@ -124,12 +125,12 @@ export default async function AdminSchoolSetupPage() {
                   <div className="flex items-center gap-2">
                     <Button size="sm" asChild>
                       <Link href={`/admin/universities?review=${school.id}`}>
-                        Review & Approve
+                        {t("reviewAndApprove")}
                       </Link>
                     </Button>
                     <Button size="sm" variant="outline" asChild>
                       <Link href={`/admin/schools/${school.id}/setup`}>
-                        Setup Guide
+                        {t("setupGuide")}
                       </Link>
                     </Button>
                   </div>
@@ -143,8 +144,8 @@ export default async function AdminSchoolSetupPage() {
       {/* Setup Checklist Template */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>School Onboarding Checklist</CardTitle>
-          <CardDescription>Steps for setting up a new school on the platform</CardDescription>
+          <CardTitle>{t("schoolOnboardingChecklist")}</CardTitle>
+          <CardDescription>{t("schoolOnboardingChecklistDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -155,9 +156,9 @@ export default async function AdminSchoolSetupPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium mb-1">Review & Approve Registration</h4>
+                <h4 className="font-medium mb-1">{t("step1")}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Verify school information, contact details, and accreditation documents
+                  {t("step1Desc")}
                 </p>
               </div>
             </div>
@@ -169,9 +170,9 @@ export default async function AdminSchoolSetupPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium mb-1">Create Admin Account</h4>
+                <h4 className="font-medium mb-1">{t("step2")}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Set up login credentials for the school administrator
+                  {t("step2Desc")}
                 </p>
               </div>
             </div>
@@ -183,9 +184,9 @@ export default async function AdminSchoolSetupPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium mb-1">Configure Payment Settings</h4>
+                <h4 className="font-medium mb-1">{t("step3")}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Set up Stripe Connect or MonCash for receiving application fees
+                  {t("step3Desc")}
                 </p>
               </div>
             </div>
@@ -197,9 +198,9 @@ export default async function AdminSchoolSetupPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium mb-1">Add Programs</h4>
+                <h4 className="font-medium mb-1">{t("step4")}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Help school create their first programs with correct fees and deadlines
+                  {t("step4Desc")}
                 </p>
               </div>
             </div>
@@ -211,9 +212,9 @@ export default async function AdminSchoolSetupPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium mb-1">Customize Application Questions</h4>
+                <h4 className="font-medium mb-1">{t("step5")}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Set up program-specific questions beyond standard application fields
+                  {t("step5Desc")}
                 </p>
               </div>
             </div>
@@ -225,9 +226,9 @@ export default async function AdminSchoolSetupPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium mb-1">Training & Documentation</h4>
+                <h4 className="font-medium mb-1">{t("step6")}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Provide access to school portal guide and review workflow training
+                  {t("step6Desc")}
                 </p>
               </div>
             </div>
@@ -239,9 +240,9 @@ export default async function AdminSchoolSetupPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium mb-1">Go Live</h4>
+                <h4 className="font-medium mb-1">{t("step7")}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Enable application acceptance and make programs visible to students
+                  {t("step7Desc")}
                 </p>
               </div>
             </div>
@@ -255,9 +256,9 @@ export default async function AdminSchoolSetupPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              <CardTitle>Recently Approved Schools</CardTitle>
+              <CardTitle>{t("recentlyApprovedSchools")}</CardTitle>
             </div>
-            <CardDescription>Schools that joined in the last 30 days</CardDescription>
+            <CardDescription>{t("recentlyApprovedDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -275,11 +276,11 @@ export default async function AdminSchoolSetupPage() {
                   <div className="flex items-center gap-3">
                     <Badge className="bg-green-100 text-green-800">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Approved
+                      {t("approved")}
                     </Badge>
                     <Button size="sm" variant="outline" asChild>
                       <Link href={`/admin/schools/${school.id}/setup`}>
-                        View Setup
+                        {t("viewSetup")}
                       </Link>
                     </Button>
                   </div>

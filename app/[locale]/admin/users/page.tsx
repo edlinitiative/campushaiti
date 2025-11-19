@@ -1,5 +1,5 @@
 import { requireRole } from "@/lib/auth/server-auth";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,17 +26,18 @@ async function getUsers() {
 
 export default async function AdminUsersPage() {
   await requireRole(["ADMIN"]);
-  
+
+  const t = await getTranslations("admin.users");
   const users = await getUsers();
 
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "ADMIN":
-        return <Badge className="bg-red-100 text-red-800">Admin</Badge>;
+        return <Badge className="bg-red-100 text-red-800">{t("admin")}</Badge>;
       case "SCHOOL_ADMIN":
-        return <Badge className="bg-blue-100 text-blue-800">School Admin</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800">{t("schoolAdmin")}</Badge>;
       case "APPLICANT":
-        return <Badge variant="outline">Applicant</Badge>;
+        return <Badge variant="outline">{t("applicant")}</Badge>;
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
@@ -49,24 +50,24 @@ export default async function AdminUsersPage() {
         <Button variant="ghost" asChild className="mb-4">
           <Link href="/admin">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("backToDashboard")}
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold mb-2">User Management</h1>
-        <p className="text-muted-foreground">Manage platform users and permissions</p>
+        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Stats */}
       <div className="grid md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Users</CardDescription>
+            <CardDescription>{t("totalUsers")}</CardDescription>
             <CardTitle className="text-2xl">{users.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Applicants</CardDescription>
+            <CardDescription>{t("applicants")}</CardDescription>
             <CardTitle className="text-2xl text-blue-600">
               {users.filter((u: any) => u.role === "APPLICANT").length}
             </CardTitle>
@@ -74,7 +75,7 @@ export default async function AdminUsersPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>School Admins</CardDescription>
+            <CardDescription>{t("schoolAdmins")}</CardDescription>
             <CardTitle className="text-2xl text-purple-600">
               {users.filter((u: any) => u.role === "SCHOOL_ADMIN").length}
             </CardTitle>
@@ -82,7 +83,7 @@ export default async function AdminUsersPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Platform Admins</CardDescription>
+            <CardDescription>{t("platformAdmins")}</CardDescription>
             <CardTitle className="text-2xl text-red-600">
               {users.filter((u: any) => u.role === "ADMIN").length}
             </CardTitle>
@@ -93,12 +94,12 @@ export default async function AdminUsersPage() {
       {/* Users List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
-          <CardDescription>View and manage user accounts</CardDescription>
+          <CardTitle>{t("allUsers")}</CardTitle>
+          <CardDescription>{t("viewAndManage")}</CardDescription>
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No users found</p>
+            <p className="text-center text-muted-foreground py-8">{t("noUsersFound")}</p>
           ) : (
             <div className="space-y-3">
               {users.map((user: any) => (
@@ -108,7 +109,7 @@ export default async function AdminUsersPage() {
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <p className="font-medium">{user.name || "Unnamed User"}</p>
+                      <p className="font-medium">{user.name || t("unnamedUser")}</p>
                       {getRoleBadge(user.role)}
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -120,7 +121,7 @@ export default async function AdminUsersPage() {
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           <span>
-                            Joined {new Date(user.createdAt.seconds * 1000 || user.createdAt).toLocaleDateString()}
+                            {t("joined", { date: new Date(user.createdAt.seconds * 1000 || user.createdAt).toLocaleDateString() })}
                           </span>
                         </div>
                       )}
@@ -129,7 +130,7 @@ export default async function AdminUsersPage() {
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm">
                       <UserCog className="w-4 h-4 mr-1" />
-                      Manage
+                      {t("manage")}
                     </Button>
                   </div>
                 </div>
@@ -144,27 +145,27 @@ export default async function AdminUsersPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5" />
-            <CardTitle>Role Permissions</CardTitle>
+            <CardTitle>{t("rolePermissions")}</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 text-sm">
             <div>
-              <p className="font-medium text-red-800">Admin</p>
+              <p className="font-medium text-red-800">{t("admin")}</p>
               <p className="text-muted-foreground">
-                Full platform access - manage universities, users, view all applications
+                {t("adminDesc")}
               </p>
             </div>
             <div>
-              <p className="font-medium text-blue-800">School Admin</p>
+              <p className="font-medium text-blue-800">{t("schoolAdmin")}</p>
               <p className="text-muted-foreground">
-                Manage their university&apos;s programs, review applications, configure settings
+                {t("schoolAdminDesc")}
               </p>
             </div>
             <div>
-              <p className="font-medium">Applicant</p>
+              <p className="font-medium">{t("applicant")}</p>
               <p className="text-muted-foreground">
-                Submit applications, upload documents, track application status
+                {t("applicantDesc")}
               </p>
             </div>
           </div>

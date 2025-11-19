@@ -1,5 +1,5 @@
 import { requireRole } from "@/lib/auth/server-auth";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -257,6 +257,7 @@ async function getAnalytics() {
 export default async function AdminAnalyticsPage() {
   await requireRole(["ADMIN"]);
   
+  const t = await getTranslations("admin.analytics");
   const analytics = await getAnalytics();
 
   const exportData = () => {
@@ -272,15 +273,15 @@ export default async function AdminAnalyticsPage() {
           <Button variant="ghost" asChild className="mb-4">
             <Link href="/admin">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {t("backToDashboard")}
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold mb-2">System Analytics</h1>
-          <p className="text-muted-foreground">Comprehensive platform insights and metrics</p>
+          <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button variant="outline">
           <Download className="h-4 w-4 mr-2" />
-          Export Report
+          {t("exportReport")}
         </Button>
       </div>
 
@@ -290,7 +291,7 @@ export default async function AdminAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
               <DollarSign className="h-3 w-3" />
-              Total Revenue
+              {t("totalRevenue")}
             </CardDescription>
             <CardTitle className="text-3xl text-green-600">
               {(analytics.revenue.total / 100).toLocaleString()} HTG
@@ -304,7 +305,7 @@ export default async function AdminAnalyticsPage() {
                 <TrendingDown className="w-4 h-4 text-red-600" />
               )}
               <span className={`text-sm font-medium ${analytics.revenue.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {Math.abs(analytics.revenue.growth)}% from last month
+                {t("fromLastMonth", { rate: Math.abs(analytics.revenue.growth) })}
               </span>
             </div>
           </CardContent>
@@ -312,42 +313,42 @@ export default async function AdminAnalyticsPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Monthly Revenue</CardDescription>
+            <CardDescription>{t("monthlyRevenue")}</CardDescription>
             <CardTitle className="text-3xl text-blue-600">
               {(analytics.revenue.thisMonth / 100).toLocaleString()} HTG
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              Last month: {(analytics.revenue.lastMonth / 100).toLocaleString()} HTG
+              {t("lastMonth")}: {(analytics.revenue.lastMonth / 100).toLocaleString()} HTG
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Application Growth</CardDescription>
+            <CardDescription>{t("applicationGrowth")}</CardDescription>
             <CardTitle className="text-3xl text-purple-600">
               {analytics.growth.applications >= 0 ? '+' : ''}{analytics.growth.applications}%
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {analytics.recentActivity.last30d.applications} new applications this month
+              {t("newApplicationsThisMonth", { count: analytics.recentActivity.last30d.applications })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>User Growth</CardDescription>
+            <CardDescription>{t("userGrowth")}</CardDescription>
             <CardTitle className="text-3xl text-indigo-600">
               {analytics.growth.users >= 0 ? '+' : ''}{analytics.growth.users}%
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {analytics.recentActivity.last30d.users} new users this month
+              {t("newUsersThisMonth", { count: analytics.recentActivity.last30d.users })}
             </p>
           </CardContent>
         </Card>
@@ -359,12 +360,12 @@ export default async function AdminAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
               <Building2 className="h-3 w-3" />
-              Universities
+              {t("universities")}
             </CardDescription>
             <CardTitle className="text-3xl">{analytics.total.universities}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Active institutions</p>
+            <p className="text-xs text-muted-foreground">{t("activeInstitutions")}</p>
           </CardContent>
         </Card>
 
@@ -372,12 +373,12 @@ export default async function AdminAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
               <FileText className="h-3 w-3" />
-              Programs
+              {t("programs")}
             </CardDescription>
             <CardTitle className="text-3xl">{analytics.total.programs}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Available programs</p>
+            <p className="text-xs text-muted-foreground">{t("availablePrograms")}</p>
           </CardContent>
         </Card>
 
@@ -385,12 +386,12 @@ export default async function AdminAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
               <FileText className="h-3 w-3" />
-              Applications
+              {t("applications")}
             </CardDescription>
             <CardTitle className="text-3xl">{analytics.total.applications}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Total submissions</p>
+            <p className="text-xs text-muted-foreground">{t("totalSubmissions")}</p>
           </CardContent>
         </Card>
 
@@ -398,13 +399,13 @@ export default async function AdminAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
               <Users className="h-3 w-3" />
-              Total Users
+              {t("totalUsers")}
             </CardDescription>
             <CardTitle className="text-3xl">{analytics.total.users}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {analytics.activeUsers} active (7d)
+              {analytics.activeUsers} {t("active7d")}
             </p>
           </CardContent>
         </Card>
@@ -416,15 +417,15 @@ export default async function AdminAnalyticsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-blue-600" />
-              <CardTitle>User Engagement</CardTitle>
+              <CardTitle>{t("userEngagement")}</CardTitle>
             </div>
-            <CardDescription>Active users in the last 7 days</CardDescription>
+            <CardDescription>{t("userEngagementDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Active Users</span>
+                  <span className="text-sm font-medium">{t("activeUsers")}</span>
                   <span className="text-sm text-muted-foreground">
                     {analytics.activeUsers} / {analytics.total.users} ({analytics.total.users > 0 ? ((analytics.activeUsers / analytics.total.users) * 100).toFixed(1) : 0}%)
                   </span>
@@ -439,15 +440,15 @@ export default async function AdminAnalyticsPage() {
 
               <div className="grid grid-cols-3 gap-4 pt-2">
                 <div>
-                  <p className="text-xs text-muted-foreground">Applicants</p>
+                  <p className="text-xs text-muted-foreground">{t("applicants")}</p>
                   <p className="text-2xl font-bold">{analytics.usersByRole.applicants}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">School Admins</p>
+                  <p className="text-xs text-muted-foreground">{t("schoolAdmins")}</p>
                   <p className="text-2xl font-bold">{analytics.usersByRole.schoolAdmins}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Admins</p>
+                  <p className="text-xs text-muted-foreground">{t("admins")}</p>
                   <p className="text-2xl font-bold">{analytics.usersByRole.admins}</p>
                 </div>
               </div>
@@ -459,29 +460,29 @@ export default async function AdminAnalyticsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-600" />
-              <CardTitle>Processing Metrics</CardTitle>
+              <CardTitle>{t("processingMetrics")}</CardTitle>
             </div>
-            <CardDescription>Application review performance</CardDescription>
+            <CardDescription>{t("processingMetricsDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Average Processing Time</p>
-                <p className="text-4xl font-bold text-amber-600">{analytics.avgProcessingTime} days</p>
+                <p className="text-sm text-muted-foreground mb-2">{t("avgProcessingTime")}</p>
+                <p className="text-4xl font-bold text-amber-600">{analytics.avgProcessingTime} {t("days")}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Acceptance Rate</p>
+                    <p className="text-xs text-muted-foreground">{t("acceptanceRate")}</p>
                     <p className="text-xl font-bold text-green-600">{analytics.acceptanceRate}%</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <XCircle className="h-5 w-5 text-red-600" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Rejection Rate</p>
+                    <p className="text-xs text-muted-foreground">{t("rejectionRate")}</p>
                     <p className="text-xl font-bold text-red-600">
                       {analytics.total.applications > 0 ? ((analytics.byStatus.rejected / analytics.total.applications) * 100).toFixed(1) : 0}%
                     </p>
@@ -498,53 +499,53 @@ export default async function AdminAnalyticsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-purple-600" />
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>{t("recentActivity")}</CardTitle>
           </div>
-          <CardDescription>Platform activity breakdown</CardDescription>
+          <CardDescription>{t("recentActivityDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Last 24 Hours</span>
-                <Badge variant="secondary">Recent</Badge>
+                <span className="text-sm font-medium">{t("last24Hours")}</span>
+                <Badge variant="secondary">{t("recent")}</Badge>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Applications: <span className="font-semibold text-foreground">{analytics.recentActivity.last24h.applications}</span>
+                  {t("applications")}: <span className="font-semibold text-foreground">{analytics.recentActivity.last24h.applications}</span>
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  New Users: <span className="font-semibold text-foreground">{analytics.recentActivity.last24h.users}</span>
+                  {t("newUsers")}: <span className="font-semibold text-foreground">{analytics.recentActivity.last24h.users}</span>
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Last 7 Days</span>
-                <Badge variant="secondary">Week</Badge>
+                <span className="text-sm font-medium">{t("last7Days")}</span>
+                <Badge variant="secondary">{t("week")}</Badge>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Applications: <span className="font-semibold text-foreground">{analytics.recentActivity.last7d.applications}</span>
+                  {t("applications")}: <span className="font-semibold text-foreground">{analytics.recentActivity.last7d.applications}</span>
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  New Users: <span className="font-semibold text-foreground">{analytics.recentActivity.last7d.users}</span>
+                  {t("newUsers")}: <span className="font-semibold text-foreground">{analytics.recentActivity.last7d.users}</span>
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Last 30 Days</span>
-                <Badge variant="secondary">Month</Badge>
+                <span className="text-sm font-medium">{t("last30Days")}</span>
+                <Badge variant="secondary">{t("month")}</Badge>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Applications: <span className="font-semibold text-foreground">{analytics.recentActivity.last30d.applications}</span>
+                  {t("applications")}: <span className="font-semibold text-foreground">{analytics.recentActivity.last30d.applications}</span>
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  New Users: <span className="font-semibold text-foreground">{analytics.recentActivity.last30d.users}</span>
+                  {t("newUsers")}: <span className="font-semibold text-foreground">{analytics.recentActivity.last30d.users}</span>
                 </p>
               </div>
             </div>
@@ -557,15 +558,15 @@ export default async function AdminAnalyticsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            <CardTitle>Applications by Status</CardTitle>
+            <CardTitle>{t("applicationsByStatus")}</CardTitle>
           </div>
-          <CardDescription>Distribution of application statuses</CardDescription>
+          <CardDescription>{t("applicationsByStatusDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">Accepted</span>
+                <span className="text-sm font-medium">{t("accepted")}</span>
                 <span className="text-sm text-muted-foreground">
                   {analytics.byStatus.accepted} ({analytics.total.applications > 0 ? ((analytics.byStatus.accepted / analytics.total.applications) * 100).toFixed(1) : 0}%)
                 </span>
@@ -580,7 +581,7 @@ export default async function AdminAnalyticsPage() {
 
             <div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">Under Review</span>
+                <span className="text-sm font-medium">{t("underReview")}</span>
                 <span className="text-sm text-muted-foreground">
                   {analytics.byStatus.underReview} ({analytics.total.applications > 0 ? ((analytics.byStatus.underReview / analytics.total.applications) * 100).toFixed(1) : 0}%)
                 </span>
@@ -595,7 +596,7 @@ export default async function AdminAnalyticsPage() {
 
             <div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">Submitted (New)</span>
+                <span className="text-sm font-medium">{t("submitted")}</span>
                 <span className="text-sm text-muted-foreground">
                   {analytics.byStatus.submitted} ({analytics.total.applications > 0 ? ((analytics.byStatus.submitted / analytics.total.applications) * 100).toFixed(1) : 0}%)
                 </span>
@@ -610,7 +611,7 @@ export default async function AdminAnalyticsPage() {
 
             <div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">Waitlisted</span>
+                <span className="text-sm font-medium">{t("waitlisted")}</span>
                 <span className="text-sm text-muted-foreground">
                   {analytics.byStatus.waitlisted} ({analytics.total.applications > 0 ? ((analytics.byStatus.waitlisted / analytics.total.applications) * 100).toFixed(1) : 0}%)
                 </span>
@@ -625,7 +626,7 @@ export default async function AdminAnalyticsPage() {
 
             <div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">Rejected</span>
+                <span className="text-sm font-medium">{t("rejected")}</span>
                 <span className="text-sm text-muted-foreground">
                   {analytics.byStatus.rejected} ({analytics.total.applications > 0 ? ((analytics.byStatus.rejected / analytics.total.applications) * 100).toFixed(1) : 0}%)
                 </span>
@@ -647,13 +648,13 @@ export default async function AdminAnalyticsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Globe className="w-5 h-5 text-teal-600" />
-              <CardTitle>Geographic Distribution</CardTitle>
+              <CardTitle>{t("geographicDistribution")}</CardTitle>
             </div>
-            <CardDescription>Top cities by applicants</CardDescription>
+            <CardDescription>{t("topCitiesByApplicants")}</CardDescription>
           </CardHeader>
           <CardContent>
             {analytics.topCities.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No data yet</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t("noDataYet")}</p>
             ) : (
               <div className="space-y-3">
                 {analytics.topCities.map((city: any, index: number) => (
@@ -676,13 +677,13 @@ export default async function AdminAnalyticsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-blue-600" />
-              <CardTitle>Top Universities</CardTitle>
+              <CardTitle>{t("topUniversities")}</CardTitle>
             </div>
-            <CardDescription>By number of applications</CardDescription>
+            <CardDescription>{t("byNumberOfApplications")}</CardDescription>
           </CardHeader>
           <CardContent>
             {analytics.topUniversities.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No data yet</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t("noDataYet")}</p>
             ) : (
               <div className="space-y-3">
                 {analytics.topUniversities.map((uni: any, index: number) => (
@@ -705,13 +706,13 @@ export default async function AdminAnalyticsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-purple-600" />
-              <CardTitle>Popular Programs</CardTitle>
+              <CardTitle>{t("popularPrograms")}</CardTitle>
             </div>
-            <CardDescription>Most applied-to programs</CardDescription>
+            <CardDescription>{t("mostAppliedToPrograms")}</CardDescription>
           </CardHeader>
           <CardContent>
             {analytics.topPrograms.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No data yet</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t("noDataYet")}</p>
             ) : (
               <div className="space-y-3">
                 {analytics.topPrograms.map((prog: any, index: number) => (
