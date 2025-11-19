@@ -101,6 +101,12 @@
     "passkeyPromptTitle": "Make Sign-In Even Faster?",
     "passkeyPromptDescription": "Register a passkey to sign in instantly using your fingerprint, face ID, or security key. You can skip this and set it up later in your settings.",
     "skipForNow": "Skip for Now",
+    "continueWithGoogle": "Continue with Google",
+    "orContinueWith": "or continue with",
+    "popupClosed": "Sign-in popup was closed",
+    "popupCancelled": "Sign-in was cancelled",
+    "popupBlocked": "Sign-in popup was blocked. Please allow popups for this site",
+    "accountExistsWithDifferentCredential": "An account already exists with the same email but different sign-in method",
     "verify": {
       "verifying": "Verifying your email...",
       "success": "Success! Redirecting...",

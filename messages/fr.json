@@ -101,6 +101,12 @@
     "passkeyPromptTitle": "Rendre la connexion encore plus rapide?",
     "passkeyPromptDescription": "Enregistrez une passkey pour vous connecter instantanément avec votre empreinte digitale, Face ID ou clé de sécurité. Vous pouvez ignorer cette étape et la configurer plus tard dans vos paramètres.",
     "skipForNow": "Passer pour le moment",
+    "continueWithGoogle": "Continuer avec Google",
+    "orContinueWith": "ou continuer avec",
+    "popupClosed": "La fenêtre de connexion a été fermée",
+    "popupCancelled": "La connexion a été annulée",
+    "popupBlocked": "La fenêtre de connexion a été bloquée. Veuillez autoriser les fenêtres contextuelles pour ce site",
+    "accountExistsWithDifferentCredential": "Un compte existe déjà avec le même email mais une méthode de connexion différente",
     "verify": {
       "verifying": "Vérification de votre email...",
       "success": "Succès! Redirection...",

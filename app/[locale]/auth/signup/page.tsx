@@ -1,6 +1,8 @@
 import { useTranslations } from "next-intl";
 import PasswordAuth from "@/components/auth/PasswordAuth";
+import GoogleAuth from "@/components/auth/GoogleAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 
 export default function SignUpPage() {
@@ -15,6 +17,15 @@ export default function SignUpPage() {
             <CardDescription>{t("signUpDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
+            <GoogleAuth />
+            
+            <div className="relative my-6">
+              <Separator />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+                {t("orContinueWith")}
+              </span>
+            </div>
+
             <PasswordAuth mode="signup" />
           </CardContent>
         </Card>

@@ -3,8 +3,10 @@ import PasswordAuth from "@/components/auth/PasswordAuth";
 import PhoneAuth from "@/components/auth/PhoneAuth";
 import EmailLinkAuth from "@/components/auth/EmailLinkAuth";
 import PasskeyAuth from "@/components/auth/PasskeyAuth";
+import GoogleAuth from "@/components/auth/GoogleAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 
 export default function SignInPage() {
@@ -19,6 +21,15 @@ export default function SignInPage() {
             <CardDescription>{t("signInToAccount")}</CardDescription>
           </CardHeader>
           <CardContent>
+            <GoogleAuth />
+            
+            <div className="relative my-6">
+              <Separator />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+                {t("orContinueWith")}
+              </span>
+            </div>
+
             <Tabs defaultValue="password" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="password">{t("password")}</TabsTrigger>

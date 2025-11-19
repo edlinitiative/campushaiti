@@ -101,6 +101,12 @@
     "passkeyPromptTitle": "Fè Koneksyon Plis Rapid?",
     "passkeyPromptDescription": "Anrejistre yon passkey pou konekte imedyatman ak anprent dwèt ou, Face ID, oswa kle sekirite. Ou ka sote sa e konfigirel pi ta nan paramèt ou yo.",
     "skipForNow": "Sote Pou Kounye a",
+    "continueWithGoogle": "Kontinye ak Google",
+    "orContinueWith": "oswa kontinye ak",
+    "popupClosed": "Fenèt koneksyon an te fèmen",
+    "popupCancelled": "Koneksyon an te anile",
+    "popupBlocked": "Fenèt koneksyon an te bloke. Tanpri pèmèt fenèt popup pou sit sa a",
+    "accountExistsWithDifferentCredential": "Yon kont deja egziste ak menm imel la men yon lòt metòd koneksyon",
     "verify": {
       "verifying": "N ap verifye imel ou...",
       "success": "Siksè! N ap redireksyone...",
