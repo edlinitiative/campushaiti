@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
 export default function SchoolSettingsPage() {
+  const t = useTranslations("schools.settings");
   const [demoMode] = useState(true); // Demo mode until API is implemented
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -86,16 +88,16 @@ export default function SchoolSettingsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div className="flex-1">
-              <h3 className="font-semibold text-amber-900 mb-1">Demo Mode - Read Only</h3>
+              <h3 className="font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-2">
-                You&apos;re viewing sample settings. Changes cannot be saved in demo mode. Please{' '}
-                <Link href="/auth/signin" className="underline font-medium">sign in</Link>
-                {' '}or{' '}
-                <Link href="/schools/register" className="underline font-medium">register your institution</Link>
-                {' '}to manage real settings.
+                {t("demoModeMessage")}{' '}
+                <Link href="/auth/signin" className="underline font-medium">{t("signIn")}</Link>
+                {' '}{t("or")}{' '}
+                <Link href="/schools/register" className="underline font-medium">{t("registerInstitution")}</Link>
+                {' '}{t("toManageSettings")}
               </p>
               <p className="text-xs text-amber-700">
-                This demo shows the settings interface for managing your university profile and payment methods.
+                {t("demoModeDescription")}
               </p>
             </div>
           </div>
@@ -104,13 +106,13 @@ export default function SchoolSettingsPage() {
 
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">University Settings</h1>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Manage your university profile and payment settings
+            {t("manageSettings")}
           </p>
         </div>
         <Button variant="outline" asChild>
-          <Link href="/schools/dashboard">← Back to Dashboard</Link>
+          <Link href="/schools/dashboard">← {t("dashboard")}</Link>
         </Button>
       </div>
 
@@ -122,24 +124,24 @@ export default function SchoolSettingsPage() {
 
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="profile">University Profile</TabsTrigger>
-          <TabsTrigger value="payments">Payment Settings</TabsTrigger>
-          <TabsTrigger value="team">Team Members</TabsTrigger>
+          <TabsTrigger value="profile">{t("profileTab")}</TabsTrigger>
+          <TabsTrigger value="payments">{t("paymentsTab")}</TabsTrigger>
+          <TabsTrigger value="team">{t("teamTab")}</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
         <TabsContent value="profile">
           <Card>
             <CardHeader>
-              <CardTitle>University Information</CardTitle>
+              <CardTitle>{t("universityInformation")}</CardTitle>
               <CardDescription>
-                Update your university&apos;s public information
+                {t("updatePublicInfo")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">University Name *</Label>
+                  <Label htmlFor="name">{t("universityName")}</Label>
                   <Input
                     id="name"
                     value={universityInfo.name}
@@ -148,18 +150,19 @@ export default function SchoolSettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="slug">URL Slug *</Label>
+                  <Label htmlFor="slug">{t("slug")}</Label>
                   <Input
                     id="slug"
                     value={universityInfo.slug}
                     onChange={(e) => setUniversityInfo({ ...universityInfo, slug: e.target.value })}
                   />
+                  <p className="text-sm text-muted-foreground">{t("slugHelp")}</p>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city">City *</Label>
+                  <Label htmlFor="city">{t("city")}</Label>
                   <Input
                     id="city"
                     value={universityInfo.city}
@@ -168,7 +171,7 @@ export default function SchoolSettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country *</Label>
+                  <Label htmlFor="country">{t("country")}</Label>
                   <Input
                     id="country"
                     value={universityInfo.country}
@@ -178,7 +181,7 @@ export default function SchoolSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("description")}</Label>
                 <Textarea
                   id="description"
                   value={universityInfo.description}
@@ -189,7 +192,7 @@ export default function SchoolSettingsPage() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="websiteUrl">Website URL</Label>
+                  <Label htmlFor="websiteUrl">{t("websiteUrl")}</Label>
                   <Input
                     id="websiteUrl"
                     type="url"
@@ -199,7 +202,7 @@ export default function SchoolSettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Contact Email *</Label>
+                  <Label htmlFor="contactEmail">{t("contactEmail")}</Label>
                   <Input
                     id="contactEmail"
                     type="email"
@@ -210,7 +213,7 @@ export default function SchoolSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contactPhone">Contact Phone</Label>
+                <Label htmlFor="contactPhone">{t("contactPhone")}</Label>
                 <Input
                   id="contactPhone"
                   type="tel"
@@ -221,7 +224,7 @@ export default function SchoolSettingsPage() {
 
               <div className="flex justify-end">
                 <Button onClick={handleSaveUniversity} disabled={saving}>
-                  {saving ? "Saving..." : "Save Changes"}
+                  {saving ? t("saving") : t("saveChanges")}
                 </Button>
               </div>
             </CardContent>
@@ -233,15 +236,15 @@ export default function SchoolSettingsPage() {
           {/* Bank Account */}
           <Card>
             <CardHeader>
-              <CardTitle>Bank Account Information</CardTitle>
+              <CardTitle>{t("bankAccount")}</CardTitle>
               <CardDescription>
-                Add your bank account to receive direct payments
+                {t("bankAccountDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="accountName">Account Name *</Label>
+                  <Label htmlFor="accountName">{t("accountName")}</Label>
                   <Input
                     id="accountName"
                     value={bankAccount.accountName}
@@ -251,7 +254,7 @@ export default function SchoolSettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bankName">Bank Name *</Label>
+                  <Label htmlFor="bankName">{t("bankName")}</Label>
                   <Input
                     id="bankName"
                     value={bankAccount.bankName}
@@ -263,7 +266,7 @@ export default function SchoolSettingsPage() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="accountNumber">Account Number *</Label>
+                  <Label htmlFor="accountNumber">{t("accountNumber")}</Label>
                   <Input
                     id="accountNumber"
                     value={bankAccount.accountNumber}
@@ -273,7 +276,7 @@ export default function SchoolSettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="routingNumber">Routing Number</Label>
+                  <Label htmlFor="routingNumber">{t("routingNumber")}</Label>
                   <Input
                     id="routingNumber"
                     value={bankAccount.routingNumber}
@@ -284,7 +287,7 @@ export default function SchoolSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="swiftCode">SWIFT/BIC Code</Label>
+                <Label htmlFor="swiftCode">{t("swiftCode")}</Label>
                 <Input
                   id="swiftCode"
                   value={bankAccount.swiftCode}
@@ -295,7 +298,7 @@ export default function SchoolSettingsPage() {
 
               <div className="flex justify-end">
                 <Button onClick={handleSaveBankAccount} disabled={saving}>
-                  {saving ? "Saving..." : "Save Bank Account"}
+                  {saving ? t("saving") : t("saveBankAccount")}
                 </Button>
               </div>
             </CardContent>
@@ -304,30 +307,29 @@ export default function SchoolSettingsPage() {
           {/* Stripe Connect */}
           <Card>
             <CardHeader>
-              <CardTitle>Stripe Connect</CardTitle>
+              <CardTitle>{t("stripeConnect")}</CardTitle>
               <CardDescription>
-                Connect your Stripe account to accept international payments
+                {t("stripeDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {stripeConnected ? (
                 <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-md">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-green-600">Connected</Badge>
-                    <span className="text-sm">Your Stripe account is connected</span>
+                    <Badge className="bg-green-600">{t("connected")}</Badge>
+                    <span className="text-sm">{t("stripeConnectedMessage")}</span>
                   </div>
                   <Button variant="outline" size="sm">
-                    Disconnect
+                    {t("disconnect")}
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Connect your Stripe account to receive payments via credit card from applicants worldwide.
-                    Stripe handles all compliance and transfers funds directly to your bank account.
+                    {t("stripeExplanation")}
                   </p>
                   <Button onClick={handleConnectStripe}>
-                    Connect with Stripe
+                    {t("connectStripe")}
                   </Button>
                 </div>
               )}
@@ -337,29 +339,29 @@ export default function SchoolSettingsPage() {
           {/* MonCash */}
           <Card>
             <CardHeader>
-              <CardTitle>MonCash Integration</CardTitle>
+              <CardTitle>{t("monCash")}</CardTitle>
               <CardDescription>
-                Connect MonCash to accept local mobile payments in Haiti
+                {t("monCashDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {monCashConnected ? (
                 <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-md">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-green-600">Connected</Badge>
-                    <span className="text-sm">Your MonCash account is connected</span>
+                    <Badge className="bg-green-600">{t("connected")}</Badge>
+                    <span className="text-sm">{t("monCashConnectedMessage")}</span>
                   </div>
                   <Button variant="outline" size="sm">
-                    Disconnect
+                    {t("disconnect")}
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Connect your MonCash account to accept payments from applicants in Haiti using mobile money.
+                    {t("monCashExplanation")}
                   </p>
                   <Button onClick={handleConnectMonCash} variant="outline">
-                    Connect with MonCash
+                    {t("connectMonCash")}
                   </Button>
                 </div>
               )}
@@ -371,9 +373,9 @@ export default function SchoolSettingsPage() {
         <TabsContent value="team">
           <Card>
             <CardHeader>
-              <CardTitle>Team Members</CardTitle>
+              <CardTitle>{t("teamMembers")}</CardTitle>
               <CardDescription>
-                Manage who can access and manage your university account
+                {t("manageTeam")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -381,17 +383,17 @@ export default function SchoolSettingsPage() {
                 <div className="flex items-center justify-between p-4 border rounded-md">
                   <div>
                     <p className="font-medium">admin@ueh.edu.ht</p>
-                    <p className="text-sm text-muted-foreground">Administrator</p>
+                    <p className="text-sm text-muted-foreground">{t("administrator")}</p>
                   </div>
-                  <Badge>Owner</Badge>
+                  <Badge>{t("owner")}</Badge>
                 </div>
 
                 <Button variant="outline" className="w-full">
-                  Invite Team Member
+                  {t("inviteTeamMember")}
                 </Button>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Team members will be able to view applications, manage programs, and configure settings
+                  {t("teamMemberPermissions")}
                 </p>
               </div>
             </CardContent>

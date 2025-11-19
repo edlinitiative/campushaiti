@@ -268,21 +268,21 @@ export default function CustomQuestionsPage() {
                           size="sm"
                           onClick={() => handleToggleActive(question.id)}
                         >
-                          {question.isActive ? "Disable" : "Enable"}
+                          {question.isActive ? t("disabled") : t("toggleActive")}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleEditQuestion(question)}
                         >
-                          Edit
+                          {t("edit")}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteQuestion(question.id)}
                         >
-                          Delete
+                          {t("delete")}
                         </Button>
                       </div>
                     </div>
@@ -299,28 +299,28 @@ export default function CustomQuestionsPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingQuestion ? "Edit Question" : "Add New Question"}
+              {editingQuestion ? t("editQuestion") : t("addNewQuestion")}
             </DialogTitle>
             <DialogDescription>
-              Configure your custom application question
+              {t("dialogDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="question">Question *</Label>
+              <Label htmlFor="question">{t("questionLabel")}</Label>
               <Textarea
                 id="question"
                 value={formData.question}
                 onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                placeholder="What is your question?"
+                placeholder={t("questionPlaceholder")}
                 rows={2}
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="type">Question Type *</Label>
+                <Label htmlFor="type">{t("questionType")}</Label>
                 <Select
                   value={formData.type}
                   onValueChange={(value: QuestionType) => setFormData({ ...formData, type: value })}
@@ -329,13 +329,13 @@ export default function CustomQuestionsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="TEXT">Short Text</SelectItem>
-                    <SelectItem value="TEXTAREA">Long Text</SelectItem>
-                    <SelectItem value="SELECT">Single Choice</SelectItem>
-                    <SelectItem value="MULTISELECT">Multiple Choice</SelectItem>
-                    <SelectItem value="FILE">File Upload</SelectItem>
-                    <SelectItem value="DATE">Date</SelectItem>
-                    <SelectItem value="NUMBER">Number</SelectItem>
+                    <SelectItem value="TEXT">{t("shortText")}</SelectItem>
+                    <SelectItem value="TEXTAREA">{t("longText")}</SelectItem>
+                    <SelectItem value="SELECT">{t("singleChoice")}</SelectItem>
+                    <SelectItem value="MULTISELECT">{t("multipleChoice")}</SelectItem>
+                    <SelectItem value="FILE">{t("fileUpload")}</SelectItem>
+                    <SelectItem value="DATE">{t("date")}</SelectItem>
+                    <SelectItem value="NUMBER">{t("number")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -348,38 +348,38 @@ export default function CustomQuestionsPage() {
                     setFormData({ ...formData, required: checked as boolean })
                   }
                 />
-                <Label htmlFor="required">Required field</Label>
+                <Label htmlFor="required">{t("requiredField")}</Label>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="placeholder">Placeholder Text</Label>
+              <Label htmlFor="placeholder">{t("placeholderText")}</Label>
               <Input
                 id="placeholder"
                 value={formData.placeholder}
                 onChange={(e) => setFormData({ ...formData, placeholder: e.target.value })}
-                placeholder="Enter placeholder..."
+                placeholder={t("placeholderPlaceholder")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="helpText">Help Text</Label>
+              <Label htmlFor="helpText">{t("helpText")}</Label>
               <Input
                 id="helpText"
                 value={formData.helpText}
                 onChange={(e) => setFormData({ ...formData, helpText: e.target.value })}
-                placeholder="Additional guidance for applicants..."
+                placeholder={t("helpTextPlaceholder")}
               />
             </div>
 
             {(formData.type === "SELECT" || formData.type === "MULTISELECT") && (
               <div className="space-y-2">
-                <Label htmlFor="options">Options (one per line) *</Label>
+                <Label htmlFor="options">{t("optionsLabel")}</Label>
                 <Textarea
                   id="options"
                   value={formData.options}
                   onChange={(e) => setFormData({ ...formData, options: e.target.value })}
-                  placeholder="Option 1&#10;Option 2&#10;Option 3"
+                  placeholder={t("optionsPlaceholder")}
                   rows={5}
                 />
               </div>
