@@ -30,6 +30,9 @@ export default function SignInPage() {
             </Tabs>
           </CardContent>
         </Card>
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          {t("secureSignIn")}
+        </p>
       </div>
     </div>
   );

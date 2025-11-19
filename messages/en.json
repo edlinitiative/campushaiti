@@ -58,6 +58,7 @@
     "passkeyVerifyError": "Failed to verify passkey registration",
     "passkeySuccess": "Passkey registered successfully!",
     "passkeyAuthError": "Failed to verify passkey authentication",
+    "secureSignIn": "Your sign-in is secure and encrypted",
     "verify": {
       "verifying": "Verifying your email...",
       "success": "Success! Redirecting...",

@@ -58,6 +58,7 @@
     "passkeyVerifyError": "Echwe verifye anrejistreman passkey",
     "passkeySuccess": "Passkey anrejistre ak siksè!",
     "passkeyAuthError": "Echwe verifye otantifikasyon passkey",
+    "secureSignIn": "Koneksyon ou sekirize e kripte",
     "verify": {
       "verifying": "N ap verifye imel ou...",
       "success": "Siksè! N ap redireksyone...",

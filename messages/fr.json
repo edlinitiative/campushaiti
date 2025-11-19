@@ -58,6 +58,7 @@
     "passkeyVerifyError": "Échec de la vérification de l'enregistrement de la passkey",
     "passkeySuccess": "Passkey enregistrée avec succès !",
     "passkeyAuthError": "Échec de la vérification de l'authentification par passkey",
+    "secureSignIn": "Votre connexion est sécurisée et chiffrée",
     "verify": {
       "verifying": "Vérification de votre email...",
       "success": "Succès! Redirection...",
