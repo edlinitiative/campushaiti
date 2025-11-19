@@ -1,23 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DollarSign, TrendingUp, FileText, CheckCircle, Users, Clock, XCircle, AlertCircle, Download, Calendar, BarChart } from "lucide-react";
 
 export default function SchoolAnalyticsPage() {
   const t = useTranslations("schools.analytics");
-  const params = useParams();
-  const locale = (params.locale as string) || "en";
-  
-  // Helper to create locale-aware path
-  const getLocalePath = (path: string) => {
-    if (locale === "en") return path;
-    return `/${locale}${path}`;
-  };
   
   const [loading, setLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
@@ -248,9 +239,9 @@ export default function SchoolAnalyticsPage() {
               <h3 className="font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-2">
                 {t("demoModeMessage")}{' '}
-                <Link href={getLocalePath("/auth/signin")} className="underline font-medium">{t("signIn")}</Link>
+                <Link href="/auth/signin" className="underline font-medium">{t("signIn")}</Link>
                 {' '}{t("or")}{' '}
-                <Link href={getLocalePath("/schools/register")} className="underline font-medium">{t("registerInstitution")}</Link>.
+                <Link href="/schools/register" className="underline font-medium">{t("registerInstitution")}</Link>.
               </p>
             </div>
           </div>
@@ -268,7 +259,7 @@ export default function SchoolAnalyticsPage() {
             {t("exportReport")}
           </Button>
           <Button variant="outline" asChild>
-            <Link href={getLocalePath("/schools/dashboard")}>{t("backToDashboard")}</Link>
+            <Link href="/schools/dashboard">{t("backToDashboard")}</Link>
           </Button>
         </div>
       </div>
