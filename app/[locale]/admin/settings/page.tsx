@@ -58,15 +58,15 @@ export default function AdminSettingsPage() {
           <Link href="/admin">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {t("backToDashboard")}
             </Button>
           </Link>
         </div>
 
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Platform Settings</h1>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Configure global platform settings and preferences
+            {t("subtitle")}
           </p>
         </div>
 
@@ -76,13 +76,13 @@ export default function AdminSettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Globe className="w-5 h-5 text-blue-600" />
-                <CardTitle>General Settings</CardTitle>
+                <CardTitle>{t("generalSettings")}</CardTitle>
               </div>
-              <CardDescription>Basic platform configuration</CardDescription>
+              <CardDescription>{t("generalSettingsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="platformName">Platform Name</Label>
+                <Label htmlFor="platformName">{t("platformName")}</Label>
                 <Input
                   id="platformName"
                   value={settings.platformName}
@@ -91,7 +91,7 @@ export default function AdminSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="welcomeMessage">Welcome Message</Label>
+                <Label htmlFor="welcomeMessage">{t("welcomeMessage")}</Label>
                 <Textarea
                   id="welcomeMessage"
                   value={settings.welcomeMessage}
@@ -101,7 +101,7 @@ export default function AdminSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="supportEmail">Support Email</Label>
+                <Label htmlFor="supportEmail">{t("supportEmail")}</Label>
                 <Input
                   id="supportEmail"
                   type="email"
@@ -117,16 +117,16 @@ export default function AdminSettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-green-600" />
-                <CardTitle>Registration & Access</CardTitle>
+                <CardTitle>{t("securitySettings")}</CardTitle>
               </div>
-              <CardDescription>Control user registration and access</CardDescription>
+              <CardDescription>{t("securitySettingsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Enable New Registrations</Label>
+                  <Label>{t("enableRegistrations")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Allow new users to create accounts
+                    {t("enableRegistrationsDesc")}
                   </p>
                 </div>
                 <Checkbox
@@ -137,9 +137,9 @@ export default function AdminSettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Require Email Verification</Label>
+                  <Label>{t("requireEmailVerification")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Users must verify their email before applying
+                    {t("requireEmailVerificationDesc")}
                   </p>
                 </div>
                 <Checkbox
@@ -150,9 +150,9 @@ export default function AdminSettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Maintenance Mode</Label>
+                  <Label>{t("maintenanceMode")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Disable platform access for maintenance
+                    {t("maintenanceModeDesc")}
                   </p>
                 </div>
                 <Checkbox
@@ -168,13 +168,13 @@ export default function AdminSettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Database className="w-5 h-5 text-purple-600" />
-                <CardTitle>Application Settings</CardTitle>
+                <CardTitle>{t("applicationSettings")}</CardTitle>
               </div>
-              <CardDescription>Configure application limits and defaults</CardDescription>
+              <CardDescription>{t("applicationSettingsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="maxApplications">Maximum Applications Per User</Label>
+                <Label htmlFor="maxApplications">{t("maxApplicationsPerUser")}</Label>
                 <Input
                   id="maxApplications"
                   type="number"
@@ -182,12 +182,12 @@ export default function AdminSettingsPage() {
                   onChange={(e) => handleChange("maxApplicationsPerUser", parseInt(e.target.value))}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Limit how many programs a student can apply to
+                  {t("maxApplicationsDesc")}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="defaultFee">Default Application Fee (in cents)</Label>
+                <Label htmlFor="defaultFee">{t("defaultApplicationFee")}</Label>
                 <Input
                   id="defaultFee"
                   type="number"
@@ -195,7 +195,7 @@ export default function AdminSettingsPage() {
                   onChange={(e) => handleChange("defaultApplicationFee", parseInt(e.target.value))}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Suggested fee amount for new programs (50 HTG = 5000 cents)
+                  {t("defaultApplicationFeeDesc")}
                 </p>
               </div>
             </CardContent>
@@ -231,15 +231,15 @@ export default function AdminSettingsPage() {
           {/* Save Button */}
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => window.location.reload()}>
-              Reset
+              {t("reset")}
             </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? (
-                <>Saving...</>
+                <>{t("saving")}</>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Save Settings
+                  {t("saveSettings")}
                 </>
               )}
             </Button>
