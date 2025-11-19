@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DollarSign, TrendingUp, FileText, CheckCircle, Users, Clock, XCircle, AlertCircle, Download, Calendar, BarChart } from "lucide-react";
 
 export default function SchoolAnalyticsPage() {
+  const t = useTranslations("schools.analytics");
   const [loading, setLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
   const [allApplications, setAllApplications] = useState<any[]>([]);
@@ -218,7 +220,7 @@ export default function SchoolAnalyticsPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-16">
-        <p className="text-center text-muted-foreground">Loading analytics...</p>
+        <p className="text-center text-muted-foreground">{t("loadingAnalytics")}</p>
       </div>
     );
   }
@@ -233,12 +235,12 @@ export default function SchoolAnalyticsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div className="flex-1">
-              <h3 className="font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-2">
-                You&apos;re viewing sample analytics data. To see real analytics, please{' '}
-                <Link href="/auth/signin" className="underline font-medium">sign in</Link>
-                {' '}or{' '}
-                <Link href="/schools/register" className="underline font-medium">register your institution</Link>.
+                {t("demoModeMessage")}{' '}
+                <Link href="/auth/signin" className="underline font-medium">{t("signIn")}</Link>
+                {' '}{t("or")}{' '}
+                <Link href="/schools/register" className="underline font-medium">{t("registerInstitution")}</Link>.
               </p>
             </div>
           </div>
@@ -247,27 +249,27 @@ export default function SchoolAnalyticsPage() {
 
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Analytics & Insights</h1>
-          <p className="text-muted-foreground">Track your institution&apos;s application and revenue metrics</p>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={exportAnalytics}>
             <Download className="w-4 h-4 mr-2" />
-            Export Report
+            {t("exportReport")}
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">← Back to Dashboard</Link>
+            <Link href="/schools/dashboard">{t("backToDashboard")}</Link>
           </Button>
         </div>
       </div>
 
       {/* Financial Summary */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Financial Overview</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("financialOverview")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("totalRevenue")}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -278,42 +280,42 @@ export default function SchoolAnalyticsPage() {
                 })} HTG
               </div>
               <p className="text-xs text-muted-foreground">
-                From application fees
+                {t("applicationFee")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("totalApplications")}</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.financial.totalApplications}</div>
               <p className="text-xs text-muted-foreground">
-                All time submissions
+                {t("submitted")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Paid Applications</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("paidApplications")}</CardTitle>
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.financial.paidApplications}</div>
               <p className="text-xs text-muted-foreground">
                 {analytics.financial.totalApplications > 0 
-                  ? `${((analytics.financial.paidApplications / analytics.financial.totalApplications) * 100).toFixed(1)}% payment rate`
-                  : 'No applications yet'}
+                  ? `${((analytics.financial.paidApplications / analytics.financial.totalApplications) * 100).toFixed(1)}% ${t("paymentRate")}`
+                  : t("submitted")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Average Fee</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("averageFee")}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -324,7 +326,7 @@ export default function SchoolAnalyticsPage() {
                 })} HTG
               </div>
               <p className="text-xs text-muted-foreground">
-                Per application
+                {t("paidApplications")}
               </p>
             </CardContent>
           </Card>
@@ -333,69 +335,69 @@ export default function SchoolAnalyticsPage() {
 
       {/* Application Status Breakdown */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Application Status</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("applicationsByStatus")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Submitted</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("submitted")}</CardTitle>
               <FileText className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.applications.submitted}</div>
               <p className="text-xs text-muted-foreground">
-                New applications
+                {t("applications")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Under Review</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("underReview")}</CardTitle>
               <Clock className="h-4 w-4 text-amber-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.applications.underReview}</div>
               <p className="text-xs text-muted-foreground">
-                Being reviewed
+                {t("applications")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Accepted</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("accepted")}</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.applications.accepted}</div>
               <p className="text-xs text-muted-foreground">
-                Approved applicants
+                {t("applications")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Waitlisted</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("waitlisted")}</CardTitle>
               <AlertCircle className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.applications.waitlisted}</div>
               <p className="text-xs text-muted-foreground">
-                On waitlist
+                {t("applications")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("rejected")}</CardTitle>
               <XCircle className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.applications.rejected}</div>
               <p className="text-xs text-muted-foreground">
-                Not accepted
+                {t("applications")}
               </p>
             </CardContent>
           </Card>
@@ -404,11 +406,11 @@ export default function SchoolAnalyticsPage() {
 
       {/* Trends & Performance Metrics */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Trends & Performance</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("trends")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Week</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("applicationsThisWeek")}</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -416,14 +418,14 @@ export default function SchoolAnalyticsPage() {
               <p className="text-xs text-muted-foreground">
                 {analytics.trends.applicationsThisWeek > analytics.trends.applicationsLastWeek ? (
                   <span className="text-green-600">
-                    ↑ {analytics.trends.applicationsThisWeek - analytics.trends.applicationsLastWeek} from last week
+                    ↑ {analytics.trends.applicationsThisWeek - analytics.trends.applicationsLastWeek} {t("weeklyChange")}
                   </span>
                 ) : analytics.trends.applicationsThisWeek < analytics.trends.applicationsLastWeek ? (
                   <span className="text-red-600">
-                    ↓ {analytics.trends.applicationsLastWeek - analytics.trends.applicationsThisWeek} from last week
+                    ↓ {analytics.trends.applicationsLastWeek - analytics.trends.applicationsThisWeek} {t("weeklyChange")}
                   </span>
                 ) : (
-                  <span className="text-gray-600">Same as last week</span>
+                  <span className="text-gray-600">{t("applicationsLastWeek")}</span>
                 )}
               </p>
             </CardContent>
@@ -431,20 +433,20 @@ export default function SchoolAnalyticsPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Last Week</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("applicationsLastWeek")}</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.trends.applicationsLastWeek}</div>
               <p className="text-xs text-muted-foreground">
-                Previous 7 days
+                {t("applications")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Acceptance Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("acceptanceRate")}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -452,14 +454,14 @@ export default function SchoolAnalyticsPage() {
                 {analytics.trends.acceptanceRate.toFixed(1)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                Of decided applications
+                {t("accepted")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Payment Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("paymentRate")}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -467,7 +469,7 @@ export default function SchoolAnalyticsPage() {
                 {analytics.trends.conversionRate.toFixed(1)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                Applications with payment
+                {t("paidApplications")}
               </p>
             </CardContent>
           </Card>
@@ -476,13 +478,13 @@ export default function SchoolAnalyticsPage() {
 
       {/* Program Popularity */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Top Programs</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("topPrograms")}</h2>
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Program Popularity</CardTitle>
-                <CardDescription>Most applied programs</CardDescription>
+                <CardTitle>{t("topPrograms")}</CardTitle>
+                <CardDescription>{t("program")}</CardDescription>
               </div>
               <BarChart className="h-5 w-5 text-muted-foreground" />
             </div>
@@ -498,7 +500,7 @@ export default function SchoolAnalyticsPage() {
                     <div key={index}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium">{program.name}</span>
-                        <span className="text-sm text-muted-foreground">{program.count} apps</span>
+                        <span className="text-sm text-muted-foreground">{program.count} {t("applications")}</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
                         <div 
@@ -512,7 +514,7 @@ export default function SchoolAnalyticsPage() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
-                No program data available yet
+                {t("applications")}
               </p>
             )}
           </CardContent>
@@ -521,23 +523,23 @@ export default function SchoolAnalyticsPage() {
 
       {/* Conversion Funnel */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Application Funnel</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("applicationFunnel")}</h2>
         <Card>
           <CardHeader>
-            <CardTitle>Application Journey</CardTitle>
-            <CardDescription>From submission to decision</CardDescription>
+            <CardTitle>{t("applicationJourney")}</CardTitle>
+            <CardDescription>{t("submissionToDecision")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {[
                 { 
-                  label: 'Total Applications', 
+                  label: t("totalApplicationsLabel"), 
                   count: analytics.financial.totalApplications, 
                   color: 'bg-blue-500',
                   percentage: 100
                 },
                 { 
-                  label: 'Paid Applications', 
+                  label: t("paidApplicationsLabel"), 
                   count: analytics.financial.paidApplications, 
                   color: 'bg-green-500',
                   percentage: analytics.financial.totalApplications > 0 
@@ -545,7 +547,7 @@ export default function SchoolAnalyticsPage() {
                     : 0
                 },
                 { 
-                  label: 'Under Review', 
+                  label: t("underReviewLabel"), 
                   count: analytics.applications.underReview, 
                   color: 'bg-amber-500',
                   percentage: analytics.financial.totalApplications > 0 
@@ -553,7 +555,7 @@ export default function SchoolAnalyticsPage() {
                     : 0
                 },
                 { 
-                  label: 'Accepted', 
+                  label: t("acceptedLabel"), 
                   count: analytics.applications.accepted, 
                   color: 'bg-green-600',
                   percentage: analytics.financial.totalApplications > 0 

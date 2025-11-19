@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ interface CustomQuestion {
 }
 
 export default function CustomQuestionsPage() {
+  const t = useTranslations("schools.questions");
   const [demoMode] = useState(true); // Demo mode until API is implemented
   const [questions, setQuestions] = useState<CustomQuestion[]>([
     {
@@ -148,15 +150,15 @@ export default function CustomQuestionsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div className="flex-1">
-              <h3 className="font-semibold text-amber-900 mb-1">Demo Mode</h3>
+              <h3 className="font-semibold text-amber-900 mb-1">{t("demoMode")}</h3>
               <p className="text-sm text-amber-800 mb-2">
-                You&apos;re viewing sample custom questions. To manage real questions, please{' '}
-                <Link href="/auth/signin" className="underline font-medium">sign in</Link>
-                {' '}or{' '}
-                <Link href="/schools/register" className="underline font-medium">register your institution</Link>.
+                {t("demoModeMessage")}{' '}
+                <Link href="/auth/signin" className="underline font-medium">{t("signIn")}</Link>
+                {' '}{t("or")}{' '}
+                <Link href="/schools/register" className="underline font-medium">{t("registerInstitution")}</Link>.
               </p>
               <p className="text-xs text-amber-700">
-                This demo shows how you can create custom questions for your application form.
+                {t("demoModeDescription")}
               </p>
             </div>
           </div>
@@ -165,17 +167,17 @@ export default function CustomQuestionsPage() {
 
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Custom Application Questions</h1>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Add custom questions to your application form to gather specific information
+            {t("subtitle")}
           </p>
         </div>
         <div className="space-x-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">← Dashboard</Link>
+            <Link href="/schools/dashboard">{t("dashboard")}</Link>
           </Button>
           <Button onClick={handleAddQuestion}>
-            Add Question
+            {t("addQuestion")}
           </Button>
         </div>
       </div>
@@ -184,8 +186,7 @@ export default function CustomQuestionsPage() {
       <Card className="mb-6 bg-blue-50 border-blue-200">
         <CardContent className="pt-6">
           <p className="text-sm text-blue-900">
-            <strong>Note:</strong> These questions will appear in the application form for all your programs.
-            Applicants will see them after completing their profile and uploading documents.
+            <strong>{t("noteTitle")}</strong> {t("noteMessage")}
           </p>
         </CardContent>
       </Card>
@@ -195,8 +196,8 @@ export default function CustomQuestionsPage() {
         {questions.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
-              <p className="text-muted-foreground mb-4">No custom questions yet</p>
-              <Button onClick={handleAddQuestion}>Add Your First Question</Button>
+              <p className="text-muted-foreground mb-4">{t("noQuestions")}</p>
+              <Button onClick={handleAddQuestion}>{t("addFirstQuestion")}</Button>
             </CardContent>
           </Card>
         ) : (
@@ -230,26 +231,26 @@ export default function CustomQuestionsPage() {
                           <span className="font-semibold">{question.order}.</span>
                           <h3 className="font-semibold">{question.question}</h3>
                           {question.required && (
-                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                            <Badge variant="destructive" className="text-xs">{t("required")}</Badge>
                           )}
                           {!question.isActive && (
-                            <Badge variant="outline" className="text-xs">Disabled</Badge>
+                            <Badge variant="outline" className="text-xs">{t("disabled")}</Badge>
                           )}
                         </div>
                         <div className="flex gap-2 text-sm text-muted-foreground">
                           <Badge variant="outline">{question.type}</Badge>
                           {question.placeholder && (
-                            <span>• Placeholder: {question.placeholder}</span>
+                            <span>• {t("placeholder")}: {question.placeholder}</span>
                           )}
                         </div>
                         {question.helpText && (
                           <p className="text-sm text-muted-foreground mt-1">
-                            Help: {question.helpText}
+                            {t("help")}: {question.helpText}
                           </p>
                         )}
                         {question.options && (
                           <div className="mt-2">
-                            <span className="text-xs text-muted-foreground">Options:</span>
+                            <span className="text-xs text-muted-foreground">{t("options")}:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {question.options.map((opt, i) => (
                                 <Badge key={i} variant="secondary" className="text-xs">
