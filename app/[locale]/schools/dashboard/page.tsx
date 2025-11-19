@@ -305,7 +305,7 @@ export default function SchoolDashboardPage() {
               <Link href="/schools/dashboard/programs">
                 <div className="text-left w-full">
                   <div className="font-semibold">{t("managePrograms")}</div>
-                  <div className="text-sm text-muted-foreground">{t("addOrEditPrograms")}</div>
+                  <div className="text-sm text-muted-foreground">{t("addEditPrograms")}</div>
                 </div>
               </Link>
             </Button>
