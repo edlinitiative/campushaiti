@@ -201,17 +201,17 @@ export default function AdminPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Users</CardDescription>
+            <CardDescription>{t("totalUsersCard")}</CardDescription>
             <CardTitle className="text-3xl text-green-600">{stats.totalUsers}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-1 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Applicants:</span>
+                <span className="text-muted-foreground">{t("applicants")}:</span>
                 <span>{stats.applicants}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">School Admins:</span>
+                <span className="text-muted-foreground">{t("schoolAdmins")}:</span>
                 <span>{stats.schoolAdmins}</span>
               </div>
             </div>
@@ -225,17 +225,17 @@ export default function AdminPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-600" />
-              <CardTitle>Action Required</CardTitle>
+              <CardTitle>{t("actionRequired")}</CardTitle>
             </div>
-            <CardDescription>Pending university registrations need review</CardDescription>
+            <CardDescription>{t("pendingUniversitiesNeedReview")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <p className="text-sm">
-                <strong>{stats.pendingUniversities}</strong> {stats.pendingUniversities === 1 ? 'university is' : 'universities are'} waiting for approval
+                <strong>{stats.pendingUniversities}</strong> {stats.pendingUniversities === 1 ? t("universityWaitingApproval") : t("universitiesWaitingApproval")}
               </p>
               <Button asChild>
-                <Link href="/admin/universities">Review Now</Link>
+                <Link href="/admin/universities">{t("reviewNow")}</Link>
               </Button>
             </div>
           </CardContent>
@@ -244,29 +244,29 @@ export default function AdminPage() {
 
       {/* Management Sections */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">University Management</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("universityManagement")}</h2>
         <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-blue-600" />
-                <CardTitle>Universities</CardTitle>
+                <CardTitle>{t("universities")}</CardTitle>
               </div>
-              <CardDescription>Approve and manage university registrations</CardDescription>
+              <CardDescription>{t("approveManageRegistrations")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Approved:</span>
+                  <span className="text-muted-foreground">{t("approved")}:</span>
                   <Badge variant="outline">{stats.approvedUniversities}</Badge>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Pending:</span>
+                  <span className="text-muted-foreground">{t("pending")}:</span>
                   <Badge variant="outline" className="bg-amber-100">{stats.pendingUniversities}</Badge>
                 </div>
               </div>
               <Button asChild className="w-full">
-                <Link href="/admin/universities">Manage Universities</Link>
+                <Link href="/admin/universities">{t("manageUniversitiesBtn")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -275,16 +275,16 @@ export default function AdminPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <GraduationCap className="w-5 h-5 text-purple-600" />
-                <CardTitle>Programs</CardTitle>
+                <CardTitle>{t("programs")}</CardTitle>
               </div>
-              <CardDescription>View and configure university programs</CardDescription>
+              <CardDescription>{t("viewConfigurePrograms")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                {stats.totalPrograms} programs across {stats.approvedUniversities} universities
+                {stats.totalPrograms} {t("programsAcross")} {stats.approvedUniversities} {t("universitiesLower")}
               </p>
               <Button asChild className="w-full" variant="outline">
-                <Link href="/admin/programs">View All Programs</Link>
+                <Link href="/admin/programs">{t("viewAllPrograms")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -292,33 +292,33 @@ export default function AdminPage() {
       </div>
 
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Application Management</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("applicationManagement")}</h2>
         <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-green-600" />
-                <CardTitle>All Applications</CardTitle>
+                <CardTitle>{t("allApplications")}</CardTitle>
               </div>
-              <CardDescription>Monitor and review all student applications</CardDescription>
+              <CardDescription>{t("monitorReviewApplications")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total:</span>
+                  <span className="text-muted-foreground">{t("total")}:</span>
                   <Badge>{stats.totalApplications}</Badge>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Pending Review:</span>
+                  <span className="text-muted-foreground">{t("pendingReviewLabel")}:</span>
                   <Badge variant="outline">{stats.pendingApplications}</Badge>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Accepted:</span>
+                  <span className="text-muted-foreground">{t("accepted")}:</span>
                   <Badge variant="outline" className="bg-green-100">{stats.acceptedApplications}</Badge>
                 </div>
               </div>
               <Button asChild className="w-full" variant="outline">
-                <Link href="/admin/applications">View Applications</Link>
+                <Link href="/admin/applications">{t("viewApplicationsBtn")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -327,27 +327,27 @@ export default function AdminPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-indigo-600" />
-                <CardTitle>User Management</CardTitle>
+                <CardTitle>{t("userManagement")}</CardTitle>
               </div>
-              <CardDescription>Manage platform users and permissions</CardDescription>
+              <CardDescription>{t("manageUsersPermissions")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total Users:</span>
+                  <span className="text-muted-foreground">{t("totalUsersLabel")}:</span>
                   <Badge>{stats.totalUsers}</Badge>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Applicants:</span>
+                  <span className="text-muted-foreground">{t("applicantsLabel")}:</span>
                   <Badge variant="outline">{stats.applicants}</Badge>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">School Admins:</span>
+                  <span className="text-muted-foreground">{t("schoolAdminsLabel")}:</span>
                   <Badge variant="outline">{stats.schoolAdmins}</Badge>
                 </div>
               </div>
               <Button asChild className="w-full" variant="outline">
-                <Link href="/admin/users">Manage Users</Link>
+                <Link href="/admin/users">{t("manageUsersBtn")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -355,19 +355,19 @@ export default function AdminPage() {
       </div>
 
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Platform Tools</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("platformTools")}</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-blue-600" />
-                <CardTitle>Analytics</CardTitle>
+                <CardTitle>{t("analytics")}</CardTitle>
               </div>
-              <CardDescription>Platform usage and statistics</CardDescription>
+              <CardDescription>{t("platformUsageStats")}</CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full" variant="outline">
-                <Link href="/admin/analytics">View Analytics</Link>
+                <Link href="/admin/analytics">{t("viewAnalyticsBtn")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -376,13 +376,13 @@ export default function AdminPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-green-600" />
-                <CardTitle>Payments</CardTitle>
+                <CardTitle>{t("payments")}</CardTitle>
               </div>
-              <CardDescription>Payment tracking and revenue</CardDescription>
+              <CardDescription>{t("paymentTrackingRevenue")}</CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full" variant="outline">
-                <Link href="/admin/payments">View Payments</Link>
+                <Link href="/admin/payments">{t("viewPaymentsBtn")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -391,13 +391,13 @@ export default function AdminPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-gray-600" />
-                <CardTitle>Settings</CardTitle>
+                <CardTitle>{t("settings")}</CardTitle>
               </div>
-              <CardDescription>Platform configuration</CardDescription>
+              <CardDescription>{t("platformConfigurationDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full" variant="outline">
-                <Link href="/admin/settings">Configure</Link>
+                <Link href="/admin/settings">{t("configureBtn")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -409,31 +409,31 @@ export default function AdminPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-green-600" />
-            <CardTitle>System Status</CardTitle>
+            <CardTitle>{t("systemStatus")}</CardTitle>
           </div>
-          <CardDescription>Platform health and monitoring</CardDescription>
+          <CardDescription>{t("platformHealthMonitoring")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-600" />
               <div>
-                <p className="text-sm font-medium">Database</p>
-                <p className="text-xs text-muted-foreground">Operational</p>
+                <p className="text-sm font-medium">{t("database")}</p>
+                <p className="text-xs text-muted-foreground">{t("operational")}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-600" />
               <div>
-                <p className="text-sm font-medium">Authentication</p>
-                <p className="text-xs text-muted-foreground">Operational</p>
+                <p className="text-sm font-medium">{t("authentication")}</p>
+                <p className="text-xs text-muted-foreground">{t("operational")}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-600" />
               <div>
-                <p className="text-sm font-medium">Storage</p>
-                <p className="text-xs text-muted-foreground">Operational</p>
+                <p className="text-sm font-medium">{t("storage")}</p>
+                <p className="text-xs text-muted-foreground">{t("operational")}</p>
               </div>
             </div>
           </div>
