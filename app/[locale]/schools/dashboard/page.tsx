@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -125,6 +125,9 @@ export default function SchoolDashboardPage() {
         <div className="space-x-2">
           <Button variant="outline" asChild>
             <Link href="/schools/dashboard/programs">{t("managePrograms")}</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/schools/dashboard/team">{t("team")}</Link>
           </Button>
           <Button asChild>
             <Link href="/schools/dashboard/settings">{t("settings")}</Link>
