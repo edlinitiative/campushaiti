@@ -16,8 +16,8 @@ function getAdminApp(): App {
   }
 
   if (getApps().length === 0) {
-    // Skip initialization during build time
-    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
+    // Skip initialization during build time only
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
       console.log("Skipping Firebase Admin initialization during build");
       // Return a mock app to prevent errors during build
       return {} as App;
