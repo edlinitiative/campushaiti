@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 import { School } from "@/lib/types/firestore";
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the session
-    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie);
+    const decodedClaims = await getAdminAuth().verifySessionCookie(sessionCookie);
     const uid = decodedClaims.uid;
 
     // Parse request body
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     await schoolRef.set(schoolData);
 
     // Update user role to SCHOOL_ADMIN
-    await adminAuth.setCustomUserClaims(uid, { role: "SCHOOL_ADMIN" });
+    await getAdminAuth().setCustomUserClaims(uid, { role: "SCHOOL_ADMIN" });
 
     // Update user document
     await collection("users").doc(uid).update({

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 import { requireRole } from "@/lib/auth/server-auth";
 
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const provider = searchParams.get("provider"); // google.com, password, phone
 
     // List all users from Firebase Auth
-    const listUsersResult = await adminAuth.listUsers(limit);
+    const listUsersResult = await getAdminAuth().listUsers(limit);
     
     let users = listUsersResult.users.map((userRecord) => {
       // Get primary auth provider

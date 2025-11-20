@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { requireRole } from "@/lib/auth/server-auth";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user to check if they have a password provider
-    const user = await adminAuth.getUser(userId);
+    const user = await getAdminAuth().getUser(userId);
     
     const hasPasswordProvider = user.providerData.some(
       (provider) => provider.providerId === "password"
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate password reset link
-    const resetLink = await adminAuth.generatePasswordResetLink(user.email);
+    const resetLink = await getAdminAuth().generatePasswordResetLink(user.email);
 
     // In production, you would send this via email
     // For now, we'll just return success

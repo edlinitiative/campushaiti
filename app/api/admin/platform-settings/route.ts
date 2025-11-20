@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decodedToken = await adminAuth.verifySessionCookie(token);
+    const decodedToken = await getAdminAuth().verifySessionCookie(token);
     const userDoc = await collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decodedToken = await adminAuth.verifySessionCookie(token);
+    const decodedToken = await getAdminAuth().verifySessionCookie(token);
     const userDoc = await collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {

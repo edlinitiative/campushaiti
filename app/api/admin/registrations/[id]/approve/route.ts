@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 import { sendUniversityApprovedEmail, sendNewRegistrationNotification } from "@/lib/email/service";
 import { University } from "@/lib/types/firestore";
@@ -21,7 +21,7 @@ export async function PUT(
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie);
+    const decodedClaims = await getAdminAuth().verifySessionCookie(sessionCookie);
     
     // Verify user is admin
     if (decodedClaims.role !== "ADMIN") {
@@ -81,15 +81,15 @@ export async function PUT(
       // Check if user already exists
       let userRecord;
       try {
-        userRecord = await adminAuth.getUserByEmail(contactEmail);
+        userRecord = await getAdminAuth().getUserByEmail(contactEmail);
         schoolAdminUid = userRecord.uid;
         
         // Update existing user's role to SCHOOL_ADMIN
-        await adminAuth.setCustomUserClaims(userRecord.uid, { role: "SCHOOL_ADMIN" });
+        await getAdminAuth().setCustomUserClaims(userRecord.uid, { role: "SCHOOL_ADMIN" });
       } catch (getUserError: any) {
         if (getUserError.code === 'auth/user-not-found') {
           // Create new user
-          userRecord = await adminAuth.createUser({
+          userRecord = await getAdminAuth().createUser({
             email: contactEmail,
             password: tempPassword,
             displayName: contactName,
@@ -99,7 +99,7 @@ export async function PUT(
           schoolAdminUid = userRecord.uid;
           
           // Set custom claims
-          await adminAuth.setCustomUserClaims(userRecord.uid, { role: "SCHOOL_ADMIN" });
+          await getAdminAuth().setCustomUserClaims(userRecord.uid, { role: "SCHOOL_ADMIN" });
           
           // TODO: Send welcome email with temporary password
           console.log(`Created school admin account for ${contactEmail} with temp password: ${tempPassword}`);

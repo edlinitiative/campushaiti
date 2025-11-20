@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { requireRole } from "@/lib/auth/server-auth";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user disabled status in Firebase Auth
-    await adminAuth.updateUser(userId, {
+    await getAdminAuth().updateUser(userId, {
       disabled: disabled,
     });
 

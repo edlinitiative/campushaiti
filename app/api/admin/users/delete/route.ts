@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 import { requireRole } from "@/lib/auth/server-auth";
 
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Delete user from Firebase Auth
-    await adminAuth.deleteUser(userId);
+    await getAdminAuth().deleteUser(userId);
 
     // Delete user data from Firestore
     try {

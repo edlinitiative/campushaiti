@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 import {
   generateRegistrationOptions,
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       } else {
         // If user doesn't exist in Firestore, try to get from Firebase Auth
         try {
-          const authUser = await adminAuth.getUser(userId);
+          const authUser = await getAdminAuth().getUser(userId);
           userData = {
             email: authUser.email,
             name: authUser.displayName,

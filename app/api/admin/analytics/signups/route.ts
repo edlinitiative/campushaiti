@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { requireRole } from "@/lib/auth/server-auth";
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const timeRange = searchParams.get("timeRange") || "6months";
 
     // Fetch all users
-    const listUsersResult = await adminAuth.listUsers(1000);
+    const listUsersResult = await getAdminAuth().listUsers(1000);
     const users = listUsersResult.users;
 
     // Calculate provider distribution

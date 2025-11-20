@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Verify the request is authenticated (from server or admin)
     const token = request.cookies.get("session")?.value;
     if (token) {
-      const decodedToken = await adminAuth.verifySessionCookie(token);
+      const decodedToken = await getAdminAuth().verifySessionCookie(token);
       // Allow if user is sending to themselves or is admin
       if (userId && decodedToken.uid !== userId) {
         // Check if admin

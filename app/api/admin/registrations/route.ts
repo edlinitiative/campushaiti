@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 import { UniversityRegistration } from "@/lib/types/firestore";
 
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie);
+    const decodedClaims = await getAdminAuth().verifySessionCookie(sessionCookie);
     
     // Verify user is admin
     if (decodedClaims.role !== "ADMIN") {

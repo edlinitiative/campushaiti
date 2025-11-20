@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Update display name in Firebase Auth if provided
     if (fullName) {
       try {
-        await adminAuth.updateUser(userId, {
+        await getAdminAuth().updateUser(userId, {
           displayName: fullName,
         });
       } catch (authError) {
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const decodedToken = await adminAuth.verifySessionCookie(token);
+    const decodedToken = await getAdminAuth().verifySessionCookie(token);
     if (decodedToken.uid !== userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user from Firebase Auth
-    const userRecord = await adminAuth.getUser(userId);
+    const userRecord = await getAdminAuth().getUser(userId);
 
     return NextResponse.json({
       phoneNumber,
@@ -129,7 +129,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const decodedToken = await adminAuth.verifySessionCookie(token);
+    const decodedToken = await getAdminAuth().verifySessionCookie(token);
     if (decodedToken.uid !== userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
