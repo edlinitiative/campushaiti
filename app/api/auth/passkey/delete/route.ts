@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Delete the passkey from Firestore
-    await adminDb.collection("passkeys").doc(passkeyId).delete();
+    await collection("passkeys").doc(passkeyId).delete();
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

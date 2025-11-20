@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import {
   generateRegistrationOptions,
   type GenerateRegistrationOptionsOpts,
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Get or create user in Firestore
     let userData: any = {};
     try {
-      const userDoc = await adminDb.collection("users").doc(userId).get();
+      const userDoc = await collection("users").doc(userId).get();
       if (userDoc.exists) {
         userData = userDoc.data();
       } else {
@@ -32,10 +33,10 @@ export async function POST(request: NextRequest) {
             name: authUser.displayName,
           };
           // Create the user document
-          await adminDb.collection("users").doc(userId).set({
+          await collection("users").doc(userId).set({
             email: authUser.email,
             displayName: authUser.displayName,
-            createdAt: new Date(),
+            createdAt: Date.now(),
           }, { merge: true });
         } catch (authError) {
           console.error("Could not fetch user from Auth:", authError);
@@ -66,9 +67,9 @@ export async function POST(request: NextRequest) {
 
     // Store challenge in Firestore temporarily
     try {
-      await adminDb.collection("passkey_challenges").doc(userId).set({
+      await collection("passkey_challenges").doc(userId).set({
         challenge: options.challenge,
-        createdAt: new Date(),
+        createdAt: Date.now(),
       });
     } catch (challengeError) {
       console.warn("Could not store challenge in Firestore:", challengeError);

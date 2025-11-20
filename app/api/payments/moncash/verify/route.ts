@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { monCash } from "@/lib/payments/moncash";
 
 export async function POST(request: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const paymentStatus = await monCash.verifyPayment({ transactionId });
 
     // Find payment record
-    const paymentsSnapshot = await adminDb
+    const paymentsSnapshot = await collection(
       .collection("payments")
       .where("providerRef", "==", transactionId)
       .limit(1)
@@ -37,17 +37,17 @@ export async function POST(request: NextRequest) {
     if (paymentStatus.status === "PAID") {
       await paymentDoc.ref.update({
         status: "PAID",
-        updatedAt: new Date(),
+        updatedAt: Date.now(),
       });
 
       // Update application item
       const applicationItemId = paymentData.metadata?.applicationItemId;
       if (applicationItemId) {
-        await adminDb.collection("applicationItems").doc(applicationItemId).update({
+        await collection("applicationItems").doc(applicationItemId).update({
           status: "PAID",
           paymentId: paymentDoc.id,
           "checklist.paymentReceived": true,
-          updatedAt: new Date(),
+          updatedAt: Date.now(),
         });
       }
     }

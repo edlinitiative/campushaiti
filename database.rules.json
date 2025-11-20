@@ -1,0 +1,109 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+        ".write": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+        ".validate": "newData.hasChildren(['updatedAt'])"
+      }
+    },
+    
+    "universities": {
+      ".read": true,
+      "$universityId": {
+        ".write": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN' || root.child('users').child(auth.uid).child('universityId').val() === $universityId"
+      }
+    },
+    
+    "programs": {
+      ".read": true,
+      "$programId": {
+        ".write": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+      }
+    },
+    
+    "applicationItems": {
+      "$applicationId": {
+        ".read": "data.child('applicantUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN' || root.child('users').child(auth.uid).child('role').val() === 'SCHOOL_ADMIN'",
+        ".write": "data.child('applicantUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN' || root.child('users').child(auth.uid).child('role').val() === 'SCHOOL_ADMIN'"
+      }
+    },
+    
+    "documents": {
+      "$documentId": {
+        ".read": "data.child('ownerUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+        ".write": "data.child('ownerUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+      }
+    },
+    
+    "payments": {
+      "$paymentId": {
+        ".read": "data.child('userId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+        ".write": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+      }
+    },
+    
+    "sms_notifications": {
+      ".read": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+    },
+    
+    "bulk_sms_notifications": {
+      ".read": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+    },
+    
+    "platform_settings": {
+      ".read": true,
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+    },
+    
+    "passkeys": {
+      "$passkeyId": {
+        ".read": "data.child('userId').val() === auth.uid",
+        ".write": "data.child('userId').val() === auth.uid"
+      }
+    },
+    
+    "passkey_challenges": {
+      "$userId": {
+        ".read": "$userId === auth.uid",
+        ".write": "$userId === auth.uid"
+      }
+    },
+    
+    "auth_challenges": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "auditLogs": {
+      ".read": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+    },
+    
+    "schools": {
+      "$schoolId": {
+        ".read": "data.child('ownerUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+        ".write": "data.child('ownerUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+      }
+    },
+    
+    "universityRegistrations": {
+      ".read": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+      "$registrationId": {
+        ".write": "!data.exists() || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+      }
+    },
+    
+    "notifications": {
+      "$notificationId": {
+        ".read": "data.child('userId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'ADMIN'",
+        ".write": "root.child('users').child(auth.uid).child('role').val() === 'ADMIN'"
+      }
+    }
+  }
+}

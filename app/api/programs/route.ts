@@ -90,8 +90,8 @@ const DEMO_PROGRAMS = [
 
 export async function GET() {
   try {
-    const adminDb = getAdminDb();
-    const snapshot = await adminDb
+    // Migrated to Realtime Database
+    const snapshot = await collection(
       .collection("programs")
       .orderBy("name")
       .limit(100)

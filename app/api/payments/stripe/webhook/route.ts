@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { adminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { headers } from "next/headers";
 
 // Lazy load Stripe to avoid initialization during build
@@ -46,26 +46,26 @@ export async function POST(request: NextRequest) {
 
       if (paymentId) {
         // Update payment status
-        const paymentDoc = await adminDb.collection("payments").doc(paymentId).get();
+        const paymentDoc = await collection("payments").doc(paymentId).get();
         const paymentData = paymentDoc.data();
         
-        await adminDb.collection("payments").doc(paymentId).update({
+        await collection("payments").doc(paymentId).update({
           status: "PAID",
-          updatedAt: new Date(),
+          updatedAt: Date.now(),
         });
 
         // Update application item
         if (applicationItemId) {
-          await adminDb.collection("applicationItems").doc(applicationItemId).update({
+          await collection("applicationItems").doc(applicationItemId).update({
             status: "PAID",
             paymentId,
             "checklist.paymentReceived": true,
-            updatedAt: new Date(),
+            updatedAt: Date.now(),
           });
           
           // Send payment confirmation email
           try {
-            const appItemDoc = await adminDb.collection("applicationItems").doc(applicationItemId).get();
+            const appItemDoc = await collection("applicationItems").doc(applicationItemId).get();
             const appItemData = appItemDoc.data();
             
             if (appItemData && paymentData) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     const stripeUserId = tokenData.stripe_user_id;
 
     // Update university with Stripe account ID
-    await adminDb.collection("universities").doc(universityId).update({
+    await collection("universities").doc(universityId).update({
       stripeAccountId: stripeUserId,
       updatedAt: Date.now(),
     });

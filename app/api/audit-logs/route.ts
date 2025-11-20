@@ -31,10 +31,10 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get("action") as AuditAction | undefined;
     const limit = parseInt(searchParams.get("limit") || "100");
     const startDate = searchParams.get("startDate")
-      ? new Date(searchParams.get("startDate")!)
+      ? new Date(searchParams.get("startDate")!).getTime()
       : undefined;
     const endDate = searchParams.get("endDate")
-      ? new Date(searchParams.get("endDate")!)
+      ? new Date(searchParams.get("endDate")!).getTime()
       : undefined;
 
     const logs = await auditLogger.query({

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import {
   verifyRegistrationResponse,
   type VerifyRegistrationResponseOpts,
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get stored challenge
-    const challengeDoc = await adminDb
+    const challengeDoc = await collection(
       .collection("passkey_challenges")
       .doc(userId)
       .get();
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const { credential } = verification.registrationInfo;
 
     // Store credential in Firestore
-    await adminDb
+    await collection(
       .collection("users")
       .doc(userId)
       .collection("passkeys")
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         credentialID: Buffer.from(credential.id).toString("base64"),
         credentialPublicKey: Buffer.from(credential.publicKey).toString("base64"),
         counter: credential.counter,
-        createdAt: new Date(),
+        createdAt: Date.now(),
       });
 
     // Delete challenge

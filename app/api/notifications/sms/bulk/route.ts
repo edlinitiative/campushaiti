@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     const decodedToken = await adminAuth.verifySessionCookie(token);
-    const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
+    const userDoc = await collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     if (specificUserIds && Array.isArray(specificUserIds)) {
       // Specific users
       const userDocs = await Promise.all(
-        specificUserIds.map((id) => adminDb.collection("users").doc(id).get())
+        specificUserIds.map((id) => collection("users").doc(id).get())
       );
       recipients = userDocs
         .filter((doc) => doc.exists && doc.data()?.phoneNumber)
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
         }));
     } else if (recipientType === "all") {
       // All users with phone numbers
-      const usersSnapshot = await adminDb
+      const usersSnapshot = await collection(
         .collection("users")
         .where("phoneNumber", "!=", null)
         .get();
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       }));
     } else if (recipientType === "applicants") {
       // Only applicants
-      const usersSnapshot = await adminDb
+      const usersSnapshot = await collection(
         .collection("users")
         .where("role", "==", "APPLICANT")
         .where("phoneNumber", "!=", null)
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
       const verifiedUsers = allUsers.users.filter((user) => user.emailVerified);
       const userDocs = await Promise.all(
         verifiedUsers.map((user) =>
-          adminDb.collection("users").doc(user.uid).get()
+          collection("users").doc(user.uid).get()
         )
       );
       recipients = userDocs
@@ -89,12 +90,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Create bulk notification record
-    const bulkNotificationRef = await adminDb.collection("bulk_sms_notifications").add({
+    const bulkNotificationRef = await collection("bulk_sms_notifications").add({
       message,
       recipientType: recipientType || "specific",
       recipientCount: recipients.length,
       status: "processing",
-      createdAt: new Date(),
+      createdAt: Date.now(),
       createdBy: decodedToken.uid,
       sentCount: 0,
       failedCount: 0,
@@ -109,12 +110,12 @@ export async function POST(request: NextRequest) {
         type: "bulk",
         bulkNotificationId: bulkNotificationRef.id,
         status: "pending",
-        createdAt: new Date(),
+        createdAt: Date.now(),
         sentAt: null,
         error: null,
       };
 
-      const notificationRef = await adminDb
+      const notificationRef = await collection(
         .collection("sms_notifications")
         .add(notificationData);
 
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
       // For now, mark as sent
       await notificationRef.update({
         status: "sent",
-        sentAt: new Date(),
+        sentAt: Date.now(),
       });
 
       return { success: true, notificationId: notificationRef.id };
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
       status: "completed",
       sentCount,
       failedCount,
-      completedAt: new Date(),
+      completedAt: Date.now(),
     });
 
     return NextResponse.json({

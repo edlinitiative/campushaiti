@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -26,7 +27,7 @@ export async function GET(
     }
 
     const applicationId = params.id;
-    const applicationRef = adminDb.collection("applicationItems").doc(applicationId);
+    const applicationRef = collection("applicationItems").doc(applicationId);
     const applicationDoc = await applicationRef.get();
 
     if (!applicationDoc.exists) {
@@ -40,7 +41,7 @@ export async function GET(
 
     // Verify user has access to this application's university
     if (decodedClaims.role === "SCHOOL_ADMIN") {
-      const universityRef = adminDb.collection("universities").doc(application!.universityId);
+      const universityRef = collection("universities").doc(application!.universityId);
       const universityDoc = await universityRef.get();
       
       if (!universityDoc.exists) {
@@ -87,7 +88,7 @@ export async function PUT(
     }
 
     const applicationId = params.id;
-    const applicationRef = adminDb.collection("applicationItems").doc(applicationId);
+    const applicationRef = collection("applicationItems").doc(applicationId);
     const applicationDoc = await applicationRef.get();
 
     if (!applicationDoc.exists) {
@@ -101,7 +102,7 @@ export async function PUT(
 
     // Verify user has access to this application's university
     if (decodedClaims.role === "SCHOOL_ADMIN") {
-      const universityRef = adminDb.collection("universities").doc(application!.universityId);
+      const universityRef = collection("universities").doc(application!.universityId);
       const universityDoc = await universityRef.get();
       
       if (!universityDoc.exists) {

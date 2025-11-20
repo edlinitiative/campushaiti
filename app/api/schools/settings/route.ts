@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -32,7 +33,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const universityRef = adminDb.collection("universities").doc(universityId);
+    const universityRef = collection("universities").doc(universityId);
     const universityDoc = await universityRef.get();
 
     if (!universityDoc.exists) {

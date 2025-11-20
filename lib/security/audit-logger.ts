@@ -3,7 +3,7 @@
  * Comprehensive logging system for security and compliance
  */
 
-import { getAdminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export enum AuditAction {
   // Authentication
@@ -82,7 +82,7 @@ export interface AuditLogEntry {
   resourceId?: string;
   details?: Record<string, any>;
   metadata?: Record<string, any>;
-  timestamp: Date;
+  timestamp: number; // Changed to number for Realtime Database compatibility
   success: boolean;
   errorMessage?: string;
 }
@@ -104,17 +104,17 @@ export class AuditLogger {
    */
   async log(entry: Partial<AuditLogEntry> & { action: AuditAction }): Promise<void> {
     try {
-      const db = getAdminDb();
+      // Use Realtime Database for audit logs
       
       const logEntry: AuditLogEntry = {
         severity: AuditSeverity.INFO,
-        timestamp: new Date(),
+        timestamp: Date.now(),
         success: true,
         ...entry,
       };
 
-      // Store in Firestore
-      await db.collection("auditLogs").add(logEntry);
+      // Store in Realtime Database
+      await collection("auditLogs").add(logEntry);
 
       // Console log for development (remove in production)
       if (process.env.NODE_ENV === "development") {
@@ -190,13 +190,12 @@ export class AuditLogger {
   async query(filters: {
     userId?: string;
     action?: AuditAction;
-    startDate?: Date;
-    endDate?: Date;
+    startDate?: number;
+    endDate?: number;
     limit?: number;
   }): Promise<AuditLogEntry[]> {
     try {
-      const db = getAdminDb();
-      let query = db.collection("auditLogs").orderBy("timestamp", "desc");
+      let query = collection("auditLogs").orderBy("timestamp", "desc");
 
       if (filters.userId) {
         query = query.where("userId", "==", filters.userId);
@@ -221,7 +220,7 @@ export class AuditLogger {
       const snapshot = await query.get();
       return snapshot.docs.map((doc) => ({
         ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate() || new Date(),
+        timestamp: doc.data().timestamp || Date.now(),
       })) as AuditLogEntry[];
     } catch (error) {
       console.error("Failed to query audit logs:", error);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { adminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { monCash } from "@/lib/payments/moncash";
 
 export async function POST(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment record in Firestore
-    const paymentRef = await adminDb.collection("payments").add({
+    const paymentRef = await collection("payments").add({
       provider: "MONCASH",
       providerRef: "",
       amountCents,
@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
         applicationItemId,
         applicantUid: user.uid,
       },
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     // Create MonCash payment
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     // Update payment record with transaction ID
     await paymentRef.update({
       providerRef: paymentResponse.transactionId,
-      updatedAt: new Date(),
+      updatedAt: Date.now(),
     });
 
     return NextResponse.json({

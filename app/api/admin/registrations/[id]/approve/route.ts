@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { sendUniversityApprovedEmail, sendNewRegistrationNotification } from "@/lib/email/service";
 import { University } from "@/lib/types/firestore";
 
@@ -28,7 +29,7 @@ export async function PUT(
     }
 
     const registrationId = params.id;
-    const registrationRef = adminDb.collection("universityRegistrations").doc(registrationId);
+    const registrationRef = collection("universityRegistrations").doc(registrationId);
     const registrationDoc = await registrationRef.get();
 
     if (!registrationDoc.exists) {
@@ -64,7 +65,8 @@ export async function PUT(
       approvedBy: decodedClaims.uid,
     };
 
-    const universityRef = await adminDb.collection("universities").add(universityData);
+    const universityRef = await collection("universities").add(universityData);
+    const universityId = universityRef.path.split('/').pop()!;
 
     // Create school admin user account
     const contactEmail = registration!.contactPersonEmail;
@@ -122,7 +124,7 @@ export async function PUT(
       status: "APPROVED",
       reviewedAt: Date.now(),
       reviewedBy: decodedClaims.uid,
-      universityId: universityRef.id,
+      universityId: universityId,
     });
 
     // Send approval email
@@ -138,7 +140,7 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      universityId: universityRef.id,
+      universityId: universityRef.path.split('/').pop() || '',
       message: "University approved successfully",
     });
   } catch (error) {

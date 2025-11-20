@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { adminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 // Lazy load Stripe to avoid initialization during build
 const getStripe = () => {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
 
     // Create payment record in Firestore
-    const paymentRef = await adminDb.collection("payments").add({
+    const paymentRef = await collection("payments").add({
       provider: "STRIPE",
       providerRef: "", // Will be updated after session creation
       amountCents,
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
         applicationItemId,
         applicantUid: user.uid,
       },
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     // Create Stripe Checkout session
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     // Update payment record with session ID
     await paymentRef.update({
       providerRef: session.id,
-      updatedAt: new Date(),
+      updatedAt: Date.now(),
     });
 
     return NextResponse.json({ sessionId: session.id, sessionUrl: session.url });

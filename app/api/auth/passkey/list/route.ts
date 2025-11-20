@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get passkeys from Firestore
-    const passkeysRef = adminDb.collection("passkeys");
+    const passkeysRef = collection("passkeys");
     const snapshot = await passkeysRef
       .where("userId", "==", userId)
       .get();

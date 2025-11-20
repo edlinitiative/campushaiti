@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -23,8 +24,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Find universities where user is an admin
-    const universitiesSnapshot = await adminDb
-      .collection("universities")
+    const universitiesSnapshot = await collection("universities")
       .where("adminUids", "array-contains", decodedClaims.uid)
       .get();
 
@@ -46,15 +46,14 @@ export async function GET(request: NextRequest) {
     // Get programs count
     let programsCount = 0;
     for (const universityId of universityIds) {
-      const programsSnapshot = await adminDb
-        .collection("programs")
+      const programsSnapshot = await collection("programs")
         .where("universityId", "==", universityId)
         .get();
       programsCount += programsSnapshot.size;
     }
 
     // Get applications statistics
-    let applicationsQuery = adminDb.collection("applicationItems");
+    let applicationsQuery = collection("applicationItems");
     
     if (universityIds.length === 1) {
       applicationsQuery = applicationsQuery.where("universityId", "==", universityIds[0]) as any;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { School } from "@/lib/types/firestore";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
       .replace(/(^-|-$)/g, "");
 
     // Check if slug already exists
-    const existingSchool = await adminDb
+    const existingSchool = await collection(
       .collection("schools")
       .where("slug", "==", slug)
       .limit(1)
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already has a pending/approved school
-    const userSchools = await adminDb
+    const userSchools = await collection(
       .collection("schools")
       .where("adminUids", "array-contains", uid)
       .limit(1)
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create school document
-    const schoolRef = adminDb.collection("schools").doc();
+    const schoolRef = collection("schools").doc();
     const now = new Date();
 
     const schoolData: Omit<School, "id"> = {
@@ -120,20 +121,20 @@ export async function POST(request: NextRequest) {
     await adminAuth.setCustomUserClaims(uid, { role: "SCHOOL_ADMIN" });
 
     // Update user document
-    await adminDb.collection("users").doc(uid).update({
+    await collection("users").doc(uid).update({
       role: "SCHOOL_ADMIN",
       schoolId: schoolRef.id,
       updatedAt: now,
     });
 
     // Create notification for admins
-    const adminsSnapshot = await adminDb
+    const adminsSnapshot = await collection(
       .collection("users")
       .where("role", "==", "ADMIN")
       .get();
 
     const notificationPromises = adminsSnapshot.docs.map((doc) =>
-      adminDb.collection("notifications").add({
+      collection("notifications").add({
         recipientUid: doc.id,
         type: "SCHOOL_REGISTRATION",
         title: "New School Registration",

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import {
   generateAuthenticationOptions,
   type GenerateAuthenticationOptionsOpts,
@@ -14,7 +14,7 @@ export async function GET() {
     let allowCredentials: any[] = [];
     
     try {
-      const passkeysSnapshot = await adminDb
+      const passkeysSnapshot = await collection(
         .collection("passkeys")
         .where("counter", ">=", 0) // Get all valid passkeys
         .get();
@@ -41,9 +41,9 @@ export async function GET() {
     const options = await generateAuthenticationOptions(opts);
 
     // Store challenge temporarily in a general collection
-    await adminDb.collection("auth_challenges").add({
+    await collection("auth_challenges").add({
       challenge: options.challenge,
-      createdAt: new Date(),
+      createdAt: Date.now(),
       expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
     });
 

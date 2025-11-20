@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { sendUniversityRejectedEmail } from "@/lib/email/service";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export async function PUT(
     }
 
     const registrationId = params.id;
-    const registrationRef = adminDb.collection("universityRegistrations").doc(registrationId);
+    const registrationRef = collection("universityRegistrations").doc(registrationId);
     const registrationDoc = await registrationRef.get();
 
     if (!registrationDoc.exists) {

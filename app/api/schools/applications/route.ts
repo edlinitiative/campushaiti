@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { ApplicationItem } from "@/lib/types/firestore";
 
 export const dynamic = "force-dynamic";
@@ -29,8 +30,7 @@ export async function GET(request: NextRequest) {
     const programId = searchParams.get("programId");
 
     // Find universities where user is an admin
-    const universitiesSnapshot = await adminDb
-      .collection("universities")
+    const universitiesSnapshot = await collection("universities")
       .where("adminUids", "array-contains", decodedClaims.uid)
       .get();
 
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const universityIds = universitiesSnapshot.docs.map((doc) => doc.id);
 
     // Build query for applications
-    let query = adminDb.collection("applicationItems");
+    let query = collection("applicationItems");
 
     // Filter by university
     if (universityIds.length === 1) {

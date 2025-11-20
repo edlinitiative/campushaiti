@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { CustomQuestion } from "@/lib/types/firestore";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export async function GET(
 ) {
   try {
     const programId = params.programId;
-    const programRef = adminDb.collection("programs").doc(programId);
+    const programRef = collection("programs").doc(programId);
     const programDoc = await programRef.get();
 
     if (!programDoc.exists) {
@@ -57,7 +58,7 @@ export async function POST(
     }
 
     const programId = params.programId;
-    const programRef = adminDb.collection("programs").doc(programId);
+    const programRef = collection("programs").doc(programId);
     const programDoc = await programRef.get();
 
     if (!programDoc.exists) {
@@ -68,7 +69,7 @@ export async function POST(
 
     // Verify user has access to this program's university
     if (decodedClaims.role === "SCHOOL_ADMIN") {
-      const universityRef = adminDb.collection("universities").doc(program!.universityId);
+      const universityRef = collection("universities").doc(program!.universityId);
       const universityDoc = await universityRef.get();
       
       if (!universityDoc.exists) {

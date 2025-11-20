@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     const decodedToken = await adminAuth.verifySessionCookie(token);
-    const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
+    const userDoc = await collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     if (!type || type === "single") {
       // Get individual SMS notifications
-      const notificationsSnapshot = await adminDb
+      const notificationsSnapshot = await collection(
         .collection("sms_notifications")
         .orderBy("createdAt", "desc")
         .limit(limit)
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     if (!type || type === "bulk") {
       // Get bulk SMS notifications
-      const bulkNotificationsSnapshot = await adminDb
+      const bulkNotificationsSnapshot = await collection(
         .collection("bulk_sms_notifications")
         .orderBy("createdAt", "desc")
         .limit(limit)
@@ -70,19 +71,19 @@ export async function GET(request: NextRequest) {
     notifications = notifications.slice(0, limit);
 
     // Get stats
-    const totalSentSnapshot = await adminDb
+    const totalSentSnapshot = await collection(
       .collection("sms_notifications")
       .where("status", "==", "sent")
       .count()
       .get();
 
-    const totalFailedSnapshot = await adminDb
+    const totalFailedSnapshot = await collection(
       .collection("sms_notifications")
       .where("status", "==", "failed")
       .count()
       .get();
 
-    const totalPendingSnapshot = await adminDb
+    const totalPendingSnapshot = await collection(
       .collection("sms_notifications")
       .where("status", "==", "pending")
       .count()
