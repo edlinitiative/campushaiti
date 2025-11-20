@@ -1,26 +1,43 @@
 import { requireRole } from "@/lib/auth/server-auth";
 import { getTranslations } from "next-intl/server";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Link } from "@/lib/navigation";
-import { getAdminDb } from "@/lib/firebase/admin";
-import { ArrowLeft, UserCog, Shield, Mail, Calendar } from "lucide-react";
+import { adminAuth } from "@/lib/firebase/admin";
+import { ArrowLeft, Shield } from "lucide-react";
+import UsersListClient from "@/components/admin/UsersListClient";
 
-async function getUsers() {
-  const db = getAdminDb();
-  
+async function getUserStats() {
   try {
-    const usersSnapshot = await db.collection("users").orderBy("createdAt", "desc").limit(100).get();
+    const listUsersResult = await adminAuth.listUsers(1000);
+    const users = listUsersResult.users;
     
-    return usersSnapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const googleUsers = users.filter((u) => 
+      u.providerData.some((p) => p.providerId === "google.com")
+    ).length;
+    
+    const passwordUsers = users.filter((u) =>
+      u.providerData.some((p) => p.providerId === "password")
+    ).length;
+    
+    const phoneUsers = users.filter((u) =>
+      u.providerData.some((p) => p.providerId === "phone")
+    ).length;
+    
+    return {
+      total: users.length,
+      google: googleUsers,
+      password: passwordUsers,
+      phone: phoneUsers,
+    };
   } catch (error) {
-    console.error("Error fetching users:", error);
-    return [];
+    console.error("Error fetching user stats:", error);
+    return {
+      total: 0,
+      google: 0,
+      password: 0,
+      phone: 0,
+    };
   }
 }
 
@@ -28,20 +45,7 @@ export default async function AdminUsersPage() {
   await requireRole(["ADMIN"]);
 
   const t = await getTranslations("admin.users");
-  const users = await getUsers();
-
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case "ADMIN":
-        return <Badge className="bg-red-100 text-red-800">{t("admin")}</Badge>;
-      case "SCHOOL_ADMIN":
-        return <Badge className="bg-blue-100 text-blue-800">{t("schoolAdmin")}</Badge>;
-      case "APPLICANT":
-        return <Badge variant="outline">{t("applicant")}</Badge>;
-      default:
-        return <Badge variant="outline">{role}</Badge>;
-    }
-  };
+  const stats = await getUserStats();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -62,83 +66,37 @@ export default async function AdminUsersPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>{t("totalUsers")}</CardDescription>
-            <CardTitle className="text-2xl">{users.length}</CardTitle>
+            <CardTitle className="text-2xl">{stats.total}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{t("applicants")}</CardDescription>
+            <CardDescription>{t("googleUsers")}</CardDescription>
             <CardTitle className="text-2xl text-blue-600">
-              {users.filter((u: any) => u.role === "APPLICANT").length}
+              {stats.google}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{t("schoolAdmins")}</CardDescription>
+            <CardDescription>{t("passwordUsers")}</CardDescription>
+            <CardTitle className="text-2xl text-green-600">
+              {stats.password}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>{t("phoneUsers")}</CardDescription>
             <CardTitle className="text-2xl text-purple-600">
-              {users.filter((u: any) => u.role === "SCHOOL_ADMIN").length}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>{t("platformAdmins")}</CardDescription>
-            <CardTitle className="text-2xl text-red-600">
-              {users.filter((u: any) => u.role === "ADMIN").length}
+              {stats.phone}
             </CardTitle>
           </CardHeader>
         </Card>
       </div>
 
       {/* Users List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("allUsers")}</CardTitle>
-          <CardDescription>{t("viewAndManage")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {users.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">{t("noUsersFound")}</p>
-          ) : (
-            <div className="space-y-3">
-              {users.map((user: any) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <p className="font-medium">{user.name || t("unnamedUser")}</p>
-                      {getRoleBadge(user.role)}
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Mail className="w-3 h-3" />
-                        <span>{user.email}</span>
-                      </div>
-                      {user.createdAt && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          <span>
-                            {t("joined", { date: new Date(user.createdAt.seconds * 1000 || user.createdAt).toLocaleDateString() })}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                      <UserCog className="w-4 h-4 mr-1" />
-                      {t("manage")}
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <UsersListClient />
 
       {/* Role Management Info */}
       <Card className="mt-6">
