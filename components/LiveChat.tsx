@@ -1,19 +1,37 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function LiveChat() {
+  const [enabled, setEnabled] = useState(false);
+
   useEffect(() => {
-    // Only load if in browser
-    if (typeof window === "undefined") return;
+    // Check if live chat is enabled
+    const checkSettings = async () => {
+      try {
+        const response = await fetch("/api/admin/platform-settings");
+        if (response.ok) {
+          const data = await response.json();
+          setEnabled(data.liveChatEnabled ?? true);
+        } else {
+          // Default to enabled if can't fetch settings
+          setEnabled(true);
+        }
+      } catch (error) {
+        console.error("Error checking live chat settings:", error);
+        // Default to enabled on error
+        setEnabled(true);
+      }
+    };
+
+    checkSettings();
+  }, []);
+
+  useEffect(() => {
+    // Only load if enabled and in browser
+    if (!enabled || typeof window === "undefined") return;
 
     // Tawk.to Live Chat Widget
-    // To enable live chat:
-    // 1. Sign up at https://www.tawk.to/ (free)
-    // 2. Get your Property ID and Widget ID from dashboard
-    // 3. Add to .env.local: NEXT_PUBLIC_TAWK_PROPERTY_ID and NEXT_PUBLIC_TAWK_WIDGET_ID
-    // 4. Uncomment the code below and replace the demo IDs
-    
     const propertyId = process.env.NEXT_PUBLIC_TAWK_PROPERTY_ID;
     const widgetId = process.env.NEXT_PUBLIC_TAWK_WIDGET_ID;
 
@@ -54,7 +72,7 @@ export function LiveChat() {
       delete (window as any).Tawk_API;
       delete (window as any).Tawk_LoadStart;
     };
-  }, []);
+  }, [enabled]);
 
   return null;
 }

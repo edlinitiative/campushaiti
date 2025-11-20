@@ -759,6 +759,18 @@
       "statusFailed": "Échoué",
       "statusProcessing": "En cours",
       "statusCompleted": "Terminé"
+    },
+    "platformSettings": {
+      "title": "Paramètres de la plateforme",
+      "description": "Contrôler les fonctionnalités et paramètres de la plateforme",
+      "liveChatTitle": "Chat en direct",
+      "liveChatDescription": "Activer ou désactiver le widget de chat en direct Tawk.to pour tous les utilisateurs",
+      "maintenanceModeTitle": "Mode maintenance",
+      "maintenanceModeDescription": "Désactiver temporairement l'accès à la plateforme pour maintenance",
+      "saveSettings": "Enregistrer les paramètres",
+      "saving": "Enregistrement...",
+      "settingsSaved": "Paramètres enregistrés avec succès. La page va se recharger pour appliquer les modifications.",
+      "settingsSaveError": "Échec de l'enregistrement des paramètres. Veuillez réessayer."
     }
   },
   "schools": {

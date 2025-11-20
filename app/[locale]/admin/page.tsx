@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import SignupAnalytics from "@/components/admin/SignupAnalytics";
+import { PlatformSettings } from "@/components/admin/PlatformSettings";
 import { 
   Building2, 
   GraduationCap, 
@@ -446,6 +447,9 @@ export default function AdminPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Platform Settings */}
+      <PlatformSettings />
     </div>
   );
 }

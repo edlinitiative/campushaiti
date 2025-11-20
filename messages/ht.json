@@ -759,6 +759,18 @@
       "statusFailed": "Echwe",
       "statusProcessing": "Ap trete",
       "statusCompleted": "Konplete"
+    },
+    "platformSettings": {
+      "title": "Paramèt Platfòm",
+      "description": "Kontwole fonksyonalite ak paramèt platfòm nan",
+      "liveChatTitle": "Chat an Dirèk",
+      "liveChatDescription": "Aktive oswa dezaktive widget chat an dirèk Tawk.to pou tout itilizatè yo",
+      "maintenanceModeTitle": "Mòd Antretyen",
+      "maintenanceModeDescription": "Dezaktive aksè platfòm nan tanporèman pou antretyen",
+      "saveSettings": "Anrejistre Paramèt",
+      "saving": "Anrejistreman...",
+      "settingsSaved": "Paramèt yo anrejistre avèk siksè. Paj la ap recharje pou aplike chanjman yo.",
+      "settingsSaveError": "Echwe anrejistre paramèt yo. Tanpri eseye ankò."
     }
   },
   "schools": {

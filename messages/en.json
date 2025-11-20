@@ -758,6 +758,18 @@
       "statusFailed": "Failed",
       "statusProcessing": "Processing",
       "statusCompleted": "Completed"
+    },
+    "platformSettings": {
+      "title": "Platform Settings",
+      "description": "Control platform-wide features and settings",
+      "liveChatTitle": "Live Chat",
+      "liveChatDescription": "Enable or disable the Tawk.to live chat widget for all users",
+      "maintenanceModeTitle": "Maintenance Mode",
+      "maintenanceModeDescription": "Temporarily disable platform access for maintenance",
+      "saveSettings": "Save Settings",
+      "saving": "Saving...",
+      "settingsSaved": "Settings saved successfully. Page will reload to apply changes.",
+      "settingsSaveError": "Failed to save settings. Please try again."
     }
   },
   "schools": {
