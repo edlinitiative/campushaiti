@@ -17,8 +17,7 @@ export async function POST(request: NextRequest) {
     const paymentStatus = await monCash.verifyPayment({ transactionId });
 
     // Find payment record
-    const paymentsSnapshot = await collection(
-      .collection("payments")
+    const paymentsSnapshot = await collection("payments")
       .where("providerRef", "==", transactionId)
       .limit(1)
       .get();
