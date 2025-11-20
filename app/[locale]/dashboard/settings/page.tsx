@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ProfileForm from "@/components/settings/ProfileForm";
 import PasskeyManager from "@/components/settings/PasskeyManager";
 import DeleteAccount from "@/components/settings/DeleteAccount";
+import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import EmailVerificationBanner from "@/components/auth/EmailVerificationBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientAuthSync } from "@/components/ClientAuthSync";
@@ -38,9 +39,10 @@ export default async function SettingsPage({
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">{t("profileTab")}</TabsTrigger>
             <TabsTrigger value="security">{t("securityTab")}</TabsTrigger>
+            <TabsTrigger value="notifications">{t("notificationsTab")}</TabsTrigger>
             <TabsTrigger value="account">{t("accountTab")}</TabsTrigger>
           </TabsList>
 
@@ -66,6 +68,10 @@ export default async function SettingsPage({
                 <PasskeyManager />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="mt-6">
+            <NotificationPreferences />
           </TabsContent>
 
           <TabsContent value="account" className="mt-6">
