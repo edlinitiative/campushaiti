@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Navigation from "@/components/Navigation";
+import { LiveChat } from "@/components/LiveChat";
 import { locales } from "@/i18n";
 import localFont from "next/font/local";
 
@@ -45,6 +46,7 @@ export default async function LocaleLayout({
               </div>
             </footer>
           </div>
+          <LiveChat />
         </NextIntlClientProvider>
       </body>
     </html>

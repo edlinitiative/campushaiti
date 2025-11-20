@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/lib/navigation";
 import { Mail, MessageCircle, Book, Phone } from "lucide-react";
+import { ChatButton } from "@/components/ChatButton";
 
 export default function HelpPage() {
   const t = useTranslations("help");
@@ -194,9 +195,7 @@ export default function HelpPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 {t("liveChatDesc")}
               </p>
-              <Button variant="outline" size="sm">
-                {t("startChat")}
-              </Button>
+              <ChatButton text={t("startChat")} />
             </CardContent>
           </Card>
         </div>
