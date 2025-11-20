@@ -91,8 +91,7 @@ const DEMO_PROGRAMS = [
 export async function GET() {
   try {
     // Migrated to Realtime Database
-    const snapshot = await collection(
-      .collection("programs")
+    const snapshot = await collection("programs")
       .orderBy("name")
       .limit(100)
       .get();

@@ -43,8 +43,7 @@ export async function POST(request: NextRequest) {
         }));
     } else if (recipientType === "all") {
       // All users with phone numbers
-      const usersSnapshot = await collection(
-        .collection("users")
+      const usersSnapshot = await collection("users")
         .where("phoneNumber", "!=", null)
         .get();
       recipients = usersSnapshot.docs.map((doc) => ({
@@ -54,8 +53,7 @@ export async function POST(request: NextRequest) {
       }));
     } else if (recipientType === "applicants") {
       // Only applicants
-      const usersSnapshot = await collection(
-        .collection("users")
+      const usersSnapshot = await collection("users")
         .where("role", "==", "APPLICANT")
         .where("phoneNumber", "!=", null)
         .get();
@@ -90,7 +88,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create bulk notification record
-    const bulkNotificationRef = await collection("bulk_sms_notifications").add({
+    const bulkNotificationId = `bulk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const bulkNotificationRef = collection("bulk_sms_notifications").doc(bulkNotificationId);
+    await bulkNotificationRef.set({
       message,
       recipientType: recipientType || "specific",
       recipientCount: recipients.length,
@@ -108,16 +108,16 @@ export async function POST(request: NextRequest) {
         phoneNumber: recipient.phoneNumber,
         message: message,
         type: "bulk",
-        bulkNotificationId: bulkNotificationRef.id,
+        bulkNotificationId: bulkNotificationId,
         status: "pending",
         createdAt: Date.now(),
         sentAt: null,
         error: null,
       };
 
-      const notificationRef = await collection(
-        .collection("sms_notifications")
-        .add(notificationData);
+      const notificationId = `sms_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const notificationRef = collection("sms_notifications").doc(notificationId);
+      await notificationRef.set(notificationData);
 
       // TODO: Integrate with SMS provider
       console.log(`[BULK SMS] Would send to ${recipient.phoneNumber}: ${message}`);
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         sentAt: Date.now(),
       });
 
-      return { success: true, notificationId: notificationRef.id };
+      return { success: true, notificationId: notificationId };
     });
 
     // Wait for all to process
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      bulkNotificationId: bulkNotificationRef.id,
+      bulkNotificationId: bulkNotificationId,
       recipientCount: recipients.length,
       sentCount,
       failedCount,

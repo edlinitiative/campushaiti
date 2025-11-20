@@ -14,8 +14,7 @@ export async function GET() {
     let allowCredentials: any[] = [];
     
     try {
-      const passkeysSnapshot = await collection(
-        .collection("passkeys")
+      const passkeysSnapshot = await collection("passkeys")
         .where("counter", ">=", 0) // Get all valid passkeys
         .get();
 

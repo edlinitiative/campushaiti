@@ -52,8 +52,7 @@ export async function POST(request: NextRequest) {
       .replace(/(^-|-$)/g, "");
 
     // Check if slug already exists
-    const existingSchool = await collection(
-      .collection("schools")
+    const existingSchool = await collection("schools")
       .where("slug", "==", slug)
       .limit(1)
       .get();
@@ -66,8 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already has a pending/approved school
-    const userSchools = await collection(
-      .collection("schools")
+    const userSchools = await collection("schools")
       .where("adminUids", "array-contains", uid)
       .limit(1)
       .get();
@@ -80,7 +78,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create school document
-    const schoolRef = collection("schools").doc();
+    const schoolId = Date.now().toString();
+    const schoolRef = collection("schools").doc(schoolId);
     const now = new Date();
 
     const schoolData: Omit<School, "id"> = {
@@ -123,13 +122,12 @@ export async function POST(request: NextRequest) {
     // Update user document
     await collection("users").doc(uid).update({
       role: "SCHOOL_ADMIN",
-      schoolId: schoolRef.id,
+      schoolId: schoolId,
       updatedAt: now,
     });
 
     // Create notification for admins
-    const adminsSnapshot = await collection(
-      .collection("users")
+    const adminsSnapshot = await collection("users")
       .where("role", "==", "ADMIN")
       .get();
 
@@ -141,7 +139,7 @@ export async function POST(request: NextRequest) {
         message: `${name} has applied to become a partner school.`,
         read: false,
         metadata: {
-          schoolId: schoolRef.id,
+          schoolId: schoolId,
           schoolName: name,
         },
         createdAt: now,
@@ -152,7 +150,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      schoolId: schoolRef.id,
+      schoolId: schoolId,
     });
   } catch (error) {
     console.error("School registration error:", error);

@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
 
     if (!type || type === "single") {
       // Get individual SMS notifications
-      const notificationsSnapshot = await collection(
-        .collection("sms_notifications")
+      const notificationsSnapshot = await collection("sms_notifications")
         .orderBy("createdAt", "desc")
         .limit(limit)
         .get();
@@ -44,8 +43,7 @@ export async function GET(request: NextRequest) {
 
     if (!type || type === "bulk") {
       // Get bulk SMS notifications
-      const bulkNotificationsSnapshot = await collection(
-        .collection("bulk_sms_notifications")
+      const bulkNotificationsSnapshot = await collection("bulk_sms_notifications")
         .orderBy("createdAt", "desc")
         .limit(limit)
         .get();
@@ -71,20 +69,17 @@ export async function GET(request: NextRequest) {
     notifications = notifications.slice(0, limit);
 
     // Get stats
-    const totalSentSnapshot = await collection(
-      .collection("sms_notifications")
+    const totalSentSnapshot = await collection("sms_notifications")
       .where("status", "==", "sent")
       .count()
       .get();
 
-    const totalFailedSnapshot = await collection(
-      .collection("sms_notifications")
+    const totalFailedSnapshot = await collection("sms_notifications")
       .where("status", "==", "failed")
       .count()
       .get();
 
-    const totalPendingSnapshot = await collection(
-      .collection("sms_notifications")
+    const totalPendingSnapshot = await collection("sms_notifications")
       .where("status", "==", "pending")
       .count()
       .get();

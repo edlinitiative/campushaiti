@@ -20,8 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get stored challenge
-    const challengeDoc = await collection(
-      .collection("passkey_challenges")
+    const challengeDoc = await collection("passkey_challenges")
       .doc(userId)
       .get();
 
@@ -54,12 +53,9 @@ export async function POST(request: NextRequest) {
     const { credential } = verification.registrationInfo;
 
     // Store credential in Firestore
-    await collection(
-      .collection("users")
-      .doc(userId)
-      .collection("passkeys")
-      .add({
-        credentialID: Buffer.from(credential.id).toString("base64"),
+    await collection("passkeys").add({
+      userId: userId,
+      credentialID: Buffer.from(credential.id).toString("base64"),
         credentialPublicKey: Buffer.from(credential.publicKey).toString("base64"),
         counter: credential.counter,
         createdAt: Date.now(),
