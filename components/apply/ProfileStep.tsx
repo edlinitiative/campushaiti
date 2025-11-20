@@ -80,19 +80,36 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
       if (!user) return;
 
       try {
+        // First, fetch user profile from our API (has phone, fullName, email)
+        let userProfileData: any = {};
+        try {
+          const userProfileRes = await fetch(`/api/user/profile?userId=${user.uid}`);
+          if (userProfileRes.ok) {
+            userProfileData = await userProfileRes.json();
+          }
+        } catch (err) {
+          console.warn("Could not fetch user profile:", err);
+        }
+
+        // Split fullName into firstName and lastName if available
+        const fullName = userProfileData.fullName || user.displayName || "";
+        const nameParts = fullName.split(" ");
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || "";
+
+        // Then fetch saved application profile data
         const profileDoc = await getDoc(doc(db, "profiles", user.uid));
-        const userDoc = await getDoc(doc(db, "users", user.uid));
         
         if (profileDoc.exists()) {
           const data = profileDoc.data();
           setFormData({
-            // Personal Information
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
+            // Personal Information - pre-fill from user profile where available
+            firstName: data.firstName || firstName,
+            lastName: data.lastName || lastName,
             gender: data.gender || "",
-            phone: data.phone || "",
-            whatsapp: data.whatsapp || "",
-            email: user.email || "",
+            phone: data.phone || userProfileData.phoneNumber || "",
+            whatsapp: data.whatsapp || userProfileData.phoneNumber || "",
+            email: data.email || userProfileData.email || user.email || "",
             nationality: data.nationality || "Haitian",
             birthDate: data.birthDate?.toDate?.()?.toISOString().split("T")[0] || "",
             birthPlace: data.birthPlace || "",
@@ -135,6 +152,16 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
             careerGoals: data.essays?.careerGoals || "",
             whyThisUniversity: data.essays?.whyThisUniversity || "",
           });
+        } else {
+          // No saved profile yet - pre-fill from user profile
+          setFormData(prev => ({
+            ...prev,
+            firstName: firstName,
+            lastName: lastName,
+            phone: userProfileData.phoneNumber || "",
+            whatsapp: userProfileData.phoneNumber || "",
+            email: userProfileData.email || user.email || "",
+          }));
         }
       } catch (error) {
         console.error("Error loading profile:", error);
