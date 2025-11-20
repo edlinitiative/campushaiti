@@ -20,7 +20,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment record in Firestore
-    const paymentRef = await collection("payments").add({
+    const paymentId = `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const paymentRef = collection("payments").doc(paymentId);
+    await paymentRef.set({
       provider: "MONCASH",
       providerRef: "",
       amountCents,
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Create MonCash payment
     const paymentResponse = await monCash.createPayment({
       amountCents,
-      orderId: paymentRef.id,
+      orderId: paymentId,
     });
 
     // Update payment record with transaction ID
