@@ -6,22 +6,32 @@ import { onAuthStateChanged } from "firebase/auth";
 
 export function ClientAuthSync() {
   const syncedRef = useRef(false);
-  const hasSessionRef = useRef(false);
 
   useEffect(() => {
     // Check if session cookie already exists
     const hasSession = document.cookie.includes('session=');
+    
+    console.log('[ClientAuthSync] Mount - hasSession:', hasSession, 'synced:', syncedRef.current);
+    
     if (hasSession) {
-      hasSessionRef.current = true;
+      console.log('[ClientAuthSync] Session exists, skipping sync');
       syncedRef.current = true;
       return;
     }
 
     // Only run once
-    if (syncedRef.current) return;
+    if (syncedRef.current) {
+      console.log('[ClientAuthSync] Already synced, skipping');
+      return;
+    }
 
+    console.log('[ClientAuthSync] Setting up auth listener');
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && !syncedRef.current && !hasSessionRef.current) {
+      console.log('[ClientAuthSync] Auth state changed - user:', !!user, 'synced:', syncedRef.current);
+      
+      if (user && !syncedRef.current) {
+        console.log('[ClientAuthSync] Creating session cookie');
         // User is signed in on client, ensure session cookie exists
         try {
           const idToken = await user.getIdToken();
@@ -32,18 +42,23 @@ export function ClientAuthSync() {
           });
           
           if (response.ok) {
+            console.log('[ClientAuthSync] Session created successfully, reloading...');
             syncedRef.current = true;
-            hasSessionRef.current = true;
             // Only refresh if we just created a new session
             window.location.reload();
+          } else {
+            console.error('[ClientAuthSync] Session creation failed:', response.status);
           }
         } catch (error) {
-          console.error("Failed to sync session:", error);
+          console.error("[ClientAuthSync] Failed to sync session:", error);
         }
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log('[ClientAuthSync] Cleanup');
+      unsubscribe();
+    };
   }, []);
 
   return null;
