@@ -71,25 +71,22 @@ export async function GET(request: NextRequest) {
     // Get stats
     const totalSentSnapshot = await collection("sms_notifications")
       .where("status", "==", "sent")
-      .count()
       .get();
 
     const totalFailedSnapshot = await collection("sms_notifications")
       .where("status", "==", "failed")
-      .count()
       .get();
 
     const totalPendingSnapshot = await collection("sms_notifications")
       .where("status", "==", "pending")
-      .count()
       .get();
 
     return NextResponse.json({
       notifications,
       stats: {
-        totalSent: totalSentSnapshot.data().count,
-        totalFailed: totalFailedSnapshot.data().count,
-        totalPending: totalPendingSnapshot.data().count,
+        totalSent: totalSentSnapshot.docs.length,
+        totalFailed: totalFailedSnapshot.docs.length,
+        totalPending: totalPendingSnapshot.docs.length,
       },
     });
   } catch (error: any) {
