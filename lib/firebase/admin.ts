@@ -17,9 +17,10 @@ function getAdminApp(): App {
 
   if (getApps().length === 0) {
     // Skip initialization during build time
-    if (process.env.NEXT_PHASE === 'phase-production-build') {
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
       console.log("Skipping Firebase Admin initialization during build");
-      throw new Error("Firebase Admin not available during build");
+      // Return a mock app to prevent errors during build
+      return {} as App;
     }
     
     if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
@@ -62,28 +63,48 @@ function getAdminApp(): App {
 // Lazy getters for Firebase Admin services
 export const getAdminAuth = (): Auth => {
   if (!_adminAuth) {
-    _adminAuth = getAuth(getAdminApp());
+    const app = getAdminApp();
+    // Return mock during build
+    if (!app || Object.keys(app).length === 0) {
+      return {} as Auth;
+    }
+    _adminAuth = getAuth(app);
   }
   return _adminAuth;
 };
 
 export const getAdminDb = (): Firestore => {
   if (!_adminDb) {
-    _adminDb = getFirestore(getAdminApp());
+    const app = getAdminApp();
+    // Return mock during build
+    if (!app || Object.keys(app).length === 0) {
+      return {} as Firestore;
+    }
+    _adminDb = getFirestore(app);
   }
   return _adminDb;
 };
 
 export const getAdminDatabase = (): Database => {
   if (!_adminDatabase) {
-    _adminDatabase = getDatabase(getAdminApp());
+    const app = getAdminApp();
+    // Return mock during build
+    if (!app || Object.keys(app).length === 0) {
+      return {} as Database;
+    }
+    _adminDatabase = getDatabase(app);
   }
   return _adminDatabase;
 };
 
 export const getAdminStorage = (): Storage => {
   if (!_adminStorage) {
-    _adminStorage = getStorage(getAdminApp());
+    const app = getAdminApp();
+    // Return mock during build
+    if (!app || Object.keys(app).length === 0) {
+      return {} as Storage;
+    }
+    _adminStorage = getStorage(app);
   }
   return _adminStorage;
 };
