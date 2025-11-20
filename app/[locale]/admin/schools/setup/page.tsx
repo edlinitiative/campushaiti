@@ -3,16 +3,13 @@ import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/navigation";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { ArrowLeft, CheckCircle, Clock, XCircle, Building2, Mail, Phone, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 async function getPendingSchools() {
-  const db = getAdminDb();
-  
   try {
-    const snapshot = await db
-      .collection("universities")
+    const snapshot = await collection("universities")
       .where("status", "==", "PENDING")
       .orderBy("createdAt", "desc")
       .get();
@@ -28,11 +25,8 @@ async function getPendingSchools() {
 }
 
 async function getRecentlyApprovedSchools() {
-  const db = getAdminDb();
-  
   try {
-    const snapshot = await db
-      .collection("universities")
+    const snapshot = await collection("universities")
       .where("status", "==", "APPROVED")
       .orderBy("approvedAt", "desc")
       .limit(5)

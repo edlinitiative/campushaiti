@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/lib/navigation";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 import { 
   ArrowLeft, 
   TrendingUp, 
@@ -23,8 +23,6 @@ import {
 } from "lucide-react";
 
 async function getAnalytics() {
-  const db = getAdminDb();
-  
   try {
     const [
       universitiesSnap,
@@ -32,10 +30,10 @@ async function getAnalytics() {
       applicationsSnap,
       usersSnap,
     ] = await Promise.all([
-      db.collection("universities").get(),
-      db.collection("programs").get(),
-      db.collection("applicationItems").get(),
-      db.collection("users").get(),
+      collection("universities").get(),
+      collection("programs").get(),
+      collection("applicationItems").get(),
+      collection("users").get(),
     ]);
 
     const applications = applicationsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
