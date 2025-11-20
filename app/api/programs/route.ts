@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // Cache for 5 minutes
