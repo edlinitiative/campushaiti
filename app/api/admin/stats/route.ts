@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -15,15 +15,13 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
-
-    const db = getAdminDb();
     
-    // Get counts from Firestore
+    // Get counts from Realtime Database
     const [universitiesSnap, programsSnap, applicationsSnap, usersSnap] = await Promise.all([
-      db.collection("universities").get(),
-      db.collection("programs").get(),
-      db.collection("applicationItems").get(),
-      db.collection("users").get(),
+      collection("universities").get(),
+      collection("programs").get(),
+      collection("applicationItems").get(),
+      collection("users").get(),
     ]);
 
     // Get pending universities
@@ -38,17 +36,17 @@ export async function GET(request: NextRequest) {
     const acceptedApps = applications.filter((app: any) => app.status === "ACCEPTED").length;
 
     const stats = {
-      totalUniversities: universitiesSnap.size,
+      totalUniversities: universitiesSnap.docs.length,
       pendingUniversities,
       approvedUniversities: universitiesSnap.docs.filter(
         (doc: any) => doc.data().status === "APPROVED"
       ).length,
-      totalPrograms: programsSnap.size,
-      totalApplications: applicationsSnap.size,
+      totalPrograms: programsSnap.docs.length,
+      totalApplications: applicationsSnap.docs.length,
       pendingApplications: pendingApps,
       underReviewApplications: underReviewApps,
       acceptedApplications: acceptedApps,
-      totalUsers: usersSnap.size,
+      totalUsers: usersSnap.docs.length,
       applicants: usersSnap.docs.filter((doc: any) => doc.data().role === "APPLICANT").length,
       schoolAdmins: usersSnap.docs.filter((doc: any) => doc.data().role === "SCHOOL_ADMIN").length,
     };

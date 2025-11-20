@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +25,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = getAdminDb();
-
     // Get the user's university
-    const userDoc = await db.collection("users").doc(user.uid).get();
+    const userDoc = await collection("users").doc(user.uid).get();
     const userData = userDoc.data();
     
     if (!userData?.universityId) {
@@ -39,8 +37,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the program
-    const programRef = db.collection("programs").doc();
-    const now = new Date();
+    const programId = `program_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const programRef = collection("programs").doc(programId);
+    const now = Date.now();
 
     await programRef.set({
       universityId: userData.universityId,
@@ -50,14 +49,14 @@ export async function POST(request: NextRequest) {
       requirements,
       feeCents: parseInt(feeCents),
       currency,
-      deadline: new Date(deadline),
+      deadline: new Date(deadline).getTime(),
       createdAt: now,
       updatedAt: now,
     });
 
     return NextResponse.json({
       success: true,
-      programId: programRef.id,
+      programId: programId,
     });
   } catch (error: any) {
     console.error("Error creating program:", error);
