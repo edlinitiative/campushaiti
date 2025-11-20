@@ -1,22 +1,27 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
 import { auth } from "@/lib/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
 
 export function ClientAuthSync() {
-  const router = useRouter();
-  const params = useParams();
-  const locale = params.locale as string || "en";
   const syncedRef = useRef(false);
+  const hasSessionRef = useRef(false);
 
   useEffect(() => {
+    // Check if session cookie already exists
+    const hasSession = document.cookie.includes('session=');
+    if (hasSession) {
+      hasSessionRef.current = true;
+      syncedRef.current = true;
+      return;
+    }
+
     // Only run once
     if (syncedRef.current) return;
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && !syncedRef.current) {
+      if (user && !syncedRef.current && !hasSessionRef.current) {
         // User is signed in on client, ensure session cookie exists
         try {
           const idToken = await user.getIdToken();
@@ -28,8 +33,9 @@ export function ClientAuthSync() {
           
           if (response.ok) {
             syncedRef.current = true;
-            // Refresh the page once to update server-side state
-            router.refresh();
+            hasSessionRef.current = true;
+            // Only refresh if we just created a new session
+            window.location.reload();
           }
         } catch (error) {
           console.error("Failed to sync session:", error);
@@ -38,7 +44,7 @@ export function ClientAuthSync() {
     });
 
     return () => unsubscribe();
-  }, [router, locale]);
+  }, []);
 
   return null;
 }
