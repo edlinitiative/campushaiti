@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/auth/server-auth";
 import { getTranslations } from "next-intl/server";
-import { Card, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardDescription, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/navigation";
 import { adminAuth } from "@/lib/firebase/admin";
