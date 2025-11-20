@@ -7,24 +7,52 @@
  * Usage: node scripts/migrate-firestore-data.js
  */
 
+// Load environment variables from .env.local
+require('dotenv').config({ path: '.env.local' });
+
 const admin = require('firebase-admin');
 const path = require('path');
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
-  // For development, you need service account key
-  // Download from Firebase Console -> Project Settings -> Service Accounts
-  try {
-    const serviceAccount = require('../serviceAccountKey.json');
+  // Try to use environment variables first (recommended for Codespaces/CI)
+  if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+    console.log('✓ Using Firebase credentials from environment variables');
+    
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    // Handle escaped newlines
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = privateKey.slice(1, -1);
+    }
+    privateKey = privateKey.replace(/\\n/g, "\n");
+    
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      databaseURL: process.env.FIREBASE_DATABASE_URL || serviceAccount.databaseURL
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: privateKey
+      }),
+      databaseURL: process.env.FIREBASE_DATABASE_URL
     });
-  } catch (error) {
-    console.error('❌ Error: Could not load service account key.');
-    console.error('   Please download serviceAccountKey.json from Firebase Console');
-    console.error('   Project Settings → Service Accounts → Generate New Private Key');
-    process.exit(1);
+  } else {
+    // Fallback to service account key file (for local development only)
+    try {
+      console.log('✓ Using serviceAccountKey.json (this file should NOT be committed to git)');
+      const serviceAccount = require('../serviceAccountKey.json');
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.FIREBASE_DATABASE_URL || serviceAccount.databaseURL
+      });
+    } catch (error) {
+      console.error('❌ Error: No Firebase credentials found.');
+      console.error('   Either set environment variables:');
+      console.error('     - FIREBASE_PROJECT_ID');
+      console.error('     - FIREBASE_CLIENT_EMAIL');
+      console.error('     - FIREBASE_PRIVATE_KEY');
+      console.error('     - FIREBASE_DATABASE_URL');
+      console.error('   Or download serviceAccountKey.json from Firebase Console');
+      process.exit(1);
+    }
   }
 }
 
