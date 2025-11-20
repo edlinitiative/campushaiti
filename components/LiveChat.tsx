@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 
 export function LiveChat() {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true); // Default to enabled
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
+    // Prevent multiple checks
+    if (checked) return;
+    setChecked(true);
+
     // Check if live chat is enabled
     const checkSettings = async () => {
       try {
@@ -13,19 +18,21 @@ export function LiveChat() {
         if (response.ok) {
           const data = await response.json();
           setEnabled(data.liveChatEnabled ?? true);
+        } else if (response.status === 403) {
+          // User doesn't have admin access, just use default
+          setEnabled(true);
         } else {
-          // Default to enabled if can't fetch settings
+          // Other error, default to enabled
           setEnabled(true);
         }
       } catch (error) {
-        console.error("Error checking live chat settings:", error);
-        // Default to enabled on error
+        // Network error or other issue, default to enabled
         setEnabled(true);
       }
     };
 
     checkSettings();
-  }, []);
+  }, [checked]);
 
   useEffect(() => {
     // Only load if enabled and in browser
