@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { auth } from "@/lib/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
@@ -9,14 +9,14 @@ export function ClientAuthSync() {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string || "en";
-  const [synced, setSynced] = useState(false);
+  const syncedRef = useRef(false);
 
   useEffect(() => {
     // Only run once
-    if (synced) return;
+    if (syncedRef.current) return;
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && !synced) {
+      if (user && !syncedRef.current) {
         // User is signed in on client, ensure session cookie exists
         try {
           const idToken = await user.getIdToken();
@@ -27,8 +27,8 @@ export function ClientAuthSync() {
           });
           
           if (response.ok) {
-            setSynced(true);
-            // Refresh the page to update server-side state
+            syncedRef.current = true;
+            // Refresh the page once to update server-side state
             router.refresh();
           }
         } catch (error) {
@@ -38,7 +38,7 @@ export function ClientAuthSync() {
     });
 
     return () => unsubscribe();
-  }, [router, locale, synced]);
+  }, [router, locale]);
 
   return null;
 }
