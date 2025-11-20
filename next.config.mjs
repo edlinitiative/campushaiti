@@ -12,6 +12,10 @@ const nextConfig = {
     // Dangerously skip type checking during build (Vercel will handle it)
     ignoreBuildErrors: false,
   },
+  experimental: {
+    // Skip collecting page data for API routes
+    isrFlushToDisk: false,
+  },
 };
 
 export default withNextIntl(nextConfig);
