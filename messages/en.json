@@ -406,7 +406,20 @@
       "database": "Database",
       "operational": "Operational",
       "authentication": "Authentication",
-      "storage": "Storage"
+      "storage": "Storage",
+      "signupAnalytics": "Signup Analytics"
+    },
+    "signupAnalytics": {
+      "totalUsers": "Total Users",
+      "last30Days": "Last 30 Days",
+      "growthRate": "Growth Rate",
+      "topProvider": "Top Provider",
+      "providerDistribution": "Authentication Provider Distribution",
+      "providerDistributionDesc": "Breakdown of users by authentication method",
+      "providerBreakdown": "Provider Breakdown",
+      "providerBreakdownDesc": "Number of users per authentication provider",
+      "signupsOverTime": "Signups Over Time",
+      "signupsOverTimeDesc": "User registration trends by authentication method"
     },
     "universities": {
       "title": "University Management",

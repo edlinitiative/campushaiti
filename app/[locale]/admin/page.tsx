@@ -6,6 +6,7 @@ import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import SignupAnalytics from "@/components/admin/SignupAnalytics";
 import { 
   Building2, 
   GraduationCap, 
@@ -352,6 +353,12 @@ export default function AdminPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Signup Analytics */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">{t("signupAnalytics")}</h2>
+        <SignupAnalytics />
       </div>
 
       <div className="mb-6">
