@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,14 +10,14 @@ export async function GET(request: NextRequest) {
     }
 
     const decodedToken = await adminAuth.verifySessionCookie(token);
-    const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
+    const userDoc = await collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
 
-    // Get platform settings from Firestore
-    const settingsDoc = await adminDb.collection("platform_settings").doc("general").get();
+    // Get platform settings from Realtime Database
+    const settingsDoc = await collection("platform_settings").doc("general").get();
     const settings = settingsDoc.exists ? settingsDoc.data() : {};
 
     return NextResponse.json({
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     const decodedToken = await adminAuth.verifySessionCookie(token);
-    const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
+    const userDoc = await collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -49,11 +50,11 @@ export async function POST(request: NextRequest) {
     const { liveChatEnabled, maintenanceMode } = await request.json();
 
     // Update platform settings
-    await adminDb.collection("platform_settings").doc("general").set(
+    await collection("platform_settings").doc("general").set(
       {
         liveChatEnabled: liveChatEnabled ?? true,
         maintenanceMode: maintenanceMode ?? false,
-        updatedAt: new Date(),
+        updatedAt: Date.now(),
         updatedBy: decodedToken.uid,
       },
       { merge: true }

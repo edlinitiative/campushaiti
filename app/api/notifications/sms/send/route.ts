@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
       // Allow if user is sending to themselves or is admin
       if (userId && decodedToken.uid !== userId) {
         // Check if admin
-        const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
+        const userDoc = await collection("users").doc(decodedToken.uid).get();
         if (userDoc.data()?.role !== "ADMIN") {
           return NextResponse.json(
             { error: "Unauthorized" },
@@ -36,12 +37,12 @@ export async function POST(request: NextRequest) {
       message: message,
       type: type || "general",
       status: "pending",
-      createdAt: new Date(),
+      createdAt: Date.now(),
       sentAt: null,
       error: null,
     };
 
-    const notificationRef = await adminDb.collection("sms_notifications").add(notificationData);
+    const notificationRef = await collection("sms_notifications").add(notificationData);
 
     // TODO: Integrate with SMS provider (Twilio, AWS SNS, etc.)
     // For now, we'll simulate sending and just log it
@@ -63,12 +64,12 @@ export async function POST(request: NextRequest) {
     // Update notification status
     await notificationRef.update({
       status: "sent",
-      sentAt: new Date(),
+      sentAt: Date.now(),
     });
 
     return NextResponse.json({
       success: true,
-      notificationId: notificationRef.id,
+      notificationId: notificationRef.path.split('/').pop(),
       message: "SMS notification queued (demo mode - not actually sent)",
     });
   } catch (error: any) {

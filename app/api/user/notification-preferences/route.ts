@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
     }
 
     const decodedToken = await adminAuth.verifySessionCookie(token);
-    const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
+    const userDoc = await collection("users").doc(decodedToken.uid).get();
 
     if (!userDoc.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -44,8 +45,7 @@ export async function POST(request: NextRequest) {
     const decodedToken = await adminAuth.verifySessionCookie(token);
     const preferences = await request.json();
 
-    await adminDb
-      .collection("users")
+    await collection("users")
       .doc(decodedToken.uid)
       .update({
         notificationPreferences: {
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
           applicationUpdates: preferences.applicationUpdates ?? true,
           deadlineReminders: preferences.deadlineReminders ?? true,
           announcements: preferences.announcements ?? true,
-          updatedAt: new Date(),
+          updatedAt: Date.now(),
         },
       });
 

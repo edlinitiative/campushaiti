@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { collection } from "@/lib/firebase/database-helpers";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,23 +16,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Phone number required" }, { status: 400 });
     }
 
-    // Update user profile in Firestore
+    // Update user profile in Realtime Database
     try {
-      await adminDb.collection("users").doc(userId).set(
+      await collection("users").doc(userId).set(
         {
           phoneNumber,
           fullName: fullName || null,
-          updatedAt: new Date(),
+          updatedAt: Date.now(),
         },
         { merge: true }
       );
-    } catch (firestoreError: any) {
-      console.error("Firestore write error:", firestoreError);
-      // If Firestore doesn't exist yet, that's okay - just log it
-      if (firestoreError.code !== 5 && !firestoreError.message?.includes("NOT_FOUND")) {
-        throw firestoreError;
-      }
-      console.warn("Firestore database not available yet, skipping user profile storage");
+    } catch (dbError: any) {
+      console.error("Database write error:", dbError);
+      console.warn("Database not available yet, skipping user profile storage");
     }
 
     // Update display name in Firebase Auth if provided
@@ -82,19 +79,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user profile from Firestore
+    // Get user profile from Realtime Database
     let phoneNumber = null;
     let fullName = null;
 
     try {
-      const userDoc = await adminDb.collection("users").doc(userId).get();
+      const userDoc = await collection("users").doc(userId).get();
       if (userDoc.exists) {
         const data = userDoc.data();
         phoneNumber = data?.phoneNumber;
         fullName = data?.fullName;
       }
-    } catch (firestoreError: any) {
-      console.warn("Could not fetch from Firestore:", firestoreError);
+    } catch (dbError: any) {
+      console.warn("Could not fetch from database:", dbError);
     }
 
     // Get user from Firebase Auth
@@ -140,24 +137,21 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete user data from Firestore
+    // Delete user data from Realtime Database
     try {
       // Delete user document
-      await adminDb.collection("users").doc(userId).delete();
+      await collection("users").doc(userId).delete();
 
       // Delete all user's passkeys
-      const passkeysSnapshot = await adminDb
-        .collection("passkeys")
+      const passkeysSnapshot = await collection("passkeys")
         .where("userId", "==", userId)
         .get();
       
-      const batch = adminDb.batch();
-      passkeysSnapshot.docs.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-      await batch.commit();
-    } catch (firestoreError: any) {
-      console.warn("Could not delete from Firestore:", firestoreError);
+      for (const doc of passkeysSnapshot.docs) {
+        await collection("passkeys").doc(doc.id).delete();
+      }
+    } catch (dbError: any) {
+      console.warn("Could not delete from database:", dbError);
     }
 
     return NextResponse.json({ success: true });
