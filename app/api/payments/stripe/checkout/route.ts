@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { getServerUser } from "@/lib/auth/server-auth";
 import { collection } from "@/lib/firebase/database-helpers";
 
+export const dynamic = "force-dynamic";
+
 // Lazy load Stripe to avoid initialization during build
 const getStripe = () => {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -32,7 +34,9 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
 
     // Create payment record in Firestore
-    const paymentRef = await collection("payments").add({
+    const paymentId = `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const paymentRef = collection("payments").doc(paymentId);
+    await paymentRef.set({
       provider: "STRIPE",
       providerRef: "", // Will be updated after session creation
       amountCents,
@@ -65,7 +69,7 @@ export async function POST(request: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/apply/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/apply/payment`,
       metadata: {
-        paymentId: paymentRef.id,
+        paymentId: paymentId,
         applicationItemId,
         applicantUid: user.uid,
       },

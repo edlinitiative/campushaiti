@@ -4,6 +4,8 @@ import { GDPRService } from "@/lib/security/gdpr";
 import { withAPIMiddleware } from "@/lib/security/api-middleware";
 import { AuditAction } from "@/lib/security/audit-logger";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET - Export user data (GDPR Right to Access)
  */

@@ -3,6 +3,8 @@ import { getServerUser } from "@/lib/auth/server-auth";
 import { collection } from "@/lib/firebase/database-helpers";
 import { monCash } from "@/lib/payments/moncash";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getServerUser();

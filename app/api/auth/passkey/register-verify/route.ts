@@ -5,6 +5,8 @@ import {
   type VerifyRegistrationResponseOpts,
 } from "@simplewebauthn/server";
 
+export const dynamic = "force-dynamic";
+
 const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
 const origin = process.env.NEXT_PUBLIC_ORIGIN || "http://localhost:3000";
 

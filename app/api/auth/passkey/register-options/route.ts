@@ -6,6 +6,8 @@ import {
   type GenerateRegistrationOptionsOpts,
 } from "@simplewebauthn/server";
 
+export const dynamic = "force-dynamic";
+
 const rpName = "Campus Haiti";
 const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
 const origin = process.env.NEXT_PUBLIC_ORIGIN || "http://localhost:3000";

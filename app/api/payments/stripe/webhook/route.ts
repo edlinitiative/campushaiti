@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { collection } from "@/lib/firebase/database-helpers";
 import { headers } from "next/headers";
 
+export const dynamic = "force-dynamic";
+
 // Lazy load Stripe to avoid initialization during build
 const getStripe = () => {
   if (!process.env.STRIPE_SECRET_KEY) {

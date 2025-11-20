@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/auth/server-auth";
 import { getAdminDb } from "@/lib/firebase/admin";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getServerUser();

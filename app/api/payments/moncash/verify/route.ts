@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { collection } from "@/lib/firebase/database-helpers";
 import { monCash } from "@/lib/payments/moncash";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const { transactionId } = await request.json();

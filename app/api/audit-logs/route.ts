@@ -4,6 +4,8 @@ import { auditLogger, AuditAction } from "@/lib/security/audit-logger";
 import { withAPIMiddleware } from "@/lib/security/api-middleware";
 import { PermissionChecker, Permission, Role } from "@/lib/security/permissions";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET - Query audit logs (Admin only)
  */

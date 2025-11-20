@@ -3,6 +3,8 @@ import { adminAuth } from "@/lib/firebase/admin";
 import { collection } from "@/lib/firebase/database-helpers";
 import { requireRole } from "@/lib/auth/server-auth";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin permission

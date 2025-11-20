@@ -5,6 +5,8 @@ import {
   type GenerateAuthenticationOptionsOpts,
 } from "@simplewebauthn/server";
 
+export const dynamic = "force-dynamic";
+
 const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
 
 export async function GET() {
