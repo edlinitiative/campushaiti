@@ -331,20 +331,20 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Student Profile</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Complete your profile information. All fields marked with * are required.
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
           <Tabs value={currentTab} onValueChange={setCurrentTab}>
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="personal">Personal</TabsTrigger>
-              <TabsTrigger value="address">Address</TabsTrigger>
-              <TabsTrigger value="family">Family</TabsTrigger>
-              <TabsTrigger value="education">Education</TabsTrigger>
-              <TabsTrigger value="essays">Essays</TabsTrigger>
+              <TabsTrigger value="personal">{t("tabPersonal")}</TabsTrigger>
+              <TabsTrigger value="address">{t("tabAddress")}</TabsTrigger>
+              <TabsTrigger value="family">{t("tabFamily")}</TabsTrigger>
+              <TabsTrigger value="education">{t("tabEducation")}</TabsTrigger>
+              <TabsTrigger value="essays">{t("tabEssays")}</TabsTrigger>
             </TabsList>
 
             {/* Personal Information Tab */}
@@ -352,7 +352,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    First Name *
+                    {t("firstName")} *
                   </label>
                   <Input
                     required
@@ -363,7 +363,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Last Name *
+                    {t("lastName")} *
                   </label>
                   <Input
                     required
@@ -377,25 +377,25 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Gender *
+                    {t("gender")} *
                   </label>
                   <Select
                     value={formData.gender}
                     onValueChange={(value) => handleChange("gender", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder={t("selectGender")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="male">{t("male")}</SelectItem>
+                      <SelectItem value="female">{t("female")}</SelectItem>
+                      <SelectItem value="other">{t("other")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Date of Birth *
+                    {t("dateOfBirth")} *
                   </label>
                   <Input
                     type="date"
@@ -409,7 +409,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Place of Birth *
+                    {t("placeOfBirth")} *
                   </label>
                   <Input
                     required
@@ -420,12 +420,12 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    ID Number
+                    {t("idNumber")}
                   </label>
                   <Input
                     value={formData.idNumber}
                     onChange={(e) => handleChange("idNumber", e.target.value)}
-                    placeholder="National ID or Passport"
+                    placeholder={t("idNumberPlaceholder")}
                   />
                 </div>
               </div>
@@ -433,25 +433,25 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Phone Number *
+                    {t("phoneNumber")} *
                   </label>
                   <Input
                     type="tel"
                     required
                     value={formData.phone}
                     onChange={(e) => handleChange("phone", e.target.value)}
-                    placeholder="+509 1234 5678"
+                    placeholder={t("phoneNumberPlaceholder")}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    WhatsApp Number
+                    {t("whatsappNumber")}
                   </label>
                   <Input
                     type="tel"
                     value={formData.whatsapp}
                     onChange={(e) => handleChange("whatsapp", e.target.value)}
-                    placeholder="+509 1234 5678"
+                    placeholder={t("phoneNumberPlaceholder")}
                   />
                 </div>
               </div>
@@ -459,7 +459,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Email *
+                    {t("email")} *
                   </label>
                   <Input
                     type="email"
@@ -471,7 +471,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Nationality *
+                    {t("nationality")} *
                   </label>
                   <Input
                     required
@@ -487,14 +487,14 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
             <TabsContent value="address" className="space-y-4 mt-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Country *
+                  {t("country")} *
                 </label>
                 <Select
                   value={formData.country}
                   onValueChange={(value) => handleChange("country", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select country" />
+                    <SelectValue placeholder={t("selectCountry")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Haiti">Haiti</SelectItem>
@@ -509,7 +509,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Street Address *
+                  {t("streetAddress")} *
                 </label>
                 <Input
                   required
@@ -522,7 +522,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    City *
+                    {t("city")} *
                   </label>
                   <Input
                     required
@@ -533,7 +533,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    {formData.country === "Haiti" ? "Department *" : "State/Province/Region *"}
+                    {formData.country === "Haiti" ? t("department") + " *" : t("stateProvinceRegion") + " *"}
                   </label>
                   {formData.country === "Haiti" ? (
                     <Select
@@ -541,7 +541,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                       onValueChange={(value) => handleChange("department", value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select department" />
+                        <SelectValue placeholder={t("selectDepartment")} />
                       </SelectTrigger>
                       <SelectContent>
                         {haitianDepartments.map((dept) => (
@@ -571,38 +571,38 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
             {/* Family Information Tab */}
             <TabsContent value="family" className="space-y-4 mt-4">
               <div className="border-b pb-4">
-                <h3 className="font-semibold mb-3">Father Information</h3>
+                <h3 className="font-semibold mb-3">{t("fatherInfo")}</h3>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">
-                      Father&apos;s Full Name
+                      {t("fullName")}
                     </label>
                     <Input
                       value={formData.fatherName}
                       onChange={(e) => handleChange("fatherName", e.target.value)}
-                      placeholder="Full name"
+                      placeholder={t("fullNamePlaceholder")}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Phone Number
+                        {t("phoneNumber")}
                       </label>
                       <Input
                         type="tel"
                         value={formData.fatherPhone}
                         onChange={(e) => handleChange("fatherPhone", e.target.value)}
-                        placeholder="+509 1234 5678"
+                        placeholder={t("phoneNumberPlaceholder")}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Occupation
+                        {t("occupation")}
                       </label>
                       <Input
                         value={formData.fatherOccupation}
                         onChange={(e) => handleChange("fatherOccupation", e.target.value)}
-                        placeholder="Engineer, Teacher, etc."
+                        placeholder={t("occupationPlaceholder")}
                       />
                     </div>
                   </div>
@@ -610,38 +610,38 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               </div>
 
               <div className="border-b pb-4">
-                <h3 className="font-semibold mb-3">Mother Information</h3>
+                <h3 className="font-semibold mb-3">{t("motherInfo")}</h3>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">
-                      Mother&apos;s Full Name
+                      {t("fullName")}
                     </label>
                     <Input
                       value={formData.motherName}
                       onChange={(e) => handleChange("motherName", e.target.value)}
-                      placeholder="Full name"
+                      placeholder={t("fullNamePlaceholder")}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Phone Number
+                        {t("phoneNumber")}
                       </label>
                       <Input
                         type="tel"
                         value={formData.motherPhone}
                         onChange={(e) => handleChange("motherPhone", e.target.value)}
-                        placeholder="+509 1234 5678"
+                        placeholder={t("phoneNumberPlaceholder")}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Occupation
+                        {t("occupation")}
                       </label>
                       <Input
                         value={formData.motherOccupation}
                         onChange={(e) => handleChange("motherOccupation", e.target.value)}
-                        placeholder="Nurse, Accountant, etc."
+                        placeholder={t("occupationPlaceholderMother")}
                       />
                     </div>
                   </div>
@@ -649,38 +649,38 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               </div>
 
               <div className="border-b pb-4">
-                <h3 className="font-semibold mb-3">Guardian Information (if applicable)</h3>
+                <h3 className="font-semibold mb-3">{t("guardianInfo")}</h3>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">
-                      Guardian&apos;s Full Name
+                      {t("fullName")}
                     </label>
                     <Input
                       value={formData.guardianName}
                       onChange={(e) => handleChange("guardianName", e.target.value)}
-                      placeholder="Full name"
+                      placeholder={t("fullNamePlaceholder")}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Phone Number
+                        {t("phoneNumber")}
                       </label>
                       <Input
                         type="tel"
                         value={formData.guardianPhone}
                         onChange={(e) => handleChange("guardianPhone", e.target.value)}
-                        placeholder="+509 1234 5678"
+                        placeholder={t("phoneNumberPlaceholder")}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Relationship
+                        {t("relationship")}
                       </label>
                       <Input
                         value={formData.guardianRelationship}
                         onChange={(e) => handleChange("guardianRelationship", e.target.value)}
-                        placeholder="Uncle, Aunt, etc."
+                        placeholder={t("relationshipPlaceholder")}
                       />
                     </div>
                   </div>
@@ -688,41 +688,41 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-3">Emergency Contact *</h3>
+                <h3 className="font-semibold mb-3">{t("emergencyContact")} *</h3>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">
-                      Contact Name *
+                      {t("contactName")} *
                     </label>
                     <Input
                       required
                       value={formData.emergencyName}
                       onChange={(e) => handleChange("emergencyName", e.target.value)}
-                      placeholder="Full name"
+                      placeholder={t("fullNamePlaceholder")}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Phone Number *
+                        {t("phoneNumber")} *
                       </label>
                       <Input
                         type="tel"
                         required
                         value={formData.emergencyPhone}
                         onChange={(e) => handleChange("emergencyPhone", e.target.value)}
-                        placeholder="+509 1234 5678"
+                        placeholder={t("phoneNumberPlaceholder")}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Relationship *
+                        {t("relationship")} *
                       </label>
                       <Input
                         required
                         value={formData.emergencyRelationship}
                         onChange={(e) => handleChange("emergencyRelationship", e.target.value)}
-                        placeholder="Parent, Sibling, etc."
+                        placeholder={t("relationshipPlaceholderEmergency")}
                       />
                     </div>
                   </div>
@@ -735,7 +735,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Last School Name *
+                    {t("lastSchoolName")} *
                   </label>
                   <Input
                     required
@@ -746,7 +746,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    School City *
+                    {t("schoolCity")} *
                   </label>
                   <Input
                     required
@@ -760,7 +760,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Graduation Year *
+                    {t("graduationYear")} *
                   </label>
                   <Input
                     required
@@ -771,21 +771,21 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Diploma Type *
+                    {t("diplomaType")} *
                   </label>
                   <Select
                     value={formData.diplomaType}
                     onValueChange={(value) => handleChange("diplomaType", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select diploma" />
+                      <SelectValue placeholder={t("selectDiploma")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="bacc1">Baccalauréat I</SelectItem>
-                      <SelectItem value="bacc2">Baccalauréat II</SelectItem>
-                      <SelectItem value="philo">Philo</SelectItem>
-                      <SelectItem value="rheto">Rhéto</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="bacc1">{t("bacc1")}</SelectItem>
+                      <SelectItem value="bacc2">{t("bacc2")}</SelectItem>
+                      <SelectItem value="philo">{t("philo")}</SelectItem>
+                      <SelectItem value="rheto">{t("rheto")}</SelectItem>
+                      <SelectItem value="other">{t("otherDiploma")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -794,29 +794,29 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Field of Study *
+                    {t("fieldOfStudy")} *
                   </label>
                   <Input
                     required
                     value={formData.fieldOfStudy}
                     onChange={(e) => handleChange("fieldOfStudy", e.target.value)}
-                    placeholder="Sciences, Letters, etc."
+                    placeholder={t("fieldOfStudyPlaceholder")}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    GPA / Average
+                    {t("gpaAverage")}
                   </label>
                   <Input
                     value={formData.gpa}
                     onChange={(e) => handleChange("gpa", e.target.value)}
-                    placeholder="85%, 3.5, etc."
+                    placeholder={t("gpaPlaceholder")}
                   />
                 </div>
               </div>
 
               <div className="border rounded-lg p-4 bg-muted/50">
-                <h3 className="font-semibold mb-3">Baccalauréat Information</h3>
+                <h3 className="font-semibold mb-3">{t("baccInfo")}</h3>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <input
@@ -829,14 +829,14 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                       className="rounded border-gray-300"
                     />
                     <label htmlFor="hasBacc" className="text-sm font-medium">
-                      I have obtained my Baccalauréat
+                      {t("hasBacc")}
                     </label>
                   </div>
 
                   {formData.hasBaccalaureat === "yes" && (
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Baccalauréat Series *
+                        {t("baccSeries")} *
                       </label>
                       <Select
                         value={formData.baccalaureatSeries}
@@ -845,13 +845,13 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select series" />
+                          <SelectValue placeholder={t("selectSeries")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="A">Series A (Letters)</SelectItem>
-                          <SelectItem value="B">Series B (Economics)</SelectItem>
-                          <SelectItem value="C">Series C (Sciences)</SelectItem>
-                          <SelectItem value="D">Series D (Applied Sciences)</SelectItem>
+                          <SelectItem value="A">{t("seriesA")}</SelectItem>
+                          <SelectItem value="B">{t("seriesB")}</SelectItem>
+                          <SelectItem value="C">{t("seriesC")}</SelectItem>
+                          <SelectItem value="D">{t("seriesD")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -864,17 +864,17 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
             <TabsContent value="essays" className="space-y-4 mt-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Personal Statement *
+                  {t("personalStatement")} *
                 </label>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Tell us about yourself, your background, and what makes you unique. (300-500 words)
+                  {t("personalStatementDesc")}
                 </p>
                 <Textarea
                   required
                   value={formData.personalStatement}
                   onChange={(e) => handleChange("personalStatement", e.target.value)}
                   rows={6}
-                  placeholder="Share your story, experiences, and what has shaped who you are today..."
+                  placeholder={t("personalStatementPlaceholder")}
                   className={errors.personalStatement ? "border-red-500" : ""}
                 />
                 <div className="flex justify-between items-center mt-1">
@@ -886,24 +886,24 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                       ? 'text-red-500'
                       : 'text-muted-foreground'
                   }`}>
-                    {getWordCount(formData.personalStatement)} / 300-500 words
+                    {getWordCount(formData.personalStatement)} / 300-500 {t("words")}
                   </p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Career Goals *
+                  {t("careerGoals")} *
                 </label>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Describe your career aspirations and how this university education will help you achieve them. (200-300 words)
+                  {t("careerGoalsDesc")}
                 </p>
                 <Textarea
                   required
                   value={formData.careerGoals}
                   onChange={(e) => handleChange("careerGoals", e.target.value)}
                   rows={5}
-                  placeholder="What are your professional goals? How will this degree help you achieve them?"
+                  placeholder={t("careerGoalsPlaceholder")}
                   className={errors.careerGoals ? "border-red-500" : ""}
                 />
                 <div className="flex justify-between items-center mt-1">
@@ -915,24 +915,24 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                       ? 'text-red-500'
                       : 'text-muted-foreground'
                   }`}>
-                    {getWordCount(formData.careerGoals)} / 200-300 words
+                    {getWordCount(formData.careerGoals)} / 200-300 {t("words")}
                   </p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Why This University? *
+                  {t("whyThisUniversity")} *
                 </label>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Explain why you chose this university and how it aligns with your academic and career objectives. (200-300 words)
+                  {t("whyThisUniversityDesc")}
                 </p>
                 <Textarea
                   required
                   value={formData.whyThisUniversity}
                   onChange={(e) => handleChange("whyThisUniversity", e.target.value)}
                   rows={5}
-                  placeholder="What attracted you to this university? What specific programs, opportunities, or values align with your goals?"
+                  placeholder={t("whyThisUniversityPlaceholder")}
                   className={errors.whyThisUniversity ? "border-red-500" : ""}
                 />
                 <div className="flex justify-between items-center mt-1">
@@ -944,7 +944,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                       ? 'text-red-500'
                       : 'text-muted-foreground'
                   }`}>
-                    {getWordCount(formData.whyThisUniversity)} / 200-300 words
+                    {getWordCount(formData.whyThisUniversity)} / 200-300 {t("words")}
                   </p>
                 </div>
               </div>
@@ -954,7 +954,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
           {Object.keys(errors).length > 0 && (
             <Alert className="mt-4">
               <AlertDescription>
-                Please correct the errors above before continuing. Check all required fields and essay word counts.
+                {t("correctErrors")}
               </AlertDescription>
             </Alert>
           )}
@@ -970,7 +970,7 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                   if (currentIndex > 0) setCurrentTab(tabs[currentIndex - 1]);
                 }}
               >
-                Previous
+                {t("previous")}
               </Button>
             )}
             {currentTab === "personal" && <div />}
@@ -984,11 +984,11 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
                   if (currentIndex < tabs.length - 1) setCurrentTab(tabs[currentIndex + 1]);
                 }}
               >
-                Next
+                {t("next")}
               </Button>
             ) : (
               <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : "Save & Continue"}
+                {loading ? t("saving") : t("saveContinue")}
               </Button>
             )}
           </div>
