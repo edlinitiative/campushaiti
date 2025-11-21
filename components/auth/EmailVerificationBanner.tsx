@@ -16,14 +16,21 @@ export default function EmailVerificationBanner() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    let wasUnverified = false;
+    
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      
-      // Check if user just verified their email
-      if (currentUser?.emailVerified) {
-        // Refresh the page to update UI
-        window.location.reload();
+      // Track if user was previously unverified
+      if (currentUser && !currentUser.emailVerified) {
+        wasUnverified = true;
       }
+      
+      // Only reload if user just became verified (was unverified, now verified)
+      if (currentUser?.emailVerified && wasUnverified) {
+        window.location.reload();
+        return;
+      }
+      
+      setUser(currentUser);
     });
 
     return () => unsubscribe();
