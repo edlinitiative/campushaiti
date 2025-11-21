@@ -19,13 +19,27 @@ export async function getServerUser(): Promise<ServerUser | null> {
     const sessionCookie = cookieStore.get("session")?.value;
 
     if (!sessionCookie) {
-      console.log("No session cookie found");
+      console.log("[getServerUser] No session cookie found");
       return null;
     }
 
+    console.log("[getServerUser] Verifying session cookie");
+    
     // Verify the session cookie
     const adminAuth = getAdminAuth();
+    
+    // Check if adminAuth is properly initialized
+    if (!adminAuth || typeof adminAuth.verifySessionCookie !== 'function') {
+      console.error("[getServerUser] Firebase Admin Auth not properly initialized:", {
+        hasAuth: !!adminAuth,
+        hasMethod: adminAuth ? typeof adminAuth.verifySessionCookie : 'N/A'
+      });
+      return null;
+    }
+    
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+    console.log("[getServerUser] Session verified successfully for user:", decodedClaims.uid);
 
     return {
       uid: decodedClaims.uid,
@@ -34,7 +48,7 @@ export async function getServerUser(): Promise<ServerUser | null> {
       customClaims: decodedClaims,
     };
   } catch (error) {
-    console.error("Error verifying session:", error);
+    console.error("[getServerUser] Error verifying session:", error);
     return null;
   }
 }
