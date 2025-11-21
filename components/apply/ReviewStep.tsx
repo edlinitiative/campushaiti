@@ -32,7 +32,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
     
     const user = auth.currentUser;
     if (!user) {
-      setError("Not authenticated. Please sign in again.");
+      setError(t("notAuthenticated"));
       setPreparingData(false);
       return;
     }
@@ -56,7 +56,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
         console.log("Fallback to old format, program IDs:", programIds);
         
         if (programIds.length === 0) {
-          setError("No programs selected. Please go back and select programs.");
+          setError(t("noProgramsSelected"));
           setPreparingData(false);
           return;
         }
@@ -80,14 +80,14 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
           }
         } catch (dbError) {
           console.error("Error fetching from Firestore:", dbError);
-          setError("Cannot load programs. Please ensure you completed the program selection step.");
+          setError(t("cannotLoadPrograms"));
           setPreparingData(false);
           return;
         }
       }
 
       if (programsData.length === 0) {
-        setError("No programs selected. Please go back and select programs.");
+        setError(t("noProgramsSelected"));
         setPreparingData(false);
         return;
       }
@@ -151,7 +151,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
       setPreparingData(false);
     } catch (err) {
       console.error("Error preparing application data:", err);
-      setError(`Failed to prepare application data: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setError(t("errorPreparingData", {error: err instanceof Error ? err.message : 'Unknown error'}));
       setPreparingData(false);
     }
   };
@@ -260,7 +260,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
       router.push("/dashboard");
     } catch (err) {
       console.error("Error submitting application:", err);
-      setError("Submission failed. Please try again.");
+      setError(t("submissionFailed"));
       setLoading(false);
     }
   };
@@ -270,7 +270,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
       <Card>
         <CardHeader>
           <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>Preparing your application...</CardDescription>
+          <CardDescription>{t("preparing")}</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center items-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -287,9 +287,9 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert variant="destructive">
-            <AlertDescription>{error || "Failed to load application data"}</AlertDescription>
+            <AlertDescription>{error || t("errorLoadingData")}</AlertDescription>
           </Alert>
-          <Button variant="outline" onClick={onBack}>Go Back</Button>
+          <Button variant="outline" onClick={onBack}>{t("goBack")}</Button>
         </CardContent>
       </Card>
     );
@@ -299,47 +299,47 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
     <Card>
       <CardHeader>
         <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>Review your application before submitting</CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <Alert>
           <AlertDescription>
-            Please review all your information carefully. Once submitted, you cannot make changes to your application.
+            {t("reviewWarning")}
           </AlertDescription>
         </Alert>
 
         {/* Application Summary */}
         <div className="space-y-4">
           <div className="border rounded p-4">
-            <h3 className="font-semibold mb-3">Applicant Information</h3>
+            <h3 className="font-semibold mb-3">{t("applicantInfo")}</h3>
             <div className="space-y-2 text-sm">
-              <p><strong>Name:</strong> {applicationData.user.name || "Not provided"}</p>
-              <p><strong>Email:</strong> {applicationData.user.email}</p>
-              <p><strong>Phone:</strong> {applicationData.user.phone || "Not provided"}</p>
-              <p><strong>Nationality:</strong> {applicationData.profile.nationality || "Not provided"}</p>
+              <p><strong>{t("name")}:</strong> {applicationData.user.name || t("notProvided")}</p>
+              <p><strong>{t("email")}:</strong> {applicationData.user.email}</p>
+              <p><strong>{t("phone")}:</strong> {applicationData.user.phone || t("notProvided")}</p>
+              <p><strong>{t("nationality")}:</strong> {applicationData.profile.nationality || t("notProvided")}</p>
             </div>
           </div>
 
           <div className="border rounded p-4">
-            <h3 className="font-semibold mb-3">Education Background</h3>
+            <h3 className="font-semibold mb-3">{t("educationBackground")}</h3>
             <div className="space-y-2 text-sm">
-              <p><strong>School:</strong> {applicationData.profile.education.schoolName || "Not provided"}</p>
-              <p><strong>Graduation Year:</strong> {applicationData.profile.education.graduationYear || "Not provided"}</p>
+              <p><strong>{t("school")}:</strong> {applicationData.profile.education.schoolName || t("notProvided")}</p>
+              <p><strong>{t("graduationYear")}:</strong> {applicationData.profile.education.graduationYear || t("notProvided")}</p>
               {applicationData.profile.education.gpa && (
-                <p><strong>GPA:</strong> {applicationData.profile.education.gpa}</p>
+                <p><strong>{t("gpa")}:</strong> {applicationData.profile.education.gpa}</p>
               )}
             </div>
           </div>
 
           <div className="border rounded p-4">
-            <h3 className="font-semibold mb-3">Documents</h3>
+            <h3 className="font-semibold mb-3">{t("documents")}</h3>
             <p className="text-sm">
-              {applicationData.documents.length} document(s) uploaded
+              {t("documentsUploaded", {count: applicationData.documents.length})}
             </p>
           </div>
 
           <div className="border rounded p-4">
-            <h3 className="font-semibold mb-3">Selected Programs</h3>
+            <h3 className="font-semibold mb-3">{t("selectedPrograms")}</h3>
             <ul className="space-y-2">
               {applicationData.programs.map((program: any) => (
                 <li key={program.id} className="text-sm">
@@ -353,7 +353,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
 
           {applicationData.profile.personalStatement && (
             <div className="border rounded p-4">
-              <h3 className="font-semibold mb-2">Personal Statement</h3>
+              <h3 className="font-semibold mb-2">{t("personalStatement")}</h3>
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {applicationData.profile.personalStatement}
               </p>
@@ -368,12 +368,12 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
         )}
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={onBack} disabled={loading}>Back</Button>
+          <Button variant="outline" onClick={onBack} disabled={loading}>{t("back")}</Button>
           <Button onClick={handleSubmit} disabled={loading} className="flex-1">
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
+                {t("submitting")}
               </>
             ) : (
               t("confirmSubmit")

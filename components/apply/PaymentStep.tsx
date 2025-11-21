@@ -184,21 +184,21 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Application Fees Payment</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Pay for application fees. You can pay for all programs now or select individual programs to pay for later.
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {loadingPrograms ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">Loading programs...</p>
+            <p className="text-muted-foreground">{t("loadingPrograms")}</p>
           </div>
         ) : selectedPrograms.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No programs selected. Please go back and select programs first.</p>
+            <p className="text-muted-foreground mb-4">{t("noPrograms")}</p>
             <Button onClick={onBack} variant="outline">
-              Back to Program Selection
+              {t("backToSelection")}
             </Button>
           </div>
         ) : (
@@ -206,7 +206,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
             {/* Programs List with Individual Selection - Grouped by School */}
             <div className="space-y-3">
               <h3 className="font-semibold flex items-center justify-between">
-                <span>Select Programs to Pay Now</span>
+                <span>{t("selectToPay")}</span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -218,7 +218,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
                     }
                   }}
                 >
-                  {programsToPayNow.size === selectedPrograms.length ? "Deselect All" : "Select All"}
+                  {programsToPayNow.size === selectedPrograms.length ? t("deselectAll") : t("selectAll")}
                 </Button>
               </h3>
               
@@ -229,7 +229,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
                     <Building2 className="h-4 w-4 text-primary" />
                     <span className="font-semibold">{school.universityName}</span>
                     <Badge variant="outline" className="ml-auto">
-                      {school.programs.filter(p => programsToPayNow.has(p.id)).length} of {school.programs.length} selected
+                      {school.programs.filter(p => programsToPayNow.has(p.id)).length} {t("ofSelected", {total: school.programs.length})}
                     </Badge>
                   </div>
                   
@@ -266,10 +266,10 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
                                   {program.currency} {(program.feeCents / 100).toFixed(2)}
                                 </Badge>
                                 {isPaid && (
-                                  <Badge className="bg-green-600">Paid</Badge>
+                                  <Badge className="bg-green-600">{t("paid")}</Badge>
                                 )}
                                 {!isPaid && !isPayingNow && (
-                                  <Badge variant="secondary">Pay Later</Badge>
+                                  <Badge variant="secondary">{t("payLater")}</Badge>
                                 )}
                               </div>
                             </div>
@@ -285,7 +285,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
             {/* Payment Summary */}
             {programsToPayNow.size > 0 && (
               <div className="border rounded-lg p-4 bg-muted/50">
-                <h3 className="font-semibold mb-3">Payment Summary</h3>
+                <h3 className="font-semibold mb-3">{t("paymentSummary")}</h3>
                 <div className="space-y-2">
                   {selectedPrograms
                     .filter(p => programsToPayNow.has(p.id))
@@ -298,7 +298,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
                       </div>
                     ))}
                   <div className="border-t pt-2 mt-2 flex justify-between font-bold">
-                    <span>Total to Pay Now</span>
+                    <span>{t("totalToPayNow")}</span>
                     <span>
                       {getPrimaryCurrency()} {(getSelectedTotal() / 100).toFixed(2)}
                     </span>
@@ -310,7 +310,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
             {/* Payment Methods */}
             {programsToPayNow.size > 0 && (
               <div className="space-y-3">
-                <h3 className="font-semibold">Choose Payment Method</h3>
+                <h3 className="font-semibold">{t("choosePaymentMethod")}</h3>
                 <Button
                   onClick={() => handlePayment('stripe')}
                   disabled={loading}
@@ -318,7 +318,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
                   size="lg"
                 >
                   <CreditCard className="mr-2 h-5 w-5" />
-                  Pay with Credit/Debit Card (Stripe)
+                  {t("payWithStripe")}
                 </Button>
                 <Button
                   onClick={() => handlePayment('moncash')}
@@ -328,19 +328,19 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
                   size="lg"
                 >
                   <Wallet className="mr-2 h-5 w-5" />
-                  Pay with MonCash (Haiti)
+                  {t("payWithMoncash")}
                 </Button>
               </div>
             )}
 
             {/* Information Box */}
             <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
-              <h4 className="font-semibold text-sm mb-2">Payment Information</h4>
+              <h4 className="font-semibold text-sm mb-2">{t("paymentInformation")}</h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• You can pay for all programs at once or individually</li>
-                <li>• Uncheck programs you want to pay for later</li>
-                <li>• You can return to complete payment anytime</li>
-                <li>• Each program has its own application fee</li>
+                <li>• {t("paymentInfo1")}</li>
+                <li>• {t("paymentInfo2")}</li>
+                <li>• {t("paymentInfo3")}</li>
+                <li>• {t("paymentInfo4")}</li>
               </ul>
             </div>
           </>
@@ -349,10 +349,10 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
         {/* Navigation */}
         <div className="flex gap-2">
           <Button variant="outline" onClick={onBack}>
-            Back
+            {t("back")}
           </Button>
           <Button onClick={handleSkipToReview} className="flex-1">
-            {programsToPayNow.size === 0 ? "Continue to Review" : "Pay Later & Continue"}
+            {programsToPayNow.size === 0 ? t("continueToReview") : t("payLaterAndContinue")}
           </Button>
         </div>
       </CardContent>

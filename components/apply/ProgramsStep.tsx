@@ -163,7 +163,7 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
 
   const handleContinue = () => {
     if (selectedPrograms.length === 0) {
-      alert("Please select at least one program");
+      alert(t("selectAtLeastOne"));
       return;
     }
     
@@ -197,7 +197,7 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
       <Card>
         <CardHeader>
           <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>Select the programs you want to apply to</CardDescription>
+          <CardDescription>{t("descriptionLoading")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -224,12 +224,12 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
     <Card>
       <CardHeader>
         <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>First select schools, then choose programs within each school</CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-800 font-semibold">Error loading programs</p>
+            <p className="text-red-800 font-semibold">{t("errorLoading")}</p>
             <p className="text-red-600 text-sm mt-1">{error}</p>
             <Button 
               onClick={loadPrograms} 
@@ -237,16 +237,16 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
               size="sm" 
               className="mt-3"
             >
-              Retry
+              {t("retry")}
             </Button>
           </div>
         )}
         
         {!error && schoolGroups.length === 0 && !loading && (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No programs available at this time.</p>
+            <p className="text-muted-foreground mb-4">{t("noPrograms")}</p>
             <Button onClick={loadPrograms} variant="outline" size="sm">
-              Refresh
+              {t("refresh")}
             </Button>
           </div>
         )}
@@ -274,8 +274,8 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
                           <span className="font-bold text-lg">{school.universityName}</span>
                         </label>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {school.programs.length} {school.programs.length === 1 ? 'program' : 'programs'} available
-                          {schoolProgramCount > 0 && ` · ${schoolProgramCount} selected`}
+                          {school.programs.length} {school.programs.length === 1 ? t("programAvailable") : t("programsAvailable")}
+                          {schoolProgramCount > 0 && ` · ${schoolProgramCount} ${t("selected")}`}
                         </p>
                       </div>
                     </div>
@@ -310,11 +310,11 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
                                 <div className="mt-2 flex gap-2 flex-wrap">
                                   <Badge variant="secondary">{program.degree}</Badge>
                                   <Badge>
-                                    Fee: {program.currency} {(program.feeCents / 100).toFixed(2)}
+                                    {t("fee")}: {program.currency} {(program.feeCents / 100).toFixed(2)}
                                   </Badge>
                                   {hasQuestions && (
                                     <Badge variant="secondary">
-                                      {program.additionalQuestions.length} additional {program.additionalQuestions.length === 1 ? 'question' : 'questions'}
+                                      {program.additionalQuestions.length} {program.additionalQuestions.length === 1 ? t("additionalQuestion") : t("additionalQuestions")}
                                     </Badge>
                                   )}
                                 </div>
@@ -330,12 +330,12 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
                                     {isExpanded ? (
                                       <>
                                         <ChevronUp className="h-4 w-4 mr-1" />
-                                        Hide Questions
+                                        {t("hideQuestions")}
                                       </>
                                     ) : (
                                       <>
                                         <ChevronDown className="h-4 w-4 mr-1" />
-                                        Answer Additional Questions
+                                        {t("answerQuestions")}
                                       </>
                                     )}
                                   </Button>
@@ -346,7 +346,7 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
                             {/* Additional Questions Section */}
                             {hasQuestions && isProgramSelected && isExpanded && (
                               <div className="border-t bg-muted/50 p-4 space-y-4">
-                                <h4 className="font-semibold text-sm">Additional Questions for {program.name}</h4>
+                                <h4 className="font-semibold text-sm">{t("additionalQuestionsFor")} {program.name}</h4>
                                 {program.additionalQuestions.map((question: any) => (
                                   <div key={question.id} className="space-y-2">
                                     <Label htmlFor={`${program.id}-${question.id}`}>
@@ -378,9 +378,9 @@ export default function ProgramsStep({ onNext, onBack }: ProgramsStepProps) {
         )}
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={onBack}>Back</Button>
+          <Button variant="outline" onClick={onBack}>{t("back")}</Button>
           <Button onClick={handleContinue} className="flex-1" disabled={selectedPrograms.length === 0}>
-            Continue ({selectedPrograms.length} {selectedPrograms.length === 1 ? 'program' : 'programs'} selected)
+            {t("continue")} ({selectedPrograms.length} {selectedPrograms.length === 1 ? t("programAvailable").split(" ")[0] : t("programsSelected")})
           </Button>
         </div>
       </CardContent>
