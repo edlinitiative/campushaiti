@@ -61,9 +61,9 @@ export default function Navigation() {
             <Link href="/partners" className="text-sm hover:underline">
               {t("partners")}
             </Link>
-            <Link href="/schools/register" className="text-sm hover:underline">
+            {/* <Link href="/schools/register" className="text-sm hover:underline">
               {t("forSchools")}
-            </Link>
+            </Link> */}
             <Link href="/help" className="text-sm hover:underline">
               {t("help")}
             </Link>
