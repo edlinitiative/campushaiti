@@ -53,8 +53,8 @@ export default function HomePage() {
           <p className="text-muted-foreground mb-6">
             {tHome("explorePlatform")}
           </p>
-          <div className="grid md:grid-cols-1 gap-4">
-            {/* <Link href="/schools/dashboard">
+          <div className="grid md:grid-cols-2 gap-4">
+            <Link href="/schools/dashboard">
               <div className="p-6 bg-white rounded-lg border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-center gap-3 mb-3">
                   <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@ export default function HomePage() {
                   {tHome("schoolAdminDesc")}
                 </p>
               </div>
-            </Link> */}
+            </Link>
             <Link href="/admin">
               <div className="p-6 bg-white rounded-lg border border-indigo-200 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-center gap-3 mb-3">
