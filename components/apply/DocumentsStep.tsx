@@ -21,17 +21,17 @@ interface DocumentsStepProps {
   onBack: () => void;
 }
 
-// Haiti-specific document requirements
-const DOCUMENT_TYPES = [
-  { value: "BIRTH_CERTIFICATE", label: "Birth Certificate (Acte de Naissance)", required: true },
-  { value: "BACCALAUREAT", label: "Baccalauréat Certificate", required: true },
-  { value: "TRANSCRIPT", label: "School Transcript", required: true },
-  { value: "NATIONAL_ID", label: "National ID (CIN)", required: false },
-  { value: "PASSPORT", label: "Passport", required: false },
-  { value: "PASSPORT_PHOTO", label: "Passport Photo (2x2)", required: true },
-  { value: "RECOMMENDATION_LETTER", label: "Recommendation Letter", required: false },
-  { value: "DIPLOMA", label: "Other Diploma/Certificate", required: false },
-  { value: "CV", label: "CV/Resume", required: false },
+// Haiti-specific document requirements - labels will be translated
+const getDocumentTypes = (t: any) => [
+  { value: "BIRTH_CERTIFICATE", labelKey: "birthCertificate", required: true },
+  { value: "BACCALAUREAT", labelKey: "baccCertificate", required: true },
+  { value: "TRANSCRIPT", labelKey: "schoolTranscript", required: true },
+  { value: "NATIONAL_ID", labelKey: "nationalId", required: false },
+  { value: "PASSPORT", labelKey: "passportDoc", required: false },
+  { value: "PASSPORT_PHOTO", labelKey: "passportPhoto", required: true },
+  { value: "RECOMMENDATION_LETTER", labelKey: "recommendationLetter", required: false },
+  { value: "DIPLOMA", labelKey: "otherDiploma", required: false },
+  { value: "CV", labelKey: "cvResume", required: false },
 ];
 
 // File size limits
@@ -85,14 +85,16 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      setFileError(`File size must be less than ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`);
+      const maxMB = (MAX_FILE_SIZE / 1024 / 1024).toFixed(0);
+      const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+      setFileError(t("fileTooLarge", { max: maxMB, size: sizeMB }));
       e.target.value = "";
       return;
     }
 
     // Validate file type
     if (!ALLOWED_TYPES[file.type as keyof typeof ALLOWED_TYPES]) {
-      setFileError(`Invalid file type. Allowed: ${Object.values(ALLOWED_TYPES).join(', ')}`);
+      setFileError(t("invalidFileType", { types: Object.values(ALLOWED_TYPES).join(', ') }));
       e.target.value = "";
       return;
     }
@@ -144,7 +146,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
         },
         (error) => {
           console.error("Upload error:", error);
-          setFileError("Upload failed. Please try again.");
+          setFileError(t("uploadFailed"));
           setUploading(false);
         },
         async () => {
@@ -176,7 +178,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
       );
     } catch (error) {
       console.error("Error uploading file:", error);
-      setFileError("An error occurred during upload");
+      setFileError(t("uploadError"));
       setUploading(false);
     }
   };
@@ -190,7 +192,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
   };
 
   const handleDeleteDocument = async (docId: string, storagePath: string) => {
-    if (!confirm("Are you sure you want to delete this document?")) return;
+    if (!confirm(t("deleteConfirm"))) return;
 
     try {
       // Delete from Firestore
@@ -202,7 +204,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
       await loadDocuments();
     } catch (error) {
       console.error("Error deleting document:", error);
-      alert("Failed to delete document");
+      alert(t("deleteFailed"));
     }
   };
 
@@ -219,12 +221,12 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
   };
 
   const hasRequiredDocuments = () => {
-    const requiredTypes = DOCUMENT_TYPES.filter(t => t.required).map(t => t.value);
+    const requiredTypes = getDocumentTypes(t).filter(dt => dt.required).map(dt => dt.value);
     return requiredTypes.every(type => getDocumentsByType(type).length > 0);
   };
 
   const getMissingRequiredDocs = () => {
-    const requiredTypes = DOCUMENT_TYPES.filter(t => t.required);
+    const requiredTypes = getDocumentTypes(t).filter(dt => dt.required);
     return requiredTypes.filter(type => getDocumentsByType(type.value).length === 0);
   };
 
@@ -232,9 +234,9 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Required Documents</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
           <CardDescription>
-            Upload all required documents for your application. Documents marked with * are mandatory for Haitian universities.
+            {t("description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -243,10 +245,10 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Missing Required Documents:</strong>
+                <strong>{t("missingRequired")}</strong>
                 <ul className="list-disc list-inside mt-2">
                   {getMissingRequiredDocs().map(doc => (
-                    <li key={doc.value}>{doc.label}</li>
+                    <li key={doc.value}>{t(doc.labelKey)}</li>
                   ))}
                 </ul>
               </AlertDescription>
@@ -265,32 +267,32 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
           <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
             <h3 className="font-semibold flex items-center gap-2">
               <Upload className="h-5 w-5" />
-              Upload New Document
+              {t("uploadNew")}
             </h3>
             
             <div>
-              <Label htmlFor="documentKind">Document Type *</Label>
+              <Label htmlFor="documentKind">{t("documentType")} *</Label>
               <Select value={documentKind} onValueChange={setDocumentKind} disabled={uploading}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {DOCUMENT_TYPES.map((docType) => (
+                  {getDocumentTypes(t).map((docType) => (
                     <SelectItem key={docType.value} value={docType.value}>
-                      {docType.label} {docType.required && "*"}
+                      {t(docType.labelKey)} {docType.required && "*"}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-1">
-                {DOCUMENT_TYPES.find(d => d.value === documentKind)?.required 
-                  ? "This document is required" 
-                  : "This document is optional"}
+                {getDocumentTypes(t).find(d => d.value === documentKind)?.required 
+                  ? t("isRequired") 
+                  : t("isOptional")}
               </p>
             </div>
 
             <div>
-              <Label htmlFor="file">Choose File</Label>
+              <Label htmlFor="file">{t("chooseFile")}</Label>
               <Input
                 id="file"
                 type="file"
@@ -299,7 +301,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Accepted: {Object.values(ALLOWED_TYPES).join(', ')} • Max: {(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB
+                {t("acceptedFormats")}
               </p>
             </div>
 
@@ -308,7 +310,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
               <div className="border rounded-lg p-4 bg-background space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="font-medium text-sm mb-1">Preview</h4>
+                    <h4 className="font-medium text-sm mb-1">{t("preview")}</h4>
                     <p className="text-sm text-muted-foreground">{selectedFile.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {(selectedFile.size / 1024).toFixed(1)} KB • {ALLOWED_TYPES[selectedFile.type as keyof typeof ALLOWED_TYPES]}
@@ -341,10 +343,10 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
                 <div className="flex gap-2">
                   <Button onClick={confirmUpload} className="flex-1">
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload Document
+                    {t("uploadDocument")}
                   </Button>
                   <Button onClick={cancelUpload} variant="outline">
-                    Cancel
+                    {t("cancel")}
                   </Button>
                 </div>
               </div>
@@ -354,7 +356,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
               <div>
                 <Progress value={uploadProgress} />
                 <p className="text-sm text-muted-foreground mt-2">
-                  Uploading... {Math.round(uploadProgress)}%
+                  {t("uploading")} {Math.round(uploadProgress)}%
                 </p>
               </div>
             )}
@@ -365,24 +367,24 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
           <div className="flex items-center justify-between">
             <h3 className="font-semibold flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Your Documents ({documents.length})
+              {t("yourDocuments")} ({documents.length})
             </h3>
             <Badge variant={hasRequiredDocuments() ? "default" : "secondary"}>
               {hasRequiredDocuments() ? (
                 <span className="flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
-                  All Required Uploaded
+                  {t("allRequiredUploaded")}
                 </span>
               ) : (
                 <span className="flex items-center gap-1">
                   <XCircle className="h-3 w-3" />
-                  Missing Required
+                  {t("missingRequiredShort")}
                 </span>
               )}
             </Badge>
           </div>
 
-          {DOCUMENT_TYPES.map((docType) => {
+          {getDocumentTypes(t).map((docType) => {
             const docsOfType = getDocumentsByType(docType.value);
             if (docsOfType.length === 0) return null;
 
@@ -390,8 +392,8 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
               <div key={docType.value} className="border rounded-lg p-3">
                 <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
                   {docType.required && <CheckCircle2 className="h-4 w-4 text-green-600" />}
-                  {docType.label}
-                  {docType.required && <Badge variant="secondary" className="text-xs">Required</Badge>}
+                  {t(docType.labelKey)}
+                  {docType.required && <Badge variant="secondary" className="text-xs">{t("requiredBadge")}</Badge>}
                 </h4>
                 <div className="space-y-2">
                   {docsOfType.map((doc) => (
@@ -409,14 +411,14 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
                           onClick={() => setViewingDoc({ url: doc.downloadURL, name: doc.filename, type: doc.mimeType })}
                         >
                           <Eye className="h-4 w-4 mr-1" />
-                          View
+                          {t("view")}
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleReplaceDocument(docType.value)}
                         >
-                          Replace
+                          {t("replace")}
                         </Button>
                         <Button
                           size="sm"
@@ -436,35 +438,35 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
           {documents.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No documents uploaded yet</p>
-              <p className="text-sm">Upload your required documents to continue</p>
+              <p>{t("noDocuments")}</p>
+              <p className="text-sm">{t("uploadToContinue")}</p>
             </div>
           )}
         </div>
 
         {/* Important Information */}
         <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
-          <h4 className="font-semibold text-sm mb-2">Important Document Guidelines:</h4>
+          <h4 className="font-semibold text-sm mb-2">{t("guidelines")}</h4>
           <ul className="text-sm space-y-1 text-muted-foreground">
-            <li>• <strong>Birth Certificate:</strong> Must be official copy with seal (Acte de Naissance)</li>
-            <li>• <strong>Baccalauréat:</strong> Original certificate or certified copy required</li>
-            <li>• <strong>Transcripts:</strong> Official school records from last institution</li>
-            <li>• <strong>Passport Photo:</strong> Recent 2x2 color photo on white background</li>
-            <li>• <strong>ID Documents:</strong> National ID (CIN) or valid passport</li>
+            <li>• {t("guidelineBirth")}</li>
+            <li>• {t("guidelineBacc")}</li>
+            <li>• {t("guidelineTranscript")}</li>
+            <li>• {t("guidelinePhoto")}</li>
+            <li>• {t("guidelineId")}</li>
           </ul>
         </div>
 
         {/* Navigation */}
         <div className="flex gap-2">
           <Button variant="outline" onClick={onBack}>
-            Back
+            {t("back")}
           </Button>
           <Button 
             onClick={onNext} 
             className="flex-1"
             disabled={!hasRequiredDocuments()}
           >
-            {hasRequiredDocuments() ? "Continue" : "Upload Required Documents First"}
+            {hasRequiredDocuments() ? t("continue") : t("uploadRequiredFirst")}
           </Button>
         </div>
       </CardContent>
@@ -493,10 +495,10 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
             <div className="text-center py-12">
               <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">
-                This file type cannot be previewed
+                {t("cannotPreview")}
               </p>
               <Button onClick={() => window.open(viewingDoc?.url, '_blank')}>
-                Download File
+                {t("downloadFile")}
               </Button>
             </div>
           )}
