@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
       hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL?.substring(0, 30) + "...",
+      nextPhase: process.env.NEXT_PHASE,
     };
 
     if (!envCheck.hasProjectId || !envCheck.hasClientEmail || !envCheck.hasPrivateKey) {
@@ -21,6 +22,17 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Import getAdminApp to test it directly
+    const { default: getAdminApp } = await import("@/lib/firebase/admin");
+    const app = getAdminApp();
+    
+    const appInfo = {
+      hasApp: !!app,
+      appType: app?.constructor?.name,
+      appKeys: app ? Object.keys(app).length : 0,
+      isEmptyObject: app ? Object.keys(app).length === 0 : false,
+    };
+
     const db = getAdminDb();
     
     // Get database info
@@ -28,6 +40,7 @@ export async function GET(request: NextRequest) {
       type: db.constructor.name,
       hasDb: !!db,
       isObject: typeof db === 'object',
+      hasCollectionMethod: typeof (db as any).collection === 'function',
       projectId: (db as any)._settings?.projectId || (db as any).projectId,
     };
 
@@ -54,6 +67,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       envCheck,
+      appInfo,
       dbInfo,
       writeTest,
       message: "Database connection working",
