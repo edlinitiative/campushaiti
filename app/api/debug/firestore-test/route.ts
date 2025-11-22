@@ -3,28 +3,33 @@ import { getAdminDb } from "@/lib/firebase/admin";
 
 export async function GET(request: NextRequest) {
   try {
+    // Check environment variables
+    const envCheck = {
+      hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
+      hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
+      hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL?.substring(0, 30) + "...",
+    };
+
+    if (!envCheck.hasProjectId || !envCheck.hasClientEmail || !envCheck.hasPrivateKey) {
+      return NextResponse.json({
+        success: false,
+        step: "missing_env_vars",
+        envCheck,
+        message: "Firebase credentials not configured in Vercel",
+      });
+    }
+
     const db = getAdminDb();
     
     // Get database info
     const dbInfo = {
       type: db.constructor.name,
+      hasDb: !!db,
+      isObject: typeof db === 'object',
       projectId: (db as any)._settings?.projectId || (db as any).projectId,
     };
-
-    // Try to list collections
-    let collections: any[] = [];
-    try {
-      const collectionRefs = await db.listCollections();
-      collections = collectionRefs.map(col => col.id);
-    } catch (listError: any) {
-      return NextResponse.json({
-        success: false,
-        step: "list_collections_failed",
-        dbInfo,
-        error: listError.message,
-        errorCode: listError.code,
-      });
-    }
 
     // Try to create a test document
     let writeTest = null;
@@ -48,8 +53,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      envCheck,
       dbInfo,
-      collections,
       writeTest,
       message: "Database connection working",
     });
