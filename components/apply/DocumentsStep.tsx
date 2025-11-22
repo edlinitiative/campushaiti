@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth, storage, db } from "@/lib/firebase/client";
+import { auth, storage } from "@/lib/firebase/client";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { collection, addDoc, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,10 +63,14 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
     if (!user) return;
 
     try {
-      const q = query(collection(db, "documents"), where("ownerUid", "==", user.uid));
-      const snapshot = await getDocs(q);
-      const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setDocuments(docs);
+      const response = await fetch(`/api/user/documents?userId=${user.uid}`);
+      if (!response.ok) {
+        console.error("Failed to load documents:", response.statusText);
+        return;
+      }
+      
+      const data = await response.json();
+      setDocuments(data.documents || []);
     } catch (error) {
       console.error("Error loading documents:", error);
     }
@@ -153,16 +156,26 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
           // Upload complete - get download URL and save metadata
           const downloadURL = await getDownloadURL(storageRef);
           
-          await addDoc(collection(db, "documents"), {
-            ownerUid: user.uid,
-            kind: documentKind,
-            filename: selectedFile.name,
-            mimeType: selectedFile.type,
-            sizeBytes: selectedFile.size,
-            storagePath,
-            downloadURL,
-            createdAt: new Date(),
+          // Save document metadata via API
+          const response = await fetch("/api/user/documents", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              ownerUid: user.uid,
+              kind: documentKind,
+              filename: selectedFile.name,
+              mimeType: selectedFile.type,
+              sizeBytes: selectedFile.size,
+              storagePath,
+              downloadURL,
+            }),
           });
+
+          if (!response.ok) {
+            throw new Error("Failed to save document metadata");
+          }
 
           await loadDocuments();
           setUploading(false);
@@ -195,11 +208,17 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
     if (!confirm(t("deleteConfirm"))) return;
 
     try {
-      // Delete from Firestore
-      await deleteDoc(doc(db, "documents", docId));
+      // Delete via API
+      const response = await fetch(`/api/user/documents?documentId=${docId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete document");
+      }
       
       // Note: Firebase Storage deletion requires admin SDK or storage rules
-      // For now, we'll just remove from Firestore
+      // For now, we'll just remove from database
       
       await loadDocuments();
     } catch (error) {

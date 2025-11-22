@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth, db } from "@/lib/firebase/client";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth } from "@/lib/firebase/client";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,89 +79,84 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
       if (!user) return;
 
       try {
-        // First, fetch user profile from our API (has phone, fullName, email)
-        let userProfileData: any = {};
-        try {
-          const userProfileRes = await fetch(`/api/user/profile?userId=${user.uid}`);
-          if (userProfileRes.ok) {
-            userProfileData = await userProfileRes.json();
-          }
-        } catch (err) {
-          console.warn("Could not fetch user profile:", err);
+        // Fetch user profile and application profile data from API
+        const response = await fetch(`/api/user/profile?userId=${user.uid}`);
+        if (!response.ok) {
+          console.warn("Could not fetch profile:", response.statusText);
+          return;
         }
 
+        const data = await response.json();
+        const userProfile = data.user || {};
+        const appProfile = data.profile || {};
+
         // Split fullName into firstName and lastName if available
-        const fullName = userProfileData.fullName || user.displayName || "";
+        const fullName = userProfile.fullName || user.displayName || "";
         const nameParts = fullName.split(" ");
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
 
-        // Then fetch saved application profile data
-        const profileDoc = await getDoc(doc(db, "profiles", user.uid));
-        
-        if (profileDoc.exists()) {
-          const data = profileDoc.data();
-          setFormData({
-            // Personal Information - pre-fill from user profile where available
-            firstName: data.firstName || firstName,
-            lastName: data.lastName || lastName,
-            gender: data.gender || "",
-            phone: data.phone || userProfileData.phoneNumber || "",
-            whatsapp: data.whatsapp || userProfileData.phoneNumber || "",
-            email: data.email || userProfileData.email || user.email || "",
-            nationality: data.nationality || "Haitian",
-            birthDate: data.birthDate?.toDate?.()?.toISOString().split("T")[0] || "",
-            birthPlace: data.birthPlace || "",
-            idNumber: data.idNumber || "",
-            
-            // Address
-            address: data.address || "",
-            city: data.city || "",
-            department: data.department || "",
-            country: data.country || "Haiti",
-            
-            // Parents/Guardian
-            fatherName: data.fatherName || "",
-            fatherPhone: data.fatherPhone || "",
-            fatherOccupation: data.fatherOccupation || "",
-            motherName: data.motherName || "",
-            motherPhone: data.motherPhone || "",
-            motherOccupation: data.motherOccupation || "",
-            guardianName: data.guardianName || "",
-            guardianPhone: data.guardianPhone || "",
-            guardianRelationship: data.guardianRelationship || "",
-            
-            // Emergency
-            emergencyName: data.emergencyName || "",
-            emergencyPhone: data.emergencyPhone || "",
-            emergencyRelationship: data.emergencyRelationship || "",
-            
-            // Education
-            lastSchoolName: data.education?.schoolName || "",
-            lastSchoolCity: data.education?.city || "",
-            graduationYear: data.education?.graduationYear || "",
-            diplomaType: data.education?.diplomaType || "",
-            fieldOfStudy: data.education?.fieldOfStudy || "",
-            gpa: data.education?.gpa || "",
-            hasBaccalaureat: data.education?.hasBaccalaureat || "",
-            baccalaureatSeries: data.education?.baccalaureatSeries || "",
-            
-            // Essays
-            personalStatement: data.essays?.personalStatement || "",
-            careerGoals: data.essays?.careerGoals || "",
-            whyThisUniversity: data.essays?.whyThisUniversity || "",
-          });
-        } else {
-          // No saved profile yet - pre-fill from user profile
-          setFormData(prev => ({
-            ...prev,
-            firstName: firstName,
-            lastName: lastName,
-            phone: userProfileData.phoneNumber || "",
-            whatsapp: userProfileData.phoneNumber || "",
-            email: userProfileData.email || user.email || "",
-          }));
+        // Convert birthDate timestamp to ISO string if exists
+        let birthDateStr = "";
+        if (appProfile.birthDate) {
+          try {
+            const birthDate = new Date(appProfile.birthDate);
+            birthDateStr = birthDate.toISOString().split("T")[0];
+          } catch (err) {
+            console.warn("Could not parse birthDate:", err);
+          }
         }
+
+        setFormData({
+          // Personal Information - pre-fill from user profile where available
+          firstName: appProfile.firstName || firstName,
+          lastName: appProfile.lastName || lastName,
+          gender: appProfile.gender || "",
+          phone: appProfile.phone || userProfile.phoneNumber || "",
+          whatsapp: appProfile.whatsapp || userProfile.phoneNumber || "",
+          email: appProfile.email || userProfile.email || user.email || "",
+          nationality: appProfile.nationality || "Haitian",
+          birthDate: birthDateStr,
+          birthPlace: appProfile.birthPlace || "",
+          idNumber: appProfile.idNumber || "",
+          
+          // Address
+          address: appProfile.address || "",
+          city: appProfile.city || "",
+          department: appProfile.department || "",
+          country: appProfile.country || "Haiti",
+          
+          // Parents/Guardian
+          fatherName: appProfile.fatherName || "",
+          fatherPhone: appProfile.fatherPhone || "",
+          fatherOccupation: appProfile.fatherOccupation || "",
+          motherName: appProfile.motherName || "",
+          motherPhone: appProfile.motherPhone || "",
+          motherOccupation: appProfile.motherOccupation || "",
+          guardianName: appProfile.guardianName || "",
+          guardianPhone: appProfile.guardianPhone || "",
+          guardianRelationship: appProfile.guardianRelationship || "",
+          
+          // Emergency
+          emergencyName: appProfile.emergencyName || "",
+          emergencyPhone: appProfile.emergencyPhone || "",
+          emergencyRelationship: appProfile.emergencyRelationship || "",
+          
+          // Education
+          lastSchoolName: appProfile.education?.schoolName || "",
+          lastSchoolCity: appProfile.education?.city || "",
+          graduationYear: appProfile.education?.graduationYear || "",
+          diplomaType: appProfile.education?.diplomaType || "",
+          fieldOfStudy: appProfile.education?.fieldOfStudy || "",
+          gpa: appProfile.education?.gpa || "",
+          hasBaccalaureat: appProfile.education?.hasBaccalaureat || "",
+          baccalaureatSeries: appProfile.education?.baccalaureatSeries || "",
+          
+          // Essays
+          personalStatement: appProfile.essays?.personalStatement || "",
+          careerGoals: appProfile.essays?.careerGoals || "",
+          whyThisUniversity: appProfile.essays?.whyThisUniversity || "",
+        });
       } catch (error) {
         console.error("Error loading profile:", error);
       }
@@ -227,80 +221,80 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
 
     setLoading(true);
     try {
-      // Save comprehensive profile
-      await setDoc(
-        doc(db, "profiles", user.uid),
-        {
-          uid: user.uid,
-          // Personal
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          gender: formData.gender,
-          phone: formData.phone,
-          whatsapp: formData.whatsapp,
-          nationality: formData.nationality,
-          birthDate: formData.birthDate ? new Date(formData.birthDate) : null,
-          birthPlace: formData.birthPlace,
-          idNumber: formData.idNumber,
-          
-          // Address
-          address: formData.address,
-          city: formData.city,
-          department: formData.department,
-          country: formData.country,
-          
-          // Parents/Guardian
-          fatherName: formData.fatherName,
-          fatherPhone: formData.fatherPhone,
-          fatherOccupation: formData.fatherOccupation,
-          motherName: formData.motherName,
-          motherPhone: formData.motherPhone,
-          motherOccupation: formData.motherOccupation,
-          guardianName: formData.guardianName,
-          guardianPhone: formData.guardianPhone,
-          guardianRelationship: formData.guardianRelationship,
-          
-          // Emergency
-          emergencyName: formData.emergencyName,
-          emergencyPhone: formData.emergencyPhone,
-          emergencyRelationship: formData.emergencyRelationship,
-          
-          // Education
-          education: {
-            schoolName: formData.lastSchoolName,
-            city: formData.lastSchoolCity,
-            graduationYear: formData.graduationYear,
-            diplomaType: formData.diplomaType,
-            fieldOfStudy: formData.fieldOfStudy,
-            gpa: formData.gpa,
-            hasBaccalaureat: formData.hasBaccalaureat,
-            baccalaureatSeries: formData.baccalaureatSeries,
-          },
-          
-          // Essays
-          essays: {
-            personalStatement: formData.personalStatement,
-            careerGoals: formData.careerGoals,
-            whyThisUniversity: formData.whyThisUniversity,
-          },
-          
-          updatedAt: new Date(),
+      // Prepare profile data for API
+      const profileData = {
+        uid: user.uid,
+        // Personal
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        gender: formData.gender,
+        phone: formData.phone,
+        whatsapp: formData.whatsapp,
+        email: user.email,
+        nationality: formData.nationality,
+        birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : null,
+        birthPlace: formData.birthPlace,
+        idNumber: formData.idNumber,
+        
+        // Address
+        address: formData.address,
+        city: formData.city,
+        department: formData.department,
+        country: formData.country,
+        
+        // Parents/Guardian
+        fatherName: formData.fatherName,
+        fatherPhone: formData.fatherPhone,
+        fatherOccupation: formData.fatherOccupation,
+        motherName: formData.motherName,
+        motherPhone: formData.motherPhone,
+        motherOccupation: formData.motherOccupation,
+        guardianName: formData.guardianName,
+        guardianPhone: formData.guardianPhone,
+        guardianRelationship: formData.guardianRelationship,
+        
+        // Emergency
+        emergencyName: formData.emergencyName,
+        emergencyPhone: formData.emergencyPhone,
+        emergencyRelationship: formData.emergencyRelationship,
+        
+        // Education
+        education: {
+          schoolName: formData.lastSchoolName,
+          city: formData.lastSchoolCity,
+          graduationYear: formData.graduationYear,
+          diplomaType: formData.diplomaType,
+          fieldOfStudy: formData.fieldOfStudy,
+          gpa: formData.gpa,
+          hasBaccalaureat: formData.hasBaccalaureat,
+          baccalaureatSeries: formData.baccalaureatSeries,
         },
-        { merge: true }
-      );
+        
+        // Essays
+        essays: {
+          personalStatement: formData.personalStatement,
+          careerGoals: formData.careerGoals,
+          whyThisUniversity: formData.whyThisUniversity,
+        },
+        
+        // User data for users collection
+        name: `${formData.firstName} ${formData.lastName}`.trim() || user.email,
+        role: "APPLICANT",
+      };
 
-      // Update user name
-      await setDoc(
-        doc(db, "users", user.uid),
-        {
-          uid: user.uid,
-          email: user.email,
-          name: `${formData.firstName} ${formData.lastName}`.trim() || user.email,
-          role: "APPLICANT",
-          updatedAt: new Date(),
+      // Save profile using API
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
-        { merge: true }
-      );
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to save profile");
+      }
 
       onNext();
     } catch (error) {

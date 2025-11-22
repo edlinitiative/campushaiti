@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/user/profile?userId=xxx
- * Fetch user profile data
+ * Fetch user profile data from Firestore
  */
 export async function GET(request: NextRequest) {
   try {
@@ -20,24 +19,20 @@ export async function GET(request: NextRequest) {
     // Verify the user is authenticated
     const token = request.cookies.get("session")?.value;
     if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const decodedToken = await getAdminAuth().verifySessionCookie(token);
     if (decodedToken.uid !== userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user profile from Realtime Database (basic info)
+    const db = getAdminDb();
+
+    // Get user profile from Firestore (basic info)
     let userData = null;
     try {
-      const userDoc = await collection("users").doc(userId).get();
+      const userDoc = await db.collection("users").doc(userId).get();
       if (userDoc.exists) {
         userData = userDoc.data();
       }
@@ -48,7 +43,7 @@ export async function GET(request: NextRequest) {
     // Get full profile from profiles collection
     let profileData = null;
     try {
-      const profileDoc = await collection("profiles").doc(userId).get();
+      const profileDoc = await db.collection("profiles").doc(userId).get();
       if (profileDoc.exists) {
         profileData = profileDoc.data();
       }
@@ -79,83 +74,56 @@ export async function GET(request: NextRequest) {
 
 /**
  * PUT /api/user/profile
- * Update full user profile (for application form)
+ * Update full user profile (for application form) in Firestore
  */
 export async function PUT(request: NextRequest) {
   try {
-    const { userId, userData, profileData } = await request.json();
+    const body = await request.json();
+    const { uid, name, role, ...profileData } = body;
 
-    if (!userId) {
+    if (!uid) {
       return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
 
     // Verify the user is authenticated
     const token = request.cookies.get("session")?.value;
     if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const decodedToken = await getAdminAuth().verifySessionCookie(token);
-    if (decodedToken.uid !== userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    if (decodedToken.uid !== uid) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const db = getAdminDb();
 
     // Update users collection (basic info)
-    if (userData) {
-      try {
-        await collection("users").doc(userId).set(
-          {
-            ...userData,
-            updatedAt: Date.now(),
-          },
-          { merge: true }
-        );
-
-        // Update display name in Firebase Auth if provided
-        if (userData.fullName || userData.name) {
-          try {
-            await getAdminAuth().updateUser(userId, {
-              displayName: userData.fullName || userData.name,
-            });
-          } catch (authError) {
-            console.warn("Could not update display name in Auth:", authError);
-          }
-        }
-      } catch (dbError: any) {
-        console.error("Database write error (users):", dbError);
-        return NextResponse.json(
-          { error: "Failed to update user data" },
-          { status: 500 }
-        );
-      }
-    }
+    await db.collection("users").doc(uid).set(
+      {
+        uid,
+        email: decodedToken.email,
+        name: name || decodedToken.email,
+        role: role || "APPLICANT",
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
 
     // Update profiles collection (full application profile)
-    if (profileData) {
-      try {
-        await collection("profiles").doc(userId).set(
-          {
-            ...profileData,
-            updatedAt: Date.now(),
-          },
-          { merge: true }
-        );
-      } catch (dbError: any) {
-        console.error("Database write error (profiles):", dbError);
-        return NextResponse.json(
-          { error: "Failed to update profile data" },
-          { status: 500 }
-        );
-      }
-    }
+    await db.collection("profiles").doc(uid).set(
+      {
+        ...profileData,
+        uid,
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Profile updated successfully",
+    });
   } catch (error: any) {
     console.error("Profile update error:", error);
     return NextResponse.json(
@@ -171,60 +139,7 @@ export async function PUT(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { userId, phoneNumber, fullName } = await request.json();
-
-    if (!userId) {
-      return NextResponse.json({ error: "User ID required" }, { status: 400 });
-    }
-
-    if (!phoneNumber) {
-      return NextResponse.json({ error: "Phone number required" }, { status: 400 });
-    }
-
-    // Update user profile in Realtime Database
-    try {
-      await collection("users").doc(userId).set(
-        {
-          phoneNumber,
-          fullName: fullName || null,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      );
-    } catch (dbError: any) {
-      console.error("Database write error:", dbError);
-      console.warn("Database not available yet, skipping user profile storage");
-    }
-
-    // Update display name in Firebase Auth if provided
-    if (fullName) {
-      try {
-        await getAdminAuth().updateUser(userId, {
-          displayName: fullName,
-        });
-      } catch (authError) {
-        console.warn("Could not update display name in Auth:", authError);
-        // Continue anyway - this is not critical
-      }
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error("Profile update error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to update profile" },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * DELETE /api/user/profile
- * Delete user profile and associated data
- */
-export async function DELETE(request: NextRequest) {
-  try {
-    const { userId } = await request.json();
+    const { phoneNumber, fullName, userId } = await request.json();
 
     if (!userId) {
       return NextResponse.json({ error: "User ID required" }, { status: 400 });
@@ -233,45 +148,33 @@ export async function DELETE(request: NextRequest) {
     // Verify the user is authenticated
     const token = request.cookies.get("session")?.value;
     if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const decodedToken = await getAdminAuth().verifySessionCookie(token);
     if (decodedToken.uid !== userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Delete user data from Realtime Database
-    try {
-      // Delete user document
-      await collection("users").doc(userId).delete();
+    const db = getAdminDb();
 
-      // Delete profile document
-      await collection("profiles").doc(userId).delete();
+    await db.collection("users").doc(userId).set(
+      {
+        phoneNumber,
+        fullName,
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
 
-      // Delete all user's passkeys
-      const passkeysSnapshot = await collection("passkeys")
-        .where("userId", "==", userId)
-        .get();
-      
-      for (const doc of passkeysSnapshot.docs) {
-        await collection("passkeys").doc(doc.id).delete();
-      }
-    } catch (dbError: any) {
-      console.warn("Could not delete from database:", dbError);
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Profile updated successfully",
+    });
   } catch (error: any) {
-    console.error("Profile delete error:", error);
+    console.error("Profile update error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to delete profile" },
+      { error: error.message || "Failed to update profile" },
       { status: 500 }
     );
   }
