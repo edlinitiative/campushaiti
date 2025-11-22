@@ -1,13 +1,11 @@
 import { initializeApp, getApps, cert, App } from "firebase-admin/app";
 import { getAuth, Auth } from "firebase-admin/auth";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
-import { getDatabase, Database } from "firebase-admin/database";
 import { getStorage, Storage } from "firebase-admin/storage";
 
 let adminApp: App | undefined;
 let _adminAuth: Auth | undefined;
 let _adminDb: Firestore | undefined;
-let _adminDatabase: Database | undefined;
 let _adminStorage: Storage | undefined;
 
 function getAdminApp(): App {
@@ -46,7 +44,6 @@ function getAdminApp(): App {
           clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
           privateKey: privateKey,
         }),
-        databaseURL: process.env.FIREBASE_DATABASE_URL || `https://${process.env.FIREBASE_PROJECT_ID}-default-rtdb.firebaseio.com`,
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
       });
     } catch (error) {
@@ -85,18 +82,6 @@ export const getAdminDb = (): Firestore => {
   return _adminDb;
 };
 
-export const getAdminDatabase = (): Database => {
-  if (!_adminDatabase) {
-    const app = getAdminApp();
-    // Return mock during build
-    if (!app || Object.keys(app).length === 0) {
-      return {} as Database;
-    }
-    _adminDatabase = getDatabase(app);
-  }
-  return _adminDatabase;
-};
-
 export const getAdminStorage = (): Storage => {
   if (!_adminStorage) {
     const app = getAdminApp();
@@ -120,12 +105,6 @@ export const adminAuth = new Proxy({} as Auth, {
 export const adminDb = new Proxy({} as Firestore, {
   get: (target, prop) => {
     return (getAdminDb() as any)[prop];
-  }
-});
-
-export const adminDatabase = new Proxy({} as Database, {
-  get: (target, prop) => {
-    return (getAdminDatabase() as any)[prop];
   }
 });
 

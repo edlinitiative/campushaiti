@@ -104,7 +104,8 @@ export class AuditLogger {
    */
   async log(entry: Partial<AuditLogEntry> & { action: AuditAction }): Promise<void> {
     try {
-      // Use Realtime Database for audit logs
+      const db = getAdminDb();
+      // Use Firestore for audit logs
       
       const logEntry: AuditLogEntry = {
         severity: AuditSeverity.INFO,
@@ -113,7 +114,7 @@ export class AuditLogger {
         ...entry,
       };
 
-      // Store in Realtime Database
+      // Store in Firestore
       await db.collection("auditLogs").add(logEntry);
 
       // Console log for development (remove in production)
@@ -195,6 +196,7 @@ export class AuditLogger {
     limit?: number;
   }): Promise<AuditLogEntry[]> {
     try {
+      const db = getAdminDb();
       let query = db.collection("auditLogs").orderBy("timestamp", "desc");
 
       if (filters.userId) {

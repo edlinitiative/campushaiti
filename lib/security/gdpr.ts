@@ -21,6 +21,8 @@ export class GDPRService {
    */
   static async exportUserData(userId: string): Promise<GDPRDataExport> {
     try {
+      const db = getAdminDb();
+      
       // Log GDPR request
       await auditLogger.log({
         action: AuditAction.GDPR_DATA_REQUEST,
@@ -102,6 +104,7 @@ export class GDPRService {
     deleted: string[];
     retained: string[];
   }> {
+    const db = getAdminDb();
     const deleted: string[] = [];
     const retained: string[] = [];
 

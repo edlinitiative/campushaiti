@@ -29,6 +29,7 @@ export default async function DashboardPage({
   }
 
   const t = await getTranslations("userDashboard");
+  const db = getAdminDb();
 
   // Fetch applications and calculate stats
   let applications: any[] = [];
