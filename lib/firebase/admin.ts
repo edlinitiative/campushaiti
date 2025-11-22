@@ -59,34 +59,34 @@ function getAdminApp(): App {
 
 // Lazy getters for Firebase Admin services
 export const getAdminAuth = (): Auth => {
+  const app = getAdminApp();
+  
+  // Return mock during build
+  if (!app || Object.keys(app).length === 0) {
+    return {} as Auth;
+  }
+  
+  // Only cache if we have a valid app
   if (!_adminAuth) {
-    const app = getAdminApp();
-    // Return mock during build
-    if (!app || Object.keys(app).length === 0) {
-      return {} as Auth;
-    }
     _adminAuth = getAuth(app);
   }
+  
   return _adminAuth;
 };
 
 export const getAdminDb = (): Firestore => {
+  const app = getAdminApp();
+  
+  // Return mock during build
+  if (!app || Object.keys(app).length === 0) {
+    return {} as Firestore;
+  }
+  
+  // Only cache if we have a valid app
   if (!_adminDb) {
-    const app = getAdminApp();
-    // Return mock during build
-    if (!app || Object.keys(app).length === 0) {
-      return {} as Firestore;
-    }
     _adminDb = getFirestore(app);
   }
-  // Re-check if the cached db is actually a valid Firestore instance
-  // This handles cases where it was initialized as a mock during build
-  if (_adminDb && typeof (_adminDb as any).collection !== 'function') {
-    const app = getAdminApp();
-    if (app && Object.keys(app).length > 0) {
-      _adminDb = getFirestore(app);
-    }
-  }
+  
   return _adminDb;
 };
 
