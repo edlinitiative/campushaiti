@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // Cache for 5 minutes
@@ -90,8 +90,10 @@ const DEMO_PROGRAMS = [
 
 export async function GET() {
   try {
-    // Migrated to Realtime Database
-    const snapshot = await collection("programs")
+    const db = getAdminDb();
+    
+    const snapshot = await db
+      .collection("programs")
       .orderBy("name")
       .limit(100)
       .get();

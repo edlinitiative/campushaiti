@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase/client";
-import { doc, getDoc } from "firebase/firestore";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -75,7 +73,7 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
         return;
       }
 
-      // Fallback to old format
+      // Fallback to old format - fetch via API
       const programIds = JSON.parse(localStorage.getItem("selectedPrograms") || "[]");
       console.log("Fallback to old format, program IDs:", programIds);
       
@@ -84,18 +82,17 @@ export default function PaymentStep({ onNext, onBack }: PaymentStepProps) {
         return;
       }
       
-      const programs = [];
-
-      for (const id of programIds) {
-        const programDoc = await getDoc(doc(db, "programs", id));
-        if (programDoc.exists()) {
-          const data = programDoc.data();
-          programs.push({ id, ...data });
-        }
+      // Fetch all programs from API
+      const response = await fetch("/api/programs");
+      if (!response.ok) {
+        throw new Error("Failed to fetch programs");
       }
+      
+      const allPrograms = await response.json();
+      const programs = allPrograms.filter((p: any) => programIds.includes(p.id));
 
       setSelectedPrograms(programs);
-      setProgramsToPayNow(new Set(programs.map(p => p.id)));
+      setProgramsToPayNow(new Set(programs.map((p: any) => p.id)));
     } catch (error) {
       console.error("Error loading programs:", error);
     } finally {

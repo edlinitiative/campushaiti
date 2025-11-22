@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth, db } from "@/lib/firebase/client";
-import { collection, addDoc, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { auth } from "@/lib/firebase/client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,7 +50,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
         programsData = JSON.parse(programsDataStr);
         console.log("Using new format programs:", programsData);
       } else {
-        // Fallback to old format - requires Firebase
+        // Fallback to old format - requires API
         const programIds = JSON.parse(localStorage.getItem("selectedPrograms") || "[]");
         console.log("Fallback to old format, program IDs:", programIds);
         
@@ -61,25 +60,17 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
           return;
         }
 
-        // Only fetch from Firestore if we have IDs and no data
+        // Fetch all programs from API
         try {
-          for (const programId of programIds) {
-            const programDoc = await getDoc(doc(db, "programs", programId));
-            if (programDoc.exists()) {
-              const program = { id: programDoc.id, ...programDoc.data() } as any;
-              
-              // Fetch university data for this program
-              if (program.universityId) {
-                const universityDoc = await getDoc(doc(db, "universities", program.universityId));
-                const university = universityDoc.exists() ? universityDoc.data() : null;
-                program.universityName = university?.name || "Unknown University";
-              }
-              
-              programsData.push(program);
-            }
+          const response = await fetch("/api/programs");
+          if (!response.ok) {
+            throw new Error("Failed to fetch programs");
           }
-        } catch (dbError) {
-          console.error("Error fetching from Firestore:", dbError);
+          
+          const allPrograms = await response.json();
+          programsData = allPrograms.filter((p: any) => programIds.includes(p.id));
+        } catch (apiError) {
+          console.error("Error fetching from API:", apiError);
           setError(t("cannotLoadPrograms"));
           setPreparingData(false);
           return;
@@ -92,35 +83,31 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
         return;
       }
 
-      // Now try to load user/profile data (optional for review)
+      // Now try to load user/profile/documents data via API
       let userData: any = {};
       let profileData: any = {};
       let documents: any[] = [];
 
       try {
-        // 1. Fetch user data
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        userData = userDoc.data() || {};
-        console.log("User data:", userData);
+        const response = await fetch(`/api/user/profile?userId=${user.uid}`);
+        if (response.ok) {
+          const data = await response.json();
+          userData = data.user || {};
+          profileData = data.profile || {};
+          console.log("User data:", userData);
+          console.log("Profile data:", profileData);
+        }
       } catch (err) {
-        console.warn("Could not fetch user data:", err);
+        console.warn("Could not fetch user/profile data:", err);
       }
 
       try {
-        // 2. Fetch profile data
-        const profileDoc = await getDoc(doc(db, "profiles", user.uid));
-        profileData = profileDoc.data() || {};
-        console.log("Profile data:", profileData);
-      } catch (err) {
-        console.warn("Could not fetch profile data:", err);
-      }
-
-      try {
-        // 3. Fetch documents
-        const docsQuery = query(collection(db, "documents"), where("ownerUid", "==", user.uid));
-        const docsSnapshot = await getDocs(docsQuery);
-        documents = docsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        console.log("Documents:", documents);
+        const response = await fetch(`/api/user/documents?userId=${user.uid}`);
+        if (response.ok) {
+          const data = await response.json();
+          documents = data.documents || [];
+          console.log("Documents:", documents);
+        }
       } catch (err) {
         console.warn("Could not fetch documents:", err);
       }
@@ -128,8 +115,8 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
       setApplicationData({
         user: {
           uid: user.uid,
-          email: user.email || "",
-          name: userData?.name || "",
+          email: user.email || userData?.email || "",
+          name: userData?.fullName || "",
           phone: profileData?.phone || "",
         },
         profile: {
@@ -143,7 +130,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
             fieldOfStudy: profileData?.education?.fieldOfStudy || "",
           },
         },
-        documents: documents.map(d => d.id),
+        documents: documents.map((d: any) => d.id),
         programs: programsData,
       });
 
@@ -164,67 +151,22 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
     setError(null);
 
     try {
-      // Create parent application
-      const applicationRef = await addDoc(collection(db, "applications"), {
-        applicantUid: user.uid,
-        status: "SUBMITTED",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      // Submit application via API
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ applicationData }),
       });
 
-      // Create application items for each selected program
-      for (const program of applicationData.programs) {
-        const itemData: any = {
-          // Application reference
-          applicationId: applicationRef.id,
-          programId: program.id,
-          
-          // University/Program info (denormalized)
-          universityId: program.universityId || 'unknown',
-          universityName: program.universityName || 'Unknown University',
-          programName: program.name,
-          programDegree: program.degree || '',
-          
-          // Applicant info (denormalized)
-          applicantUid: user.uid,
-          applicantName: applicationData.user.name,
-          applicantEmail: applicationData.user.email,
-          applicantPhone: applicationData.user.phone,
-          
-          // Profile data
-          personalStatement: applicationData.profile.personalStatement,
-          nationality: applicationData.profile.nationality,
-          birthDate: applicationData.profile.birthDate,
-          
-          // Education
-          education: applicationData.profile.education,
-          
-          // Documents
-          documentIds: applicationData.documents,
-          
-          // Status
-          status: "SUBMITTED",
-          checklist: {
-            profileComplete: true,
-            documentsUploaded: applicationData.documents.length > 0,
-            essaysSubmitted: !!applicationData.profile.personalStatement,
-            customQuestionsAnswered: !!(program.answers && Object.keys(program.answers).length > 0),
-            paymentReceived: false, // Will be updated by payment webhook
-          },
-          
-          // Timestamps
-          submittedAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        // Add program answers if they exist
-        if (program.answers && Object.keys(program.answers).length > 0) {
-          itemData.programAnswers = program.answers;
-        }
-
-        await addDoc(collection(db, "applicationItems"), itemData);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to submit application");
       }
+
+      const result = await response.json();
+      const applicationId = result.applicationId;
 
       // Clear localStorage
       localStorage.removeItem("selectedPrograms");
@@ -245,7 +187,7 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
                 studentName: applicationData.user.name,
                 programName: program.name,
                 universityName: program.universityName || 'Unknown University',
-                applicationId: applicationRef.id,
+                applicationId: applicationId,
                 dashboardUrl
               }
             })
