@@ -14,8 +14,11 @@ function getAdminApp(): App {
   }
 
   if (getApps().length === 0) {
-    // Skip initialization during build time only
-    if (process.env.NEXT_PHASE === 'phase-production-build') {
+    // Only skip initialization if we're truly in a build context (no runtime env)
+    // Don't check NEXT_PHASE as Vercel incorrectly sets it at runtime
+    const isBuildTime = typeof window === 'undefined' && !process.env.FIREBASE_PROJECT_ID;
+    
+    if (isBuildTime) {
       console.log("Skipping Firebase Admin initialization during build");
       // Return a mock app to prevent errors during build
       return {} as App;
@@ -38,6 +41,7 @@ function getAdminApp(): App {
     privateKey = privateKey.replace(/\\n/g, "\n");
 
     try {
+      console.log("Initializing Firebase Admin...");
       adminApp = initializeApp({
         credential: cert({
           projectId: process.env.FIREBASE_PROJECT_ID,
@@ -46,6 +50,7 @@ function getAdminApp(): App {
         }),
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
       });
+      console.log("Firebase Admin initialized successfully");
     } catch (error) {
       console.error("Failed to initialize Firebase Admin:", error);
       throw error;
