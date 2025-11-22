@@ -45,17 +45,24 @@ export async function POST(request: NextRequest) {
 
     const token = request.cookies.get("session")?.value;
     if (!token) {
+      console.error("No session token found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const decodedToken = await getAdminAuth().verifySessionCookie(token);
     const userDoc = await db.collection("users").doc(decodedToken.uid).get();
+    const userData = userDoc.data();
 
-    if (userDoc.data()?.role !== "ADMIN") {
+    console.log("User data:", { uid: decodedToken.uid, exists: userDoc.exists, role: userData?.role });
+
+    if (!userData || userData.role !== "ADMIN") {
+      console.error("User is not an admin:", { role: userData?.role });
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
 
     const { liveChatEnabled, maintenanceMode } = await request.json();
+
+    console.log("Updating platform settings:", { liveChatEnabled, maintenanceMode });
 
     // Update platform settings
     await db.collection("platform_settings").doc("general").set(
@@ -68,12 +75,15 @@ export async function POST(request: NextRequest) {
       { merge: true }
     );
 
+    console.log("Platform settings updated successfully");
+
     return NextResponse.json({
       success: true,
       message: "Platform settings updated successfully",
     });
   } catch (error: any) {
     console.error("Error updating platform settings:", error);
+    console.error("Error stack:", error.stack);
     return NextResponse.json(
       { error: error.message || "Failed to update settings" },
       { status: 500 }

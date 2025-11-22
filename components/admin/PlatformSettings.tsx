@@ -50,7 +50,12 @@ export function PlatformSettings() {
         body: JSON.stringify(settings),
       });
 
-      if (!response.ok) throw new Error("Failed to save settings");
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Server error:", data);
+        throw new Error(data.error || "Failed to save settings");
+      }
 
       setMessage({
         type: "success",
@@ -61,10 +66,11 @@ export function PlatformSettings() {
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error saving settings:", error);
       setMessage({
         type: "error",
-        text: t("settingsSaveError"),
+        text: error.message || t("settingsSaveError"),
       });
     } finally {
       setSaving(false);
