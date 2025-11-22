@@ -79,6 +79,14 @@ export const getAdminDb = (): Firestore => {
     }
     _adminDb = getFirestore(app);
   }
+  // Re-check if the cached db is actually a valid Firestore instance
+  // This handles cases where it was initialized as a mock during build
+  if (_adminDb && typeof (_adminDb as any).collection !== 'function') {
+    const app = getAdminApp();
+    if (app && Object.keys(app).length > 0) {
+      _adminDb = getFirestore(app);
+    }
+  }
   return _adminDb;
 };
 
