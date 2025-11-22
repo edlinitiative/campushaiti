@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { ApplicationItem } from "@/lib/types/firestore";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +10,12 @@ export const runtime = "nodejs";
  * GET /api/schools/applications
  * Get applications for schools the user administers
  */
+
+
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const sessionCookie = request.cookies.get("session")?.value;
     if (!sessionCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -30,7 +34,7 @@ export async function GET(request: NextRequest) {
     const programId = searchParams.get("programId");
 
     // Find universities where user is an admin
-    const universitiesSnapshot = await collection("universities")
+    const universitiesSnapshot = await db.collection("universities")
       .where("adminUids", "array-contains", decodedClaims.uid)
       .get();
 
@@ -41,7 +45,7 @@ export async function GET(request: NextRequest) {
     const universityIds = universitiesSnapshot.docs.map((doc) => doc.id);
 
     // Build query for applications
-    let query = collection("applicationItems");
+    let query = db.collection("applicationItems");
 
     // Filter by university
     if (universityIds.length === 1) {

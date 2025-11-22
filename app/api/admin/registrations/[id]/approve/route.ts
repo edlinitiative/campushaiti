@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { sendUniversityApprovedEmail, sendNewRegistrationNotification } from "@/lib/email/service";
 import { University } from "@/lib/types/firestore";
 
@@ -11,11 +11,15 @@ export const runtime = "nodejs";
  * PUT /api/admin/registrations/:id/approve
  * Approve a university registration
  */
+
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const db = getAdminDb();
+
     const sessionCookie = request.cookies.get("session")?.value;
     if (!sessionCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -29,7 +33,7 @@ export async function PUT(
     }
 
     const registrationId = params.id;
-    const registrationRef = collection("universityRegistrations").doc(registrationId);
+    const registrationRef = db.collection("universityRegistrations").doc(registrationId);
     const registrationDoc = await registrationRef.get();
 
     if (!registrationDoc.exists) {
@@ -65,7 +69,7 @@ export async function PUT(
       approvedBy: decodedClaims.uid,
     };
 
-    const universityRef = await collection("universities").add(universityData);
+    const universityRef = await db.collection("universities").add(universityData);
     const universityId = universityRef.path.split('/').pop()!;
 
     // Create school admin user account

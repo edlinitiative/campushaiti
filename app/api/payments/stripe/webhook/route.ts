@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
@@ -15,8 +15,12 @@ const getStripe = () => {
   });
 };
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const stripe = getStripe();
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -48,17 +52,17 @@ export async function POST(request: NextRequest) {
 
       if (paymentId) {
         // Update payment status
-        const paymentDoc = await collection("payments").doc(paymentId).get();
+        const paymentDoc = await db.collection("payments").doc(paymentId).get();
         const paymentData = paymentDoc.data();
         
-        await collection("payments").doc(paymentId).update({
+        await db.collection("payments").doc(paymentId).update({
           status: "PAID",
           updatedAt: Date.now(),
         });
 
         // Update application item
         if (applicationItemId) {
-          await collection("applicationItems").doc(applicationItemId).update({
+          await db.collection("applicationItems").doc(applicationItemId).update({
             status: "PAID",
             paymentId,
             "checklist.paymentReceived": true,
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
           
           // Send payment confirmation email
           try {
-            const appItemDoc = await collection("applicationItems").doc(applicationItemId).get();
+            const appItemDoc = await db.collection("applicationItems").doc(applicationItemId).get();
             const appItemData = appItemDoc.data();
             
             if (appItemData && paymentData) {

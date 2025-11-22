@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
 import { UniversityRegistration } from "@/lib/types/firestore";
 
 export const dynamic = "force-dynamic";
@@ -24,11 +23,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const db = getAdminDb();
+
     // Get status filter from query params
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
 
-    let query = collection("universityRegistrations");
+    let query = db.collection("universityRegistrations");
     
     if (status) {
       query = query.where("status", "==", status) as any;

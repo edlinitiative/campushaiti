@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     // Verify admin authentication
     const token = request.cookies.get("session")?.value;
     if (!token) {
@@ -13,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     const decodedToken = await getAdminAuth().verifySessionCookie(token);
-    const userDoc = await collection("users").doc(decodedToken.uid).get();
+    const userDoc = await db.collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -27,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     if (!type || type === "single") {
       // Get individual SMS notifications
-      const notificationsSnapshot = await collection("sms_notifications")
+      const notificationsSnapshot = await db.collection("sms_notifications")
         .orderBy("createdAt", "desc")
         .limit(limit)
         .get();
@@ -45,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     if (!type || type === "bulk") {
       // Get bulk SMS notifications
-      const bulkNotificationsSnapshot = await collection("bulk_sms_notifications")
+      const bulkNotificationsSnapshot = await db.collection("bulk_sms_notifications")
         .orderBy("createdAt", "desc")
         .limit(limit)
         .get();
@@ -71,15 +75,15 @@ export async function GET(request: NextRequest) {
     notifications = notifications.slice(0, limit);
 
     // Get stats
-    const totalSentSnapshot = await collection("sms_notifications")
+    const totalSentSnapshot = await db.collection("sms_notifications")
       .where("status", "==", "sent")
       .get();
 
-    const totalFailedSnapshot = await collection("sms_notifications")
+    const totalFailedSnapshot = await db.collection("sms_notifications")
       .where("status", "==", "failed")
       .get();
 
-    const totalPendingSnapshot = await collection("sms_notifications")
+    const totalPendingSnapshot = await db.collection("sms_notifications")
       .where("status", "==", "pending")
       .get();
 

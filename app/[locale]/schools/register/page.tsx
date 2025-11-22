@@ -9,8 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert } from "@/components/ui/alert";
-import { db } from "@/lib/firebase/client";
-import { collection, addDoc } from "firebase/firestore";
 
 export default function RegisterSchoolPage() {
   const t = useTranslations("schools.register");
@@ -61,15 +59,19 @@ export default function RegisterSchoolPage() {
     setError("");
 
     try {
-      // Create registration request
-      await addDoc(collection(db, "universityRegistrations"), {
-        ...formData,
-        status: "PENDING",
-        submittedBy: "anonymous", // Will be updated when we have auth
-        submittedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      // Submit registration via API
+      const response = await fetch("/api/schools/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit registration");
+      }
 
       setSuccess(true);
       setTimeout(() => {

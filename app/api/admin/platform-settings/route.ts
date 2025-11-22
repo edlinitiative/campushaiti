@@ -1,25 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const token = request.cookies.get("session")?.value;
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const decodedToken = await getAdminAuth().verifySessionCookie(token);
-    const userDoc = await collection("users").doc(decodedToken.uid).get();
+    const userDoc = await db.collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
 
     // Get platform settings from Realtime Database
-    const settingsDoc = await collection("platform_settings").doc("general").get();
+    const settingsDoc = await db.collection("platform_settings").doc("general").get();
     const settings = settingsDoc.exists ? settingsDoc.data() : {};
 
     return NextResponse.json({
@@ -37,13 +41,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const token = request.cookies.get("session")?.value;
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const decodedToken = await getAdminAuth().verifySessionCookie(token);
-    const userDoc = await collection("users").doc(decodedToken.uid).get();
+    const userDoc = await db.collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -52,7 +58,7 @@ export async function POST(request: NextRequest) {
     const { liveChatEnabled, maintenanceMode } = await request.json();
 
     // Update platform settings
-    await collection("platform_settings").doc("general").set(
+    await db.collection("platform_settings").doc("general").set(
       {
         liveChatEnabled: liveChatEnabled ?? true,
         maintenanceMode: maintenanceMode ?? false,

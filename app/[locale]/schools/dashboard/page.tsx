@@ -8,9 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { db } from "@/lib/firebase/client";
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
-import { getServerUser } from "@/lib/auth/server-auth";
 
 export default function SchoolDashboardPage() {
   const router = useRouter();

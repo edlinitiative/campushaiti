@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const { userId, phoneNumber, message, type } = await request.json();
 
     if (!phoneNumber || !message) {
@@ -22,7 +26,7 @@ export async function POST(request: NextRequest) {
       // Allow if user is sending to themselves or is admin
       if (userId && decodedToken.uid !== userId) {
         // Check if admin
-        const userDoc = await collection("users").doc(decodedToken.uid).get();
+        const userDoc = await db.collection("users").doc(decodedToken.uid).get();
         if (userDoc.data()?.role !== "ADMIN") {
           return NextResponse.json(
             { error: "Unauthorized" },
@@ -44,7 +48,7 @@ export async function POST(request: NextRequest) {
       error: null,
     };
 
-    const notificationRef = await collection("sms_notifications").add(notificationData);
+    const notificationRef = await db.collection("sms_notifications").add(notificationData);
 
     // TODO: Integrate with SMS provider (Twilio, AWS SNS, etc.)
     // For now, we'll simulate sending and just log it

@@ -1,5 +1,5 @@
 import { getServerUser } from "@/lib/auth/server-auth";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,7 +44,7 @@ export default async function DashboardPage({
 
   try {
     // Fetch applications
-    const snapshot = await collection("applicationItems")
+    const snapshot = await db.collection("applicationItems")
       .where("applicantUid", "==", user.uid)
       .orderBy("createdAt", "desc")
       .get();
@@ -55,7 +55,7 @@ export default async function DashboardPage({
     }));
 
     // Fetch documents
-    const docsSnapshot = await collection("documents")
+    const docsSnapshot = await db.collection("documents")
       .where("ownerUid", "==", user.uid)
       .get();
     

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -9,8 +9,12 @@ export const runtime = "nodejs";
  * GET /api/schools/stats
  * Get dashboard statistics for school administrators
  */
+
+
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const sessionCookie = request.cookies.get("session")?.value;
     if (!sessionCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -24,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Find universities where user is an admin
-    const universitiesSnapshot = await collection("universities")
+    const universitiesSnapshot = await db.collection("universities")
       .where("adminUids", "array-contains", decodedClaims.uid)
       .get();
 
@@ -46,14 +50,14 @@ export async function GET(request: NextRequest) {
     // Get programs count
     let programsCount = 0;
     for (const universityId of universityIds) {
-      const programsSnapshot = await collection("programs")
+      const programsSnapshot = await db.collection("programs")
         .where("universityId", "==", universityId)
         .get();
       programsCount += programsSnapshot.size;
     }
 
     // Get applications statistics
-    let applicationsQuery = collection("applicationItems");
+    let applicationsQuery = db.collection("applicationItems");
     
     if (universityIds.length === 1) {
       applicationsQuery = applicationsQuery.where("universityId", "==", universityIds[0]) as any;

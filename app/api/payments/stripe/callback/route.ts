@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -8,8 +8,12 @@ export const runtime = "nodejs";
  * GET /api/payments/stripe/callback
  * Handle Stripe Connect OAuth callback
  */
+
+
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
     const state = searchParams.get("state");
@@ -80,7 +84,7 @@ export async function GET(request: NextRequest) {
     const stripeUserId = tokenData.stripe_user_id;
 
     // Update university with Stripe account ID
-    await collection("universities").doc(universityId).update({
+    await db.collection("universities").doc(universityId).update({
       stripeAccountId: stripeUserId,
       updatedAt: Date.now(),
     });

@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { monCash } from "@/lib/payments/moncash";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const { transactionId } = await request.json();
 
     if (!transactionId) {
@@ -19,7 +23,7 @@ export async function POST(request: NextRequest) {
     const paymentStatus = await monCash.verifyPayment({ transactionId });
 
     // Find payment record
-    const paymentsSnapshot = await collection("payments")
+    const paymentsSnapshot = await db.collection("payments")
       .where("providerRef", "==", transactionId)
       .limit(1)
       .get();
@@ -44,7 +48,7 @@ export async function POST(request: NextRequest) {
       // Update application item
       const applicationItemId = paymentData.metadata?.applicationItemId;
       if (applicationItemId) {
-        await collection("applicationItems").doc(applicationItemId).update({
+        await db.collection("applicationItems").doc(applicationItemId).update({
           status: "PAID",
           paymentId: paymentDoc.id,
           "checklist.paymentReceived": true,

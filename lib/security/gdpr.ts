@@ -3,7 +3,7 @@
  * Data export and deletion for user privacy rights
  */
 
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { auditLogger, AuditAction } from "./audit-logger";
 
 export interface GDPRDataExport {
@@ -30,10 +30,10 @@ export class GDPRService {
 
       // Fetch all user data
       const [userDoc, applicationsSnap, documentsSnap, auditLogsSnap] = await Promise.all([
-        collection("users").doc(userId).get(),
-        collection("applicationItems").where("applicantUid", "==", userId).get(),
-        collection("documents").where("ownerUid", "==", userId).get(),
-        collection("auditLogs").where("userId", "==", userId).limit(1000).get(),
+        db.collection("users").doc(userId).get(),
+        db.collection("applicationItems").where("applicantUid", "==", userId).get(),
+        db.collection("documents").where("ownerUid", "==", userId).get(),
+        db.collection("auditLogs").where("userId", "==", userId).limit(1000).get(),
       ]);
 
       const userData = userDoc.exists ? userDoc.data() : null;
@@ -114,28 +114,28 @@ export class GDPRService {
       });
 
       // Delete user profile
-      await collection("users").doc(userId).delete();
+      await db.collection("users").doc(userId).delete();
       deleted.push("user_profile");
 
       // Handle applications
       if (options.deleteApplications) {
-        const applicationsSnap = await collection("applicationItems")
+        const applicationsSnap = await db.collection("applicationItems")
           .where("applicantUid", "==", userId)
           .get();
 
         // TODO: Batch operations need manual migration to RTDB sequential operations
         for (const doc of applicationsSnap.docs) {
-          await collection("applicationItems").doc(doc.id).delete();
+          await db.collection("applicationItems").doc(doc.id).delete();
         }
         deleted.push(`${applicationsSnap.size} applications`);
       } else {
         // Anonymize instead of delete (for compliance)
-        const applicationsSnap = await collection("applicationItems")
+        const applicationsSnap = await db.collection("applicationItems")
           .where("applicantUid", "==", userId)
           .get();
 
         for (const doc of applicationsSnap.docs) {
-          await collection("applicationItems").doc(doc.id).update({
+          await db.collection("applicationItems").doc(doc.id).update({
             applicantUid: "DELETED_USER",
             email: "deleted@privacy.local",
             firstName: "Deleted",
@@ -149,12 +149,12 @@ export class GDPRService {
 
       // Delete documents
       if (options.deleteDocuments) {
-        const documentsSnap = await collection("documents")
+        const documentsSnap = await db.collection("documents")
           .where("ownerUid", "==", userId)
           .get();
 
         for (const doc of documentsSnap.docs) {
-          await collection("documents").doc(doc.id).delete();
+          await db.collection("documents").doc(doc.id).delete();
           // TODO: Also delete file from Firebase Storage
         }
         deleted.push(`${documentsSnap.size} documents`);
@@ -162,13 +162,13 @@ export class GDPRService {
 
       // Anonymize audit logs (cannot delete for compliance)
       if (options.anonymizeAuditLogs) {
-        const logsSnap = await collection("auditLogs")
+        const logsSnap = await db.collection("auditLogs")
           .where("userId", "==", userId)
           .limit(1000)
           .get();
 
         for (const doc of logsSnap.docs) {
-          await collection("auditLogs").doc(doc.id).update({
+          await db.collection("auditLogs").doc(doc.id).update({
             userId: "DELETED_USER",
             userEmail: "deleted@privacy.local",
           });

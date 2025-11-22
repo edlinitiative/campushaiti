@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     // Verify user is authenticated and is an admin
     const user = await getServerUser();
     
@@ -18,10 +22,10 @@ export async function GET(request: NextRequest) {
     
     // Get counts from Realtime Database
     const [universitiesSnap, programsSnap, applicationsSnap, usersSnap] = await Promise.all([
-      collection("universities").get(),
-      collection("programs").get(),
-      collection("applicationItems").get(),
-      collection("users").get(),
+      db.collection("universities").get(),
+      db.collection("programs").get(),
+      db.collection("applicationItems").get(),
+      db.collection("users").get(),
     ]);
 
     // Get pending universities

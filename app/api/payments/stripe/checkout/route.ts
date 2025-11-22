@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +15,12 @@ const getStripe = () => {
   });
 };
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const user = await getServerUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Create payment record in Firestore
     const paymentId = `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const paymentRef = collection("payments").doc(paymentId);
+    const paymentRef = db.collection("payments").doc(paymentId);
     await paymentRef.set({
       provider: "STRIPE",
       providerRef: "", // Will be updated after session creation

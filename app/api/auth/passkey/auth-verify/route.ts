@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
 // Simplified stub implementation - full WebAuthn verification requires additional setup
+
+
 export async function POST(request: NextRequest) {
   try {
     const { assertionResponse } = await request.json();

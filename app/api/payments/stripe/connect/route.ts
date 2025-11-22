@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -9,8 +9,12 @@ export const runtime = "nodejs";
  * POST /api/payments/stripe/connect
  * Initiate Stripe Connect OAuth flow
  */
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const sessionCookie = request.cookies.get("session")?.value;
     if (!sessionCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Verify user has access to this university
     if (decodedClaims.role === "SCHOOL_ADMIN") {
-      const universityRef = collection("universities").doc(universityId);
+      const universityRef = db.collection("universities").doc(universityId);
       const universityDoc = await universityRef.get();
       
       if (!universityDoc.exists) {

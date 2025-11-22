@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { requireRole } from "@/lib/auth/server-auth";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     // Check admin permission
     await requireRole(["ADMIN"]);
 
@@ -25,15 +29,15 @@ export async function POST(request: NextRequest) {
     // Delete user data from Firestore
     try {
       // Delete user document
-      await collection("users").doc(userId).delete();
+      await db.collection("users").doc(userId).delete();
 
       // Delete all user's passkeys
-      const passkeysSnapshot = await collection("passkeys")
+      const passkeysSnapshot = await db.collection("passkeys")
         .where("userId", "==", userId)
         .get();
       
       for (const doc of passkeysSnapshot.docs) {
-        await collection("passkeys").doc(doc.id).delete();
+        await db.collection("passkeys").doc(doc.id).delete();
       }
     } catch (firestoreError: any) {
       console.warn("Could not delete from Firestore:", firestoreError);

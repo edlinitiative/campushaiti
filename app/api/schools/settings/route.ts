@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -9,8 +9,12 @@ export const runtime = "nodejs";
  * PUT /api/schools/settings
  * Update university settings (profile, bank account, etc.)
  */
+
+
 export async function PUT(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const sessionCookie = request.cookies.get("session")?.value;
     if (!sessionCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -33,7 +37,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const universityRef = collection("universities").doc(universityId);
+    const universityRef = db.collection("universities").doc(universityId);
     const universityDoc = await universityRef.get();
 
     if (!universityDoc.exists) {

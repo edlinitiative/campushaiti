@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get("userId");
 
@@ -34,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get passkeys from Firestore
-    const passkeysRef = collection("passkeys");
+    const passkeysRef = db.collection("passkeys");
     const snapshot = await passkeysRef
       .where("userId", "==", userId)
       .get();

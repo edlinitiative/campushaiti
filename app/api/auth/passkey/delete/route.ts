@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const { userId, passkeyId } = await request.json();
 
     if (!userId || !passkeyId) {
@@ -33,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Delete the passkey from Firestore
-    await collection("passkeys").doc(passkeyId).delete();
+    await db.collection("passkeys").doc(passkeyId).delete();
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

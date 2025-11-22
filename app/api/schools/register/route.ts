@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
 import { School } from "@/lib/types/firestore";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +44,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const db = getAdminDb();
+
     // Create slug from name
     const slug = name
       .toLowerCase()
@@ -52,7 +53,8 @@ export async function POST(request: NextRequest) {
       .replace(/(^-|-$)/g, "");
 
     // Check if slug already exists
-    const existingSchool = await collection("schools")
+    const existingSchool = await db
+      .collection("schools")
       .where("slug", "==", slug)
       .limit(1)
       .get();
@@ -65,7 +67,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already has a pending/approved school
-    const userSchools = await collection("schools")
+    const userSchools = await db
+      .collection("schools")
       .where("adminUids", "array-contains", uid)
       .limit(1)
       .get();
@@ -79,7 +82,6 @@ export async function POST(request: NextRequest) {
 
     // Create school document
     const schoolId = Date.now().toString();
-    const schoolRef = collection("schools").doc(schoolId);
     const now = new Date();
 
     const schoolData: Omit<School, "id"> = {
@@ -114,25 +116,29 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     };
 
-    await schoolRef.set(schoolData);
+    await db.collection("schools").doc(schoolId).set(schoolData);
 
     // Update user role to SCHOOL_ADMIN
     await getAdminAuth().setCustomUserClaims(uid, { role: "SCHOOL_ADMIN" });
 
     // Update user document
-    await collection("users").doc(uid).update({
-      role: "SCHOOL_ADMIN",
-      schoolId: schoolId,
-      updatedAt: now,
-    });
+    await db.collection("users").doc(uid).set(
+      {
+        role: "SCHOOL_ADMIN",
+        schoolId: schoolId,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
 
     // Create notification for admins
-    const adminsSnapshot = await collection("users")
+    const adminsSnapshot = await db
+      .collection("users")
       .where("role", "==", "ADMIN")
       .get();
 
     const notificationPromises = adminsSnapshot.docs.map((doc) =>
-      collection("notifications").add({
+      db.collection("notifications").add({
         recipientUid: doc.id,
         type: "SCHOOL_REGISTRATION",
         title: "New School Registration",

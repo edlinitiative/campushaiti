@@ -3,7 +3,7 @@
  * Comprehensive logging system for security and compliance
  */
 
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export enum AuditAction {
   // Authentication
@@ -114,7 +114,7 @@ export class AuditLogger {
       };
 
       // Store in Realtime Database
-      await collection("auditLogs").add(logEntry);
+      await db.collection("auditLogs").add(logEntry);
 
       // Console log for development (remove in production)
       if (process.env.NODE_ENV === "development") {
@@ -195,7 +195,7 @@ export class AuditLogger {
     limit?: number;
   }): Promise<AuditLogEntry[]> {
     try {
-      let query = collection("auditLogs").orderBy("timestamp", "desc");
+      let query = db.collection("auditLogs").orderBy("timestamp", "desc");
 
       if (filters.userId) {
         query = query.where("userId", "==", filters.userId);

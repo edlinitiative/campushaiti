@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { requireRole } from "@/lib/auth/server-auth";
 
 export const dynamic = 'force-dynamic';
 
+
+
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     // Check admin permission
     await requireRole(["ADMIN"]);
 
@@ -53,7 +57,7 @@ export async function GET(request: NextRequest) {
     try {
       const userIds = users.map((u) => u.id);
       const firestoreDocs = await Promise.all(
-        userIds.map((id) => collection("users").doc(id).get())
+        userIds.map((id) => db.collection("users").doc(id).get())
       );
 
       users = users.map((user, index) => {

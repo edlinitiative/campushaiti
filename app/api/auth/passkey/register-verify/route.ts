@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import {
   verifyRegistrationResponse,
   type VerifyRegistrationResponseOpts,
@@ -10,8 +10,12 @@ export const dynamic = "force-dynamic";
 const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
 const origin = process.env.NEXT_PUBLIC_ORIGIN || "http://localhost:3000";
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const { userId, attestationResponse } = await request.json();
 
     if (!userId || !attestationResponse) {
@@ -22,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get stored challenge
-    const challengeDoc = await collection("passkey_challenges")
+    const challengeDoc = await db.collection("passkey_challenges")
       .doc(userId)
       .get();
 
@@ -55,7 +59,7 @@ export async function POST(request: NextRequest) {
     const { credential } = verification.registrationInfo;
 
     // Store credential in Firestore
-    await collection("passkeys").add({
+    await db.collection("passkeys").add({
       userId: userId,
       credentialID: Buffer.from(credential.id).toString("base64"),
         credentialPublicKey: Buffer.from(credential.publicKey).toString("base64"),

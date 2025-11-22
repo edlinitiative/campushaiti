@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     // Verify admin authentication
     const token = request.cookies.get("session")?.value;
     if (!token) {
@@ -13,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const decodedToken = await getAdminAuth().verifySessionCookie(token);
-    const userDoc = await collection("users").doc(decodedToken.uid).get();
+    const userDoc = await db.collection("users").doc(decodedToken.uid).get();
 
     if (userDoc.data()?.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
     if (specificUserIds && Array.isArray(specificUserIds)) {
       // Specific users
       const userDocs = await Promise.all(
-        specificUserIds.map((id) => collection("users").doc(id).get())
+        specificUserIds.map((id) => db.collection("users").doc(id).get())
       );
       recipients = userDocs
         .filter((doc) => doc.exists && doc.data()?.phoneNumber)
@@ -45,7 +49,7 @@ export async function POST(request: NextRequest) {
         }));
     } else if (recipientType === "all") {
       // All users with phone numbers
-      const usersSnapshot = await collection("users")
+      const usersSnapshot = await db.collection("users")
         .where("phoneNumber", "!=", null)
         .get();
       recipients = usersSnapshot.docs.map((doc) => ({
@@ -55,7 +59,7 @@ export async function POST(request: NextRequest) {
       }));
     } else if (recipientType === "applicants") {
       // Only applicants
-      const usersSnapshot = await collection("users")
+      const usersSnapshot = await db.collection("users")
         .where("role", "==", "APPLICANT")
         .where("phoneNumber", "!=", null)
         .get();
@@ -70,7 +74,7 @@ export async function POST(request: NextRequest) {
       const verifiedUsers = allUsers.users.filter((user) => user.emailVerified);
       const userDocs = await Promise.all(
         verifiedUsers.map((user) =>
-          collection("users").doc(user.uid).get()
+          db.collection("users").doc(user.uid).get()
         )
       );
       recipients = userDocs
@@ -91,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     // Create bulk notification record
     const bulkNotificationId = `bulk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const bulkNotificationRef = collection("bulk_sms_notifications").doc(bulkNotificationId);
+    const bulkNotificationRef = db.collection("bulk_sms_notifications").doc(bulkNotificationId);
     await bulkNotificationRef.set({
       message,
       recipientType: recipientType || "specific",
@@ -118,7 +122,7 @@ export async function POST(request: NextRequest) {
       };
 
       const notificationId = `sms_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const notificationRef = collection("sms_notifications").doc(notificationId);
+      const notificationRef = db.collection("sms_notifications").doc(notificationId);
       await notificationRef.set(notificationData);
 
       // TODO: Integrate with SMS provider

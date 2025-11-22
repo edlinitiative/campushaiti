@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import {
   generateRegistrationOptions,
   type GenerateRegistrationOptionsOpts,
@@ -12,8 +12,12 @@ const rpName = "Campus Haiti";
 const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
 const origin = process.env.NEXT_PUBLIC_ORIGIN || "http://localhost:3000";
 
+
+
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb();
+
     const { userId } = await request.json();
 
     if (!userId) {
@@ -23,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Get or create user in Firestore
     let userData: any = {};
     try {
-      const userDoc = await collection("users").doc(userId).get();
+      const userDoc = await db.collection("users").doc(userId).get();
       if (userDoc.exists) {
         userData = userDoc.data();
       } else {
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
             name: authUser.displayName,
           };
           // Create the user document
-          await collection("users").doc(userId).set({
+          await db.collection("users").doc(userId).set({
             email: authUser.email,
             displayName: authUser.displayName,
             createdAt: Date.now(),
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     // Store challenge in Firestore temporarily
     try {
-      await collection("passkey_challenges").doc(userId).set({
+      await db.collection("passkey_challenges").doc(userId).set({
         challenge: options.challenge,
         createdAt: Date.now(),
       });

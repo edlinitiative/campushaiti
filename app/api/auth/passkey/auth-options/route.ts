@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import {
   generateAuthenticationOptions,
   type GenerateAuthenticationOptionsOpts,
@@ -9,14 +9,18 @@ export const dynamic = "force-dynamic";
 
 const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
 
+
+
 export async function GET() {
   try {
+    const db = getAdminDb();
+
     // Try to get all registered passkeys from the database
     // If the collection doesn't exist yet, that's okay - we'll just use an empty array
     let allowCredentials: any[] = [];
     
     try {
-      const passkeysSnapshot = await collection("passkeys")
+      const passkeysSnapshot = await db.collection("passkeys")
         .where("counter", ">=", 0) // Get all valid passkeys
         .get();
 
@@ -42,7 +46,7 @@ export async function GET() {
     const options = await generateAuthenticationOptions(opts);
 
     // Store challenge temporarily in a general collection
-    await collection("auth_challenges").add({
+    await db.collection("auth_challenges").add({
       challenge: options.challenge,
       createdAt: Date.now(),
       expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
-import { collection } from "@/lib/firebase/database-helpers";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { sendUniversityRejectedEmail } from "@/lib/email/service";
 
 export const dynamic = "force-dynamic";
@@ -10,11 +10,15 @@ export const runtime = "nodejs";
  * PUT /api/admin/registrations/:id/reject
  * Reject a university registration
  */
+
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const db = getAdminDb();
+
     const sessionCookie = request.cookies.get("session")?.value;
     if (!sessionCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -38,7 +42,7 @@ export async function PUT(
     }
 
     const registrationId = params.id;
-    const registrationRef = collection("universityRegistrations").doc(registrationId);
+    const registrationRef = db.collection("universityRegistrations").doc(registrationId);
     const registrationDoc = await registrationRef.get();
 
     if (!registrationDoc.exists) {
