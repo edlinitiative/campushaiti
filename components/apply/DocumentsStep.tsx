@@ -53,8 +53,39 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
   const [previewFile, setPreviewFile] = useState<{ url: string; name: string; type: string } | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string; type: string } | null>(null);
 
+  // Check Firebase Storage configuration on mount
   useEffect(() => {
+    const checkStorageConfig = async () => {
+      try {
+        if (!storage) {
+          console.error("Firebase Storage is not initialized");
+          setFileError("Storage configuration error. Please contact support.");
+          return;
+        }
+        
+        const user = auth.currentUser;
+        if (!user) {
+          console.log("User not authenticated for storage check");
+          return;
+        }
+        
+        console.log("Firebase Storage initialized:", {
+          app: storage.app.name,
+          bucket: storage.app.options.storageBucket
+        });
+        
+        if (!storage.app.options.storageBucket) {
+          console.error("Storage bucket not configured");
+          setFileError("Storage bucket not configured. Please check Firebase configuration.");
+        }
+      } catch (error) {
+        console.error("Error checking storage config:", error);
+      }
+    };
+    
+    checkStorageConfig();
     loadDocuments();
   }, []);
 
@@ -129,69 +160,114 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
     if (!selectedFile) return;
 
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) {
+      setFileError("You must be signed in to upload documents");
+      return;
+    }
 
     setUploading(true);
     setUploadProgress(0);
+    setFileError(null);
 
     try {
+      // Check if storage is configured
+      if (!storage) {
+        throw new Error("Firebase Storage is not configured");
+      }
+
       const docId = `${Date.now()}_${selectedFile.name}`;
       const storagePath = `users/${user.uid}/docs/${docId}`;
-      const storageRef = ref(storage, storagePath);
+      
+      console.log("Starting upload:", {
+        file: selectedFile.name,
+        size: selectedFile.size,
+        type: selectedFile.type,
+        path: storagePath
+      });
 
+      const storageRef = ref(storage, storagePath);
       const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
       uploadTask.on(
         "state_changed",
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload progress: ${progress}%`, {
+            bytes: snapshot.bytesTransferred,
+            total: snapshot.totalBytes
+          });
           setUploadProgress(progress);
         },
         (error) => {
           console.error("Upload error:", error);
-          setFileError(t("uploadFailed"));
+          console.error("Error code:", error.code);
+          console.error("Error message:", error.message);
+          
+          // Provide specific error messages
+          let errorMessage = t("uploadFailed");
+          if (error.code === 'storage/unauthorized') {
+            errorMessage = "Storage permissions error. Please ensure you're signed in and storage rules are configured.";
+          } else if (error.code === 'storage/canceled') {
+            errorMessage = "Upload was cancelled";
+          } else if (error.code === 'storage/unknown') {
+            errorMessage = `Upload failed: ${error.message}`;
+          }
+          
+          setFileError(errorMessage);
           setUploading(false);
         },
         async () => {
-          // Upload complete - get download URL and save metadata
-          const downloadURL = await getDownloadURL(storageRef);
-          
-          // Save document metadata via API
-          const response = await fetch("/api/user/documents", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              ownerUid: user.uid,
-              kind: documentKind,
-              filename: selectedFile.name,
-              mimeType: selectedFile.type,
-              sizeBytes: selectedFile.size,
-              storagePath,
-              downloadURL,
-            }),
-          });
+          try {
+            console.log("Upload complete, getting download URL...");
+            // Upload complete - get download URL and save metadata
+            const downloadURL = await getDownloadURL(storageRef);
+            console.log("Download URL obtained:", downloadURL);
+            
+            // Save document metadata via API
+            console.log("Saving document metadata...");
+            const response = await fetch("/api/user/documents", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ownerUid: user.uid,
+                kind: documentKind,
+                filename: selectedFile.name,
+                mimeType: selectedFile.type,
+                sizeBytes: selectedFile.size,
+                storagePath,
+                downloadURL,
+              }),
+            });
 
-          if (!response.ok) {
-            throw new Error("Failed to save document metadata");
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || "Failed to save document metadata");
+            }
+
+            console.log("Document saved successfully");
+            await loadDocuments();
+            setUploading(false);
+            setUploadProgress(0);
+            setSelectedFile(null);
+            setPreviewFile(null);
+            setFileError(null);
+            
+            // Clear file input
+            const fileInput = document.getElementById('file') as HTMLInputElement;
+            if (fileInput) fileInput.value = "";
+          } catch (metadataError) {
+            console.error("Error saving metadata:", metadataError);
+            setFileError(metadataError instanceof Error ? metadataError.message : "Failed to save document");
+            setUploading(false);
           }
-
-          await loadDocuments();
-          setUploading(false);
-          setUploadProgress(0);
-          setSelectedFile(null);
-          setPreviewFile(null);
-          setFileError(null);
-          
-          // Clear file input
-          const fileInput = document.getElementById('file') as HTMLInputElement;
-          if (fileInput) fileInput.value = "";
         }
       );
     } catch (error) {
-      console.error("Error uploading file:", error);
-      setFileError(t("uploadError"));
+      console.error("Error starting upload:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to start upload";
+      setFileError(errorMessage);
       setUploading(false);
     }
   };
