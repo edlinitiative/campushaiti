@@ -309,8 +309,6 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
     if (fileInput) fileInput.click();
   };
 
-  const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string; type: string } | null>(null);
-
   const getDocumentsByType = (type: string) => {
     return documents.filter(doc => doc.kind === type);
   };
