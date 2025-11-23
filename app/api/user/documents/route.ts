@@ -20,16 +20,24 @@ export async function GET(request: NextRequest) {
     const db = getAdminDb();
 
     // Get all documents for this user
+    // Note: Removed orderBy to avoid requiring composite index
+    // Documents will be sorted client-side if needed
     const snapshot = await db
       .collection("documents")
       .where("ownerUid", "==", userId)
-      .orderBy("createdAt", "desc")
       .get();
 
     const documents = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    // Sort by createdAt in JavaScript (temporary until index is deployed)
+    documents.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis?.() || 0;
+      const bTime = b.createdAt?.toMillis?.() || 0;
+      return bTime - aTime; // DESC order
+    });
 
     return NextResponse.json({ success: true, documents });
   } catch (error: any) {
