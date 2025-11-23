@@ -47,7 +47,9 @@ export default function GoogleAuth() {
 
       console.log("Session created, getting redirect URL...");
       // Get role-based redirect URL
-      const redirectResponse = await fetch("/api/auth/redirect");
+      const redirectResponse = await fetch("/api/auth/redirect", {
+        method: "GET",
+      });
       
       if (!redirectResponse.ok) {
         console.error("Redirect endpoint failed:", redirectResponse.status);
