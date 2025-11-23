@@ -33,7 +33,22 @@ export function LiveChat() {
 
   useEffect(() => {
     // Only load if enabled and in browser
-    if (!enabled || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
+
+    // If disabled, hide any existing widget and don't load
+    if (!enabled) {
+      // Hide the Tawk widget if it exists
+      if ((window as any).Tawk_API?.hideWidget) {
+        (window as any).Tawk_API.hideWidget();
+      }
+      return;
+    }
+
+    // Show widget if it was previously hidden
+    if ((window as any).Tawk_API?.showWidget) {
+      (window as any).Tawk_API.showWidget();
+      return; // Widget already loaded, just show it
+    }
 
     // Tawk.to Live Chat Widget
     const propertyId = process.env.NEXT_PUBLIC_TAWK_PROPERTY_ID;
@@ -59,22 +74,16 @@ export function LiveChat() {
     
     document.body.appendChild(script);
 
-    // Cleanup on unmount
+    // Cleanup on unmount or when disabled
     return () => {
-      const tawkScript = document.getElementById("tawk-script");
-      if (tawkScript) {
-        tawkScript.remove();
+      if (!enabled) {
+        // Just hide it, don't remove
+        if ((window as any).Tawk_API?.hideWidget) {
+          (window as any).Tawk_API.hideWidget();
+        }
       }
-      
-      // Remove Tawk widget
-      const tawkWidget = document.getElementById("tawkchat-container");
-      if (tawkWidget) {
-        tawkWidget.remove();
-      }
-
-      // Clean up global Tawk variables
-      delete (window as any).Tawk_API;
-      delete (window as any).Tawk_LoadStart;
+    };
+  }, [enabled]);
     };
   }, [enabled]);
 
