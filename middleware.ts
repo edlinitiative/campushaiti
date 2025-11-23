@@ -47,10 +47,9 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match only internationalized pathnames, exclude API routes
+  // Match all routes including API routes (need subdomain for API)
+  // Exclude Next.js internals and static files
   matcher: [
-    "/",
-    "/(en|fr|ht)/:path*",
-    "/((?!api|_next|_vercel|.*\\..*).*)"
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -4,7 +4,7 @@
  */
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.app';
-const RESERVED_SUBDOMAINS = ['www', 'admin', 'api', 'app', 'staging', 'dev', 'test'];
+const RESERVED_SUBDOMAINS = ['www', 'admin', 'api', 'app', 'staging', 'dev', 'test', 'campushaiti'];
 
 /**
  * Extract subdomain from hostname
@@ -12,6 +12,7 @@ const RESERVED_SUBDOMAINS = ['www', 'admin', 'api', 'app', 'staging', 'dev', 'te
  *   quisqueya.campushaiti.app -> quisqueya
  *   www.campushaiti.app -> null
  *   localhost -> null
+ *   quisqueya.campushaiti.vercel.app -> quisqueya (Vercel preview)
  */
 export function getSubdomain(hostname: string): string | null {
   // Handle localhost
@@ -25,19 +26,35 @@ export function getSubdomain(hostname: string): string | null {
   // Split by dots
   const parts = host.split('.');
   
-  // Need at least subdomain.domain.tld (3 parts)
-  if (parts.length < 3) {
-    return null;
+  // For Vercel domains (e.g., quisqueya.campushaiti.vercel.app)
+  // We need at least 4 parts: subdomain.project.vercel.app
+  // Special case: project.vercel.app (3 parts) = no subdomain
+  if (parts[parts.length - 2] === 'vercel' && parts[parts.length - 1] === 'app') {
+    if (parts.length === 3) {
+      // Just project.vercel.app - no school subdomain
+      return null;
+    }
+    if (parts.length >= 4) {
+      const subdomain = parts[0];
+      // Check if it's a reserved subdomain
+      if (RESERVED_SUBDOMAINS.includes(subdomain)) {
+        return null;
+      }
+      return subdomain;
+    }
+  }
+  
+  // Custom domain pattern: subdomain.domain.tld (3 parts minimum)
+  if (parts.length >= 3) {
+    const subdomain = parts[0];
+    // Check if it's a reserved subdomain
+    if (RESERVED_SUBDOMAINS.includes(subdomain)) {
+      return null;
+    }
+    return subdomain;
   }
 
-  const subdomain = parts[0];
-
-  // Check if it's a reserved subdomain
-  if (RESERVED_SUBDOMAINS.includes(subdomain)) {
-    return null;
-  }
-
-  return subdomain;
+  return null;
 }
 
 /**
