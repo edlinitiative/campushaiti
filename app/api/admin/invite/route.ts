@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
     await sendEmail({
       to: email,
       subject: "You've been invited to join Campus Haiti as an Administrator",
+      text: `You've been invited by ${user.email} to join Campus Haiti as a platform administrator. Accept your invitation here: ${inviteUrl}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Platform Administrator Invitation</h2>
