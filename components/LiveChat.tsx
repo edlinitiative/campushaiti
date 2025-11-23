@@ -84,8 +84,6 @@ export function LiveChat() {
       }
     };
   }, [enabled]);
-    };
-  }, [enabled]);
 
   return null;
 }
