@@ -21,6 +21,7 @@ export default function AdminSettingsPage() {
     enableRegistrations: true,
     requireEmailVerification: true,
     maintenanceMode: false,
+    enableLiveChat: true,
     maxApplicationsPerUser: 10,
     defaultApplicationFee: 5000,
     welcomeMessage: "Welcome to Campus Haiti - Your gateway to higher education in Haiti",
@@ -55,14 +56,23 @@ export default function AdminSettingsPage() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         alert("Settings saved successfully!");
       } else {
-        const data = await response.json();
-        alert(data.error || "Failed to save settings");
+        // Try to parse error response
+        let errorMessage = "Failed to save settings";
+        try {
+          const data = await response.json();
+          errorMessage = data.error || errorMessage;
+        } catch (jsonError) {
+          // If response is not JSON, use status text
+          errorMessage = `Failed to save settings: ${response.status} ${response.statusText}`;
+        }
+        alert(errorMessage);
       }
     } catch (err) {
       console.error("Error saving settings:", err);
-      alert("Failed to save settings");
+      alert(`Failed to save settings: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -189,6 +199,19 @@ export default function AdminSettingsPage() {
                 <Checkbox
                   checked={settings.maintenanceMode}
                   onCheckedChange={(checked) => handleChange("maintenanceMode", checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Live Chat</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable or disable the Tawk.to live chat widget for all users
+                  </p>
+                </div>
+                <Checkbox
+                  checked={settings.enableLiveChat}
+                  onCheckedChange={(checked) => handleChange("enableLiveChat", checked)}
                 />
               </div>
             </CardContent>

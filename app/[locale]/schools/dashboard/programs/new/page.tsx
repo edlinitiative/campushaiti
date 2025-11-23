@@ -44,7 +44,7 @@ export default function NewProgramPage() {
       });
 
       if (response.ok) {
-        router.push("/schools/dashboard/programs");
+        router.push("/dashboard/programs");
       } else {
         const error = await response.json();
         alert(error.error || "Failed to create program");
@@ -65,7 +65,7 @@ export default function NewProgramPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
-          <Link href="/schools/dashboard/programs">
+          <Link href="/dashboard/programs">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t("backToPrograms")}

@@ -128,13 +128,13 @@ export default function SchoolDashboardPage() {
         </div>
         <div className="space-x-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard/programs">{t("managePrograms")}</Link>
+            <Link href="/dashboard/programs">{t("managePrograms")}</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard/team">{t("team")}</Link>
+            <Link href="/dashboard/team">{t("team")}</Link>
           </Button>
           <Button asChild>
-            <Link href="/schools/dashboard/settings">{t("settings")}</Link>
+            <Link href="/dashboard/settings">{t("settings")}</Link>
           </Button>
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function SchoolDashboardPage() {
                   <CardDescription>{t("submittedLast7Days")}</CardDescription>
                 </div>
                 <Button asChild>
-                  <Link href="/schools/dashboard/applications">{t("viewAll")}</Link>
+                  <Link href="/dashboard/applications">{t("viewAll")}</Link>
                 </Button>
               </div>
             </CardHeader>
@@ -215,7 +215,7 @@ export default function SchoolDashboardPage() {
               <div className="text-center py-8 text-muted-foreground">
                 <p>{t("noRecentApplications")}</p>
                 <Button variant="link" asChild className="mt-2">
-                  <Link href="/schools/dashboard/applications">{t("viewAllApplications")}</Link>
+                  <Link href="/dashboard/applications">{t("viewAllApplications")}</Link>
                 </Button>
               </div>
             </CardContent>
@@ -231,7 +231,7 @@ export default function SchoolDashboardPage() {
                   <CardDescription>{t("degreeProgramsOffered")}</CardDescription>
                 </div>
                 <Button asChild>
-                  <Link href="/schools/dashboard/programs/new">{t("addProgram")}</Link>
+                  <Link href="/dashboard/programs/new">{t("addProgram")}</Link>
                 </Button>
               </div>
             </CardHeader>
@@ -239,7 +239,7 @@ export default function SchoolDashboardPage() {
               <div className="text-center py-8 text-muted-foreground">
                 <p>{t("noProgramsYet")}</p>
                 <Button variant="link" asChild className="mt-2">
-                  <Link href="/schools/dashboard/programs/new">{t("createFirstProgram")}</Link>
+                  <Link href="/dashboard/programs/new">{t("createFirstProgram")}</Link>
                 </Button>
               </div>
             </CardContent>
@@ -297,7 +297,7 @@ export default function SchoolDashboardPage() {
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
             <Button variant="outline" asChild className="h-auto py-4">
-              <Link href="/schools/dashboard/applications?status=pending">
+              <Link href="/dashboard/applications?status=pending">
                 <div className="text-left w-full">
                   <div className="font-semibold">{t("reviewApplications")}</div>
                   <div className="text-sm text-muted-foreground">{stats.pending} {t("pending")}</div>
@@ -306,7 +306,7 @@ export default function SchoolDashboardPage() {
             </Button>
 
             <Button variant="outline" asChild className="h-auto py-4">
-              <Link href="/schools/dashboard/programs">
+              <Link href="/dashboard/programs">
                 <div className="text-left w-full">
                   <div className="font-semibold">{t("managePrograms")}</div>
                   <div className="text-sm text-muted-foreground">{t("addEditPrograms")}</div>
@@ -315,7 +315,7 @@ export default function SchoolDashboardPage() {
             </Button>
 
             <Button variant="outline" asChild className="h-auto py-4">
-              <Link href="/schools/dashboard/questions">
+              <Link href="/dashboard/questions">
                 <div className="text-left w-full">
                   <div className="font-semibold">{t("customQuestions")}</div>
                   <div className="text-sm text-muted-foreground">{t("customizeApplication")}</div>

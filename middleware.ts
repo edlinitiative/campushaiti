@@ -27,7 +27,7 @@ export default function middleware(request: NextRequest) {
         !url.pathname.startsWith('/_next') &&
         !url.pathname.startsWith('/auth')) {
       
-      // Rewrite to schools route
+      // Rewrite to schools route with headers
       url.pathname = `/schools${url.pathname}`;
       
       const response = NextResponse.rewrite(url, {
@@ -40,22 +40,15 @@ export default function middleware(request: NextRequest) {
       return response;
     }
     
-    // For API routes and other paths, just add headers
-    const response = intlMiddleware(request);
-    const modifiedResponse = NextResponse.next({
+    // For API routes, pass through with headers
+    const response = NextResponse.next({
       request: {
         headers: requestHeaders,
       },
     });
     
-    if (response) {
-      response.cookies.getAll().forEach(cookie => {
-        modifiedResponse.cookies.set(cookie);
-      });
-    }
-    
-    modifiedResponse.headers.set('x-school-slug', subdomain);
-    return modifiedResponse;
+    response.headers.set('x-school-slug', subdomain);
+    return response;
   }
   
   // If this is admin subdomain, rewrite URLs to /admin/* routes

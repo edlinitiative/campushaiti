@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const settings = settingsDoc.exists ? settingsDoc.data() : {};
 
     return NextResponse.json({
-      liveChatEnabled: settings?.liveChatEnabled ?? true,
+      liveChatEnabled: settings?.enableLiveChat ?? true,
     });
   } catch (error: any) {
     console.error("Error fetching public platform settings:", error);

@@ -42,9 +42,9 @@ export default function AcceptInvitationPage() {
         setUniversityName(data.universityName);
         setRole(data.role);
         
-        // Redirect to dashboard after 3 seconds
+        // Redirect to school selector after 3 seconds
         setTimeout(() => {
-          router.push("/schools/dashboard");
+          router.push("/schools/selector");
         }, 3000);
       } else {
         setError(data.error || "Failed to accept invitation");

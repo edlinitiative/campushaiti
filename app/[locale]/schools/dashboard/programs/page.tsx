@@ -182,7 +182,7 @@ export default function SchoolProgramsPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">← {t("dashboard")}</Link>
+            <Link href="/dashboard">← {t("dashboard")}</Link>
           </Button>
           <Button onClick={() => setShowDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
@@ -272,12 +272,12 @@ export default function SchoolProgramsPage() {
 
                 <div className="pt-4 flex gap-2">
                   <Button variant="outline" size="sm" asChild className="flex-1">
-                    <Link href={`/schools/dashboard/questions?programId=${program.id}`}>
+                    <Link href={`/dashboard/questions?programId=${program.id}`}>
                       {t("customQuestions")}
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild className="flex-1">
-                    <Link href={`/schools/dashboard/applications?programId=${program.id}`}>
+                    <Link href={`/dashboard/applications?programId=${program.id}`}>
                       {t("applications")}
                     </Link>
                   </Button>

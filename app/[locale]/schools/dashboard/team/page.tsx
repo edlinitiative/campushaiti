@@ -192,7 +192,7 @@ export default function TeamManagementPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">{t("backToDashboard")}</Link>
+            <Link href="/dashboard">{t("backToDashboard")}</Link>
           </Button>
           <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
             <DialogTrigger asChild>

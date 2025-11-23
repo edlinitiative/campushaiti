@@ -312,13 +312,13 @@ export default function SchoolApplicationsPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard/analytics">
+            <Link href="/dashboard/analytics">
               <BarChart3 className="w-4 h-4 mr-2" />
               {t("viewAnalytics")}
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">← {t("backToDashboard")}</Link>
+            <Link href="/dashboard">← {t("backToDashboard")}</Link>
           </Button>
         </div>
       </div>
@@ -523,13 +523,13 @@ export default function SchoolApplicationsPage() {
                       </div>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
-                          <Link href={`/schools/dashboard/applications/${app.id}`}>
+                          <Link href={`/dashboard/applications/${app.id}`}>
                             {t("viewDetails")}
                           </Link>
                         </Button>
                         {app.status === "SUBMITTED" && (
                           <Button size="sm" asChild>
-                            <Link href={`/schools/dashboard/applications/${app.id}`}>
+                            <Link href={`/dashboard/applications/${app.id}`}>
                               {t("startReview")}
                             </Link>
                           </Button>

@@ -259,7 +259,7 @@ export default function SchoolAnalyticsPage() {
             {t("exportReport")}
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">{t("backToDashboard")}</Link>
+            <Link href="/dashboard">{t("backToDashboard")}</Link>
           </Button>
         </div>
       </div>

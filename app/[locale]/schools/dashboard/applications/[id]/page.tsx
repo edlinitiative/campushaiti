@@ -602,7 +602,7 @@ export default function ApplicationDetailPage() {
           <CardContent className="text-center py-12">
             <p className="text-muted-foreground">Application not found</p>
             <Button className="mt-4" asChild>
-              <Link href="/schools/dashboard/applications">← Back to Applications</Link>
+              <Link href="/dashboard/applications">← Back to Applications</Link>
             </Button>
           </CardContent>
         </Card>
@@ -638,7 +638,7 @@ export default function ApplicationDetailPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <Button variant="ghost" asChild>
-            <Link href="/schools/dashboard/applications">
+            <Link href="/dashboard/applications">
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t("backToApplications")}
             </Link>

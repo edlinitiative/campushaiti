@@ -212,7 +212,7 @@ export default function SchoolSettingsPage() {
           </p>
         </div>
         <Button variant="outline" asChild>
-          <Link href="/schools/dashboard">{t("dashboard")}</Link>
+          <Link href="/dashboard">{t("dashboard")}</Link>
         </Button>
       </div>
 

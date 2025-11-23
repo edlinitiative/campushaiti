@@ -308,7 +308,7 @@ export default function CustomQuestionsPage() {
         </div>
         <div className="space-x-2">
           <Button variant="outline" asChild>
-            <Link href="/schools/dashboard">{t("dashboard")}</Link>
+            <Link href="/dashboard">{t("dashboard")}</Link>
           </Button>
           <Button onClick={handleAddQuestion} disabled={!selectedProgramId || loading}>
             {t("addQuestion")}
