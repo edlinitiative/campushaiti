@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { isOnSchoolSubdomain } from "@/lib/utils/routes";
 
 export default function SchoolDashboardPage() {
   const router = useRouter();
@@ -23,6 +24,12 @@ export default function SchoolDashboardPage() {
   });
 
   useEffect(() => {
+    // If accessing from main domain (no subdomain), redirect to selector
+    if (typeof window !== 'undefined' && !isOnSchoolSubdomain()) {
+      router.push('/schools/selector');
+      return;
+    }
+    
     loadDashboard();
   }, []);
 
