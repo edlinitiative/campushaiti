@@ -89,7 +89,10 @@ export const getAdminDb = (): Firestore => {
   
   // Only cache if we have a valid app
   if (!_adminDb) {
-    _adminDb = getFirestore(app);
+    // Check if we should use a specific database ID
+    const databaseId = process.env.FIRESTORE_DATABASE_ID || '(default)';
+    console.log(`Initializing Firestore with database: ${databaseId}`);
+    _adminDb = getFirestore(app, databaseId);
   }
   
   return _adminDb;
