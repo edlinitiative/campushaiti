@@ -103,10 +103,24 @@ export default function PasskeyAuth() {
       
       // Sign in with custom token
       const { signInWithCustomToken } = await import("firebase/auth");
-      await signInWithCustomToken(auth, customToken);
+      const userCredential = await signInWithCustomToken(auth, customToken);
       
-      window.location.href = "/dashboard";
-    } catch (err: any) {
+      // Create server-side session
+      const idToken = await userCredential.user.getIdToken();
+      const sessionResponse = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error("Failed to create session");
+      }
+
+      // Get role-based redirect URL
+      const redirectResponse = await fetch("/api/auth/redirect");
+      const { redirectUrl } = await redirectResponse.json();
+      window.location.href = redirectUrl;    } catch (err: any) {
       console.error("Passkey sign-in error:", err);
       setError(err.message || t("passkeyAuthError"));
     } finally {

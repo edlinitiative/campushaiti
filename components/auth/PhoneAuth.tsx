@@ -121,8 +121,11 @@ export default function PhoneAuth() {
         throw new Error("Failed to create session");
       }
 
-      window.location.href = locale === "en" ? "/dashboard" : `/${locale}/dashboard`;
-    } catch (err: any) {
+      // Get role-based redirect URL
+      const redirectResponse = await fetch("/api/auth/redirect");
+      const { redirectUrl } = await redirectResponse.json();
+      const finalUrl = locale === "en" ? redirectUrl : `/${locale}${redirectUrl}`;
+      window.location.href = finalUrl;    } catch (err: any) {
       let errorMessage = err.message;
       
       if (err.code === "auth/invalid-verification-code") {

@@ -37,10 +37,13 @@ export default function GoogleAuth() {
         throw new Error("Failed to create session");
       }
 
-      console.log("Session created, redirecting to dashboard...");
-      // User is signed in, redirect to dashboard
-      window.location.href = locale === "en" ? "/dashboard" : `/${locale}/dashboard`;
-    } catch (err: any) {
+      console.log("Session created, getting redirect URL...");
+      // Get role-based redirect URL
+      const redirectResponse = await fetch("/api/auth/redirect");
+      const { redirectUrl } = await redirectResponse.json();
+      const finalUrl = locale === "en" ? redirectUrl : `/${locale}${redirectUrl}`;
+      console.log("Redirecting to:", finalUrl);
+      window.location.href = finalUrl;    } catch (err: any) {
       console.error("Google sign-in error:", err.code, err.message);
       let errorMessage = err.message;
       
