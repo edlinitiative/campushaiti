@@ -14,15 +14,12 @@ export function LiveChat() {
     // Check if live chat is enabled
     const checkSettings = async () => {
       try {
-        const response = await fetch("/api/admin/platform-settings");
+        const response = await fetch("/api/platform-settings/public");
         if (response.ok) {
           const data = await response.json();
           setEnabled(data.liveChatEnabled ?? true);
-        } else if (response.status === 403) {
-          // User doesn't have admin access, just use default
-          setEnabled(true);
         } else {
-          // Other error, default to enabled
+          // Error, default to enabled
           setEnabled(true);
         }
       } catch (error) {
