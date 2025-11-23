@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const documents = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    }));
+    })) as any[];
 
     // Sort by createdAt in JavaScript (temporary until index is deployed)
     documents.sort((a, b) => {
