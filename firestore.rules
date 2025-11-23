@@ -130,5 +130,30 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false; // Only server can write audit logs
     }
+    
+    // Admin Access - tracks admin users and their access levels (VIEWER/ADMIN)
+    match /adminAccess/{uid} {
+      allow read: if isAdmin();
+      allow write: if false; // Only server can manage admin access
+    }
+    
+    // Admin Invitations - pending admin invitations
+    match /adminInvitations/{id} {
+      allow read: if isAdmin();
+      allow write: if false; // Only server can manage invitations
+    }
+    
+    // Team Invitations - pending school team invitations
+    match /teamInvitations/{id} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.email == request.auth.token.email || isAdmin());
+      allow write: if false; // Only server can manage team invitations
+    }
+    
+    // Platform Settings - global platform configuration
+    match /platformSettings/{id} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only server/admin can update platform settings
+    }
   }
 }
