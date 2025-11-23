@@ -173,3 +173,31 @@ export async function sendApplicationReceivedEmail(data: {
     text: template.text,
   });
 }
+
+/**
+ * Send team invitation email
+ */
+export async function sendTeamInvitationEmail(data: {
+  email: string;
+  inviterName: string;
+  universityName: string;
+  role: string;
+  inviteUrl: string;
+  expiresInDays?: number;
+}) {
+  const template = emailTemplates.teamInvitation({
+    inviteeName: data.email.split('@')[0], // Use email username as fallback name
+    inviterName: data.inviterName,
+    universityName: data.universityName,
+    role: data.role,
+    inviteUrl: data.inviteUrl,
+    expiresInDays: data.expiresInDays || 7,
+  });
+
+  return await sendEmail({
+    to: data.email,
+    subject: template.subject,
+    html: template.html,
+    text: template.text,
+  });
+}

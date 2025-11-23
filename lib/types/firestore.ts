@@ -60,6 +60,19 @@ export interface Profile {
   updatedAt: Date;
 }
 
+export type TeamRole = "OWNER" | "ADMIN" | "VIEWER";
+
+export interface TeamMember {
+  uid: string;
+  email: string;
+  name: string;
+  role: TeamRole;
+  addedAt: number;
+  addedBy: string;
+  invitedAt?: number;
+  invitationAcceptedAt?: number;
+}
+
 export interface University {
   id: string;
   name: string;
@@ -72,7 +85,10 @@ export interface University {
   contactPhone?: string;
   description?: string;
   status: UniversityStatus;
-  adminUids: string[]; // School admins who can manage this university
+  adminUids: string[]; // Legacy: School admins who can manage this university
+  team?: {
+    [uid: string]: TeamMember;
+  };
   bankAccount?: {
     accountName: string;
     accountNumber: string;
@@ -86,6 +102,21 @@ export interface University {
   updatedAt: Date;
   approvedAt?: Date;
   approvedBy?: string; // Admin uid who approved
+}
+
+export interface TeamInvitation {
+  id: string;
+  universityId: string;
+  universityName: string;
+  email: string;
+  role: TeamRole;
+  invitedBy: string;
+  invitedByName: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "EXPIRED";
+  token: string;
+  createdAt: number;
+  expiresAt: number;
+  acceptedAt?: number;
 }
 
 export interface Program {

@@ -305,6 +305,12 @@ export default function AdminUniversitiesPage() {
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/admin/universities/bulk-import">
+              <Plus className="h-4 w-4 mr-2" />
+              Bulk Import
+            </Link>
+          </Button>
           <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             {t("addUniversity")}

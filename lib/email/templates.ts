@@ -619,4 +619,101 @@ export const emailTemplates = {
       The Campus Haiti Team
     `,
   }),
+
+  /**
+   * Team Invitation Email
+   */
+  teamInvitation: (data: {
+    inviteeName: string;
+    inviterName: string;
+    universityName: string;
+    role: string;
+    inviteUrl: string;
+    expiresInDays: number;
+  }): EmailTemplate => ({
+    subject: `You've been invited to join ${data.universityName} on Campus Haiti`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #2563eb; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+            .button { display: inline-block; padding: 14px 32px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: 600; }
+            .role-badge { display: inline-block; padding: 6px 12px; background-color: #dbeafe; color: #1e40af; border-radius: 4px; font-weight: 600; margin: 10px 0; }
+            .info-box { background-color: #fff; padding: 20px; border-left: 4px solid #2563eb; margin: 20px 0; }
+            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎉 Team Invitation</h1>
+              <p>You've been invited to join an admin team</p>
+            </div>
+            <div class="content">
+              <p>Hello ${data.inviteeName},</p>
+              
+              <p><strong>${data.inviterName}</strong> has invited you to join the admin team for <strong>${data.universityName}</strong> on Campus Haiti.</p>
+              
+              <div class="info-box">
+                <p style="margin: 0;"><strong>Your Role:</strong></p>
+                <div class="role-badge">${data.role}</div>
+                <p style="margin-top: 10px; font-size: 14px; color: #6b7280;">
+                  ${data.role === 'ADMIN' 
+                    ? 'Full access to manage programs, applications, and settings' 
+                    : 'Read-only access to view applications and reports'}
+                </p>
+              </div>
+              
+              <p>As a team member, you'll be able to:</p>
+              <ul>
+                <li>${data.role === 'ADMIN' ? 'Review and manage' : 'View'} student applications</li>
+                <li>${data.role === 'ADMIN' ? 'Create and edit' : 'View'} academic programs</li>
+                <li>Access ${data.role === 'ADMIN' ? 'comprehensive' : ''} analytics and reports</li>
+                ${data.role === 'ADMIN' ? '<li>Customize application questions</li>' : ''}
+              </ul>
+              
+              <p style="text-align: center;">
+                <a href="${data.inviteUrl}" class="button">Accept Invitation</a>
+              </p>
+              
+              <p style="text-align: center; color: #6b7280; font-size: 14px;">
+                <em>This invitation expires in ${data.expiresInDays} days</em>
+              </p>
+              
+              <p>If you don't have an account yet, you'll be able to create one when you accept the invitation.</p>
+              
+              <p>Looking forward to having you on the team!</p>
+              <p><strong>The Campus Haiti Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>Campus Haiti - Connecting Students with Opportunities</p>
+              <p style="font-size: 12px; color: #9ca3af; margin-top: 10px;">
+                If you weren't expecting this invitation, you can safely ignore this email.
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `
+      Team Invitation
+      
+      Hello ${data.inviteeName},
+      
+      ${data.inviterName} has invited you to join the admin team for ${data.universityName} on Campus Haiti.
+      
+      Your Role: ${data.role}
+      
+      Accept invitation: ${data.inviteUrl}
+      
+      This invitation expires in ${data.expiresInDays} days.
+      
+      Looking forward to having you on the team!
+      The Campus Haiti Team
+    `,
+  }),
 };
