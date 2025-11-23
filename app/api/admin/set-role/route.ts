@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
+import { getServerUser } from "@/lib/auth/server-auth";
 
 export const dynamic = "force-dynamic";
 
 /**
  * POST /api/admin/set-role
- * Set user role (temporary endpoint for initial setup)
- * In production, this should be protected by admin authentication
+ * Set user role - ADMIN only
  */
 export async function POST(request: NextRequest) {
   try {
+    // Verify requester is an ADMIN
+    const requester = await getServerUser();
+    
+    if (!requester || requester.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized: Admin access required" },
+        { status: 403 }
+      );
+    }
+
     const { email, role } = await request.json();
 
     if (!email || !role) {
