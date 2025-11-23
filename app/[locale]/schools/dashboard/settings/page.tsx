@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,19 +14,22 @@ import { Badge } from "@/components/ui/badge";
 
 export default function SchoolSettingsPage() {
   const t = useTranslations("schools.settings");
-  const [demoMode] = useState(true); // Demo mode until API is implemented
+  const [demoMode, setDemoMode] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [universityId, setUniversityId] = useState("");
 
   const [universityInfo, setUniversityInfo] = useState({
-    name: "Université d'État d'Haïti",
-    slug: "ueh",
-    city: "Port-au-Prince",
+    name: "",
+    slug: "",
+    city: "",
     country: "Haiti",
-    contactEmail: "admissions@ueh.edu.ht",
-    contactPhone: "+509 1234 5678",
-    websiteUrl: "https://www.ueh.edu.ht",
-    description: "Leading public university in Haiti",
+    contactEmail: "",
+    contactPhone: "",
+    websiteUrl: "",
+    description: "",
   });
 
   const [bankAccount, setBankAccount] = useState({
@@ -40,29 +43,126 @@ export default function SchoolSettingsPage() {
   const [stripeConnected, setStripeConnected] = useState(false);
   const [monCashConnected, setMonCashConnected] = useState(false);
 
-  const handleSaveUniversity = async () => {
-    setSaving(true);
+  // Load university data on mount
+  useEffect(() => {
+    loadUniversity();
+  }, []);
+
+  const loadUniversity = async () => {
     try {
-      // Save to Firestore
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock
-      setSuccess("University information updated successfully");
-      setTimeout(() => setSuccess(""), 3000);
+      const response = await fetch('/api/schools/university');
+      
+      if (response.ok) {
+        const data = await response.json();
+        const uni = data.university;
+        
+        setUniversityId(uni.id);
+        setUniversityInfo({
+          name: uni.name || "",
+          slug: uni.slug || "",
+          city: uni.city || "",
+          country: uni.country || "Haiti",
+          contactEmail: uni.email || "",
+          contactPhone: uni.phone || "",
+          websiteUrl: uni.website || "",
+          description: uni.description || "",
+        });
+        
+        if (uni.bankAccount) {
+          setBankAccount(uni.bankAccount);
+        }
+        
+        setDemoMode(false);
+      } else {
+        // Enable demo mode if not authenticated
+        setDemoMode(true);
+        setUniversityInfo({
+          name: "Université d'État d'Haïti",
+          slug: "ueh",
+          city: "Port-au-Prince",
+          country: "Haiti",
+          contactEmail: "admissions@ueh.edu.ht",
+          contactPhone: "+509 1234 5678",
+          websiteUrl: "https://www.ueh.edu.ht",
+          description: "Leading public university in Haiti",
+        });
+      }
+    } catch (err) {
+      console.error("Error loading university:", err);
+      setDemoMode(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleSaveUniversity = async () => {
+    if (demoMode) {
+      alert("Demo Mode: Please sign in to save changes");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    try {
+      const response = await fetch('/api/schools/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          universityId,
+          name: universityInfo.name,
+          slug: universityInfo.slug,
+          city: universityInfo.city,
+          country: universityInfo.country,
+          email: universityInfo.contactEmail,
+          phone: universityInfo.contactPhone,
+          website: universityInfo.websiteUrl,
+          description: universityInfo.description,
+        }),
+      });
+
+      if (response.ok) {
+        setSuccess("University information updated successfully");
+        setTimeout(() => setSuccess(""), 3000);
+      } else {
+        const data = await response.json();
+        setError(data.error || "Failed to save settings");
+      }
     } catch (err) {
       console.error(err);
+      setError("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleSaveBankAccount = async () => {
+    if (demoMode) {
+      alert("Demo Mode: Please sign in to save changes");
+      return;
+    }
+
     setSaving(true);
+    setError("");
     try {
-      // Save to Firestore
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock
-      setSuccess("Bank account information saved");
-      setTimeout(() => setSuccess(""), 3000);
+      const response = await fetch('/api/schools/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          universityId,
+          bankAccount,
+        }),
+      });
+
+      if (response.ok) {
+        setSuccess("Bank account information saved");
+        setTimeout(() => setSuccess(""), 3000);
+      } else {
+        const data = await response.json();
+        setError(data.error || "Failed to save bank account");
+      }
     } catch (err) {
       console.error(err);
+      setError("Failed to save bank account. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -121,6 +221,18 @@ export default function SchoolSettingsPage() {
           {success}
         </Alert>
       )}
+
+      {error && (
+        <Alert className="mb-6 bg-red-50 border-red-200 text-red-800">
+          {error}
+        </Alert>
+      )}
+
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading settings...</p>
+        </div>
+      ) : (
 
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList>
@@ -400,6 +512,7 @@ export default function SchoolSettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      )}
     </div>
   );
 }

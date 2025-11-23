@@ -36,25 +36,23 @@ export default function SchoolProgramsPage() {
 
   const loadPrograms = async () => {
     try {
-      // TODO: Fetch programs from API
-      // For now, using comprehensive demo data
-      setDemoMode(true); // Always in demo mode until API is implemented
-      const demoPrograms = getAllDemoPrograms();
-      setPrograms(demoPrograms.map(p => ({
-        id: p.id,
-        name: p.name,
-        degree: p.degree,
-        description: p.description,
-        requirements: p.requirements,
-        feeCents: p.feeCents,
-        currency: p.currency,
-        deadline: p.deadline,
-        duration: p.duration,
-        language: p.language,
-      })));
+      const response = await fetch('/api/schools/programs');
+      
+      if (response.ok) {
+        const data = await response.json();
+        setPrograms(data.programs || []);
+        setDemoMode(false);
+      } else {
+        // Fallback to demo data
+        setDemoMode(true);
+        const demoPrograms = getAllDemoPrograms();
+        setPrograms(demoPrograms);
+      }
     } catch (err) {
       console.error("Error loading programs:", err);
       setDemoMode(true);
+      const demoPrograms = getAllDemoPrograms();
+      setPrograms(demoPrograms);
     } finally {
       setLoading(false);
     }
@@ -63,27 +61,45 @@ export default function SchoolProgramsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (demoMode) {
+      alert("Demo Mode: Please sign in to save changes");
+      return;
+    }
+    
     try {
-      // TODO: Call API to create/update program
-      console.log("Saving program:", formData);
+      const url = editingProgram 
+        ? `/api/schools/programs/${editingProgram.id}`
+        : '/api/schools/programs';
       
-      // Close dialog and reset form
-      setShowDialog(false);
-      setEditingProgram(null);
-      setFormData({
-        name: "",
-        degree: "",
-        description: "",
-        requirements: "",
-        feeCents: "",
-        currency: "HTG",
-        deadline: "",
+      const response = await fetch(url, {
+        method: editingProgram ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          feeCents: parseInt(formData.feeCents) * 100,
+        }),
       });
-      
-      // Reload programs
-      loadPrograms();
+
+      if (response.ok) {
+        setShowDialog(false);
+        setEditingProgram(null);
+        setFormData({
+          name: "",
+          degree: "",
+          description: "",
+          requirements: "",
+          feeCents: "",
+          currency: "HTG",
+          deadline: "",
+        });
+        loadPrograms();
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to save program");
+      }
     } catch (err) {
       console.error("Error saving program:", err);
+      alert("Failed to save program. Please try again.");
     }
   };
 
@@ -104,12 +120,25 @@ export default function SchoolProgramsPage() {
   const handleDelete = async (programId: string) => {
     if (!confirm(t("deleteConfirm"))) return;
     
+    if (demoMode) {
+      alert("Demo Mode: Please sign in to delete programs");
+      return;
+    }
+    
     try {
-      // TODO: Call API to delete program
-      console.log("Deleting program:", programId);
-      loadPrograms();
+      const response = await fetch(`/api/schools/programs/${programId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        loadPrograms();
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to delete program");
+      }
     } catch (err) {
       console.error("Error deleting program:", err);
+      alert("Failed to delete program. Please try again.");
     }
   };
 

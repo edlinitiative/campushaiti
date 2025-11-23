@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@/lib/navigation";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,30 +27,20 @@ interface CustomQuestion {
   isActive: boolean;
 }
 
+interface Program {
+  id: string;
+  name: string;
+}
+
 export default function CustomQuestionsPage() {
   const t = useTranslations("schools.questions");
   
-  const [demoMode] = useState(true); // Demo mode until API is implemented
-  const [questions, setQuestions] = useState<CustomQuestion[]>([
-    {
-      id: "1",
-      question: "Why do you want to study at our university?",
-      type: "TEXTAREA",
-      required: true,
-      placeholder: "Tell us your motivation...",
-      order: 1,
-      isActive: true,
-    },
-    {
-      id: "2",
-      question: "Do you have previous work experience?",
-      type: "SELECT",
-      required: false,
-      options: ["No experience", "Less than 1 year", "1-3 years", "3+ years"],
-      order: 2,
-      isActive: true,
-    },
-  ]);
+  const [demoMode, setDemoMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [selectedProgramId, setSelectedProgramId] = useState<string>("");
+  const [questions, setQuestions] = useState<CustomQuestion[]>([]);
 
   const [showDialog, setShowDialog] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<CustomQuestion | null>(null);
@@ -62,6 +52,61 @@ export default function CustomQuestionsPage() {
     helpText: "",
     options: "",
   });
+
+  // Load programs on mount
+  useEffect(() => {
+    loadPrograms();
+  }, []);
+
+  // Load questions when program is selected
+  useEffect(() => {
+    if (selectedProgramId) {
+      loadQuestions();
+    } else {
+      setQuestions([]);
+    }
+  }, [selectedProgramId]);
+
+  const loadPrograms = async () => {
+    try {
+      const response = await fetch('/api/schools/programs');
+      
+      if (response.ok) {
+        const data = await response.json();
+        const progs = data.programs || [];
+        setPrograms(progs.map((p: any) => ({ id: p.id, name: p.name })));
+        if (progs.length > 0) {
+          setSelectedProgramId(progs[0].id);
+        }
+        setDemoMode(false);
+      } else {
+        setDemoMode(true);
+      }
+    } catch (err) {
+      console.error("Error loading programs:", err);
+      setDemoMode(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadQuestions = async () => {
+    if (!selectedProgramId) return;
+    
+    try {
+      const response = await fetch(`/api/schools/questions/${selectedProgramId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setQuestions(data.questions || []);
+      } else {
+        setQuestions([]);
+      }
+    } catch (err) {
+      console.error("Error loading questions:", err);
+      setQuestions([]);
+    }
+  };
 
   const handleAddQuestion = () => {
     setEditingQuestion(null);
@@ -89,41 +134,129 @@ export default function CustomQuestionsPage() {
     setShowDialog(true);
   };
 
-  const handleSaveQuestion = () => {
-    const newQuestion: CustomQuestion = {
-      id: editingQuestion?.id || String(Date.now()),
-      question: formData.question,
-      type: formData.type,
-      required: formData.required,
-      placeholder: formData.placeholder,
-      helpText: formData.helpText,
-      options: formData.options ? formData.options.split("\n").filter(o => o.trim()) : undefined,
-      order: editingQuestion?.order || questions.length + 1,
-      isActive: true,
-    };
-
-    if (editingQuestion) {
-      setQuestions(questions.map(q => q.id === editingQuestion.id ? newQuestion : q));
-    } else {
-      setQuestions([...questions, newQuestion]);
+  const handleSaveQuestion = async () => {
+    if (demoMode) {
+      alert("Demo Mode: Please sign in to save changes");
+      return;
     }
 
-    setShowDialog(false);
-  };
+    if (!selectedProgramId) {
+      alert("Please select a program first");
+      return;
+    }
 
-  const handleDeleteQuestion = (id: string) => {
-    if (confirm(t("confirmDelete"))) {
-      setQuestions(questions.filter(q => q.id !== id));
+    setSaving(true);
+    try {
+      const newQuestion: CustomQuestion = {
+        id: editingQuestion?.id || String(Date.now()),
+        question: formData.question,
+        type: formData.type,
+        required: formData.required,
+        placeholder: formData.placeholder,
+        helpText: formData.helpText,
+        options: formData.options ? formData.options.split("\n").filter(o => o.trim()) : undefined,
+        order: editingQuestion?.order || questions.length + 1,
+        isActive: true,
+      };
+
+      const updatedQuestions = editingQuestion
+        ? questions.map(q => q.id === editingQuestion.id ? newQuestion : q)
+        : [...questions, newQuestion];
+
+      const response = await fetch(`/api/schools/questions/${selectedProgramId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questions: updatedQuestions }),
+      });
+
+      if (response.ok) {
+        setQuestions(updatedQuestions);
+        setShowDialog(false);
+        setFormData({
+          question: "",
+          type: "TEXT",
+          required: true,
+          placeholder: "",
+          helpText: "",
+          options: "",
+        });
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to save question");
+      }
+    } catch (err) {
+      console.error("Error saving question:", err);
+      alert("Failed to save question. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleToggleActive = (id: string) => {
-    setQuestions(questions.map(q =>
-      q.id === id ? { ...q, isActive: !q.isActive } : q
-    ));
+  const handleDeleteQuestion = async (id: string) => {
+    if (!confirm(t("confirmDelete"))) return;
+    
+    if (demoMode) {
+      alert("Demo Mode: Please sign in to delete questions");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const updatedQuestions = questions.filter(q => q.id !== id);
+
+      const response = await fetch(`/api/schools/questions/${selectedProgramId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questions: updatedQuestions }),
+      });
+
+      if (response.ok) {
+        setQuestions(updatedQuestions);
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to delete question");
+      }
+    } catch (err) {
+      console.error("Error deleting question:", err);
+      alert("Failed to delete question. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const moveQuestion = (id: string, direction: "up" | "down") => {
+  const handleToggleActive = async (id: string) => {
+    if (demoMode) {
+      alert("Demo Mode: Please sign in to modify questions");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const updatedQuestions = questions.map(q =>
+        q.id === id ? { ...q, isActive: !q.isActive } : q
+      );
+
+      const response = await fetch(`/api/schools/questions/${selectedProgramId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questions: updatedQuestions }),
+      });
+
+      if (response.ok) {
+        setQuestions(updatedQuestions);
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to update question");
+      }
+    } catch (err) {
+      console.error("Error updating question:", err);
+      alert("Failed to update question. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const moveQuestion = async (id: string, direction: "up" | "down") => {
     const index = questions.findIndex(q => q.id === id);
     if (index === -1) return;
     if (direction === "up" && index === 0) return;
@@ -177,11 +310,37 @@ export default function CustomQuestionsPage() {
           <Button variant="outline" asChild>
             <Link href="/schools/dashboard">{t("dashboard")}</Link>
           </Button>
-          <Button onClick={handleAddQuestion}>
+          <Button onClick={handleAddQuestion} disabled={!selectedProgramId || loading}>
             {t("addQuestion")}
           </Button>
         </div>
       </div>
+
+      {/* Program Selector */}
+      {!demoMode && programs.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>{t("selectProgram") || "Select Program"}</CardTitle>
+            <CardDescription>
+              {t("selectProgramDesc") || "Choose which program these custom questions apply to"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Select value={selectedProgramId} onValueChange={setSelectedProgramId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a program..." />
+              </SelectTrigger>
+              <SelectContent>
+                {programs.map((program) => (
+                  <SelectItem key={program.id} value={program.id}>
+                    {program.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Info Card */}
       <Card className="mb-6 bg-blue-50 border-blue-200">
@@ -193,6 +352,17 @@ export default function CustomQuestionsPage() {
       </Card>
 
       {/* Questions List */}
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      ) : !selectedProgramId && !demoMode ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <p>{t("selectProgramFirst") || "Please select a program to manage its custom questions"}</p>
+          </CardContent>
+        </Card>
+      ) : (
       <div className="space-y-4">
         {questions.length === 0 ? (
           <Card>
@@ -294,6 +464,7 @@ export default function CustomQuestionsPage() {
           ))
         )}
       </div>
+      )}
 
       {/* Add/Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
