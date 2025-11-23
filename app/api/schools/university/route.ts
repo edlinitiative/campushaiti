@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
 import { getAdminDb } from "@/lib/firebase/admin";
+import { getSchoolSlugFromHeaders } from "@/lib/utils/subdomain";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /**
  * GET /api/schools/university
- * Get university data for the authenticated school admin
+ * Get university data based on subdomain
  */
 export async function GET(request: NextRequest) {
   try {
@@ -25,23 +26,44 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Find universities where user is an admin
+    // Get school slug from subdomain (set by middleware)
+    const schoolSlug = getSchoolSlugFromHeaders(request.headers);
+    
+    if (!schoolSlug) {
+      return NextResponse.json(
+        { error: "No school subdomain detected" },
+        { status: 400 }
+      );
+    }
+
+    // Find university by slug
     const universitiesSnapshot = await db.collection("universities")
-      .where("adminUids", "array-contains", decodedClaims.uid)
+      .where("slug", "==", schoolSlug)
       .limit(1)
       .get();
 
     if (universitiesSnapshot.empty) {
       return NextResponse.json(
-        { error: "No university found for this user" },
+        { error: "University not found for this subdomain" },
         { status: 404 }
       );
     }
 
     const universityDoc = universitiesSnapshot.docs[0];
+    const universityData = universityDoc.data();
+    
+    // Verify user has permission to access this university
+    if (decodedClaims.role !== "ADMIN" && 
+        !universityData.adminUids?.includes(decodedClaims.uid)) {
+      return NextResponse.json(
+        { error: "You don't have access to this university" },
+        { status: 403 }
+      );
+    }
+
     const university = {
       id: universityDoc.id,
-      ...universityDoc.data(),
+      ...universityData,
     };
 
     return NextResponse.json({ university });

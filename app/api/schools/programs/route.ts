@@ -25,13 +25,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Find universities where user is an admin
+    // Get school slug from subdomain
+    const schoolSlug = request.headers.get('x-school-slug');
+    
+    if (!schoolSlug) {
+      return NextResponse.json({ programs: [] });
+    }
+
+    // Find university by slug
     const universitiesSnapshot = await db.collection("universities")
-      .where("adminUids", "array-contains", decodedClaims.uid)
+      .where("slug", "==", schoolSlug)
+      .limit(1)
       .get();
 
     if (universitiesSnapshot.empty) {
       return NextResponse.json({ programs: [] });
+    }
+    
+    // Verify user has access to this university
+    const universityData = universitiesSnapshot.docs[0].data();
+    if (decodedClaims.role !== "ADMIN" && 
+        !universityData.adminUids?.includes(decodedClaims.uid)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const universityIds = universitiesSnapshot.docs.map((doc) => doc.id);

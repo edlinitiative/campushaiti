@@ -4,6 +4,7 @@
  */
 
 import { emailTemplates } from "./templates";
+import { getSchoolSubdomainUrl } from "@/lib/utils/subdomain";
 
 interface EmailOptions {
   to: string;
@@ -80,8 +81,12 @@ export async function sendUniversityApprovedEmail(data: {
   contactName: string;
   email: string;
   tempPassword?: string;
+  universitySlug?: string;
 }) {
-  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/schools/dashboard`;
+  // Use subdomain URL if slug is provided
+  const dashboardUrl = data.universitySlug 
+    ? getSchoolSubdomainUrl(data.universitySlug, '/dashboard')
+    : `${process.env.NEXT_PUBLIC_APP_URL}/schools/dashboard`;
   
   const template = emailTemplates.universityApproved({
     ...data,
@@ -156,8 +161,12 @@ export async function sendApplicationReceivedEmail(data: {
   applicantName: string;
   programName: string;
   applicationId: string;
+  universitySlug?: string;
 }) {
-  const applicationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/schools/dashboard/applications`;
+  // Use subdomain URL if slug is provided
+  const applicationUrl = data.universitySlug
+    ? getSchoolSubdomainUrl(data.universitySlug, '/applications')
+    : `${process.env.NEXT_PUBLIC_APP_URL}/schools/dashboard/applications`;
   
   const template = emailTemplates.applicationReceived({
     universityName: data.universityName,

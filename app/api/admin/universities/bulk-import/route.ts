@@ -158,13 +158,14 @@ export async function POST(request: NextRequest) {
                 },
               });
 
-              // Send welcome email
+              // Send welcome email with subdomain URL
               if (sendEmails) {
                 await sendUniversityApprovedEmail({
                   universityName: uniData.name,
                   contactName,
                   email: contactEmail,
                   tempPassword: tempPassword || undefined,
+                  universitySlug: slug, // Pass the slug for subdomain URL
                 });
               }
             }

@@ -22,10 +22,17 @@ export async function DELETE(
 
     const { userId } = params;
 
-    // Find university for this admin
+    // Get school slug from subdomain
+    const schoolSlug = request.headers.get('x-school-slug');
+    
+    if (!schoolSlug) {
+      return NextResponse.json({ error: "No school subdomain" }, { status: 400 });
+    }
+
+    // Find university by slug
     const universitiesSnapshot = await db
       .collection("universities")
-      .where("adminUids", "array-contains", user.uid)
+      .where("slug", "==", schoolSlug)
       .limit(1)
       .get();
 
@@ -35,6 +42,11 @@ export async function DELETE(
 
     const universityDoc = universitiesSnapshot.docs[0];
     const university = universityDoc.data();
+    
+    // Verify user has access
+    if (user.role !== "ADMIN" && !university.adminUids?.includes(user.uid)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     // Check if current user has permission (must be OWNER or ADMIN)
     const currentUserRole = university.team?.[user.uid]?.role || "OWNER";
@@ -113,10 +125,17 @@ export async function PUT(
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    // Find university for this admin
+    // Get school slug from subdomain
+    const schoolSlug = request.headers.get('x-school-slug');
+    
+    if (!schoolSlug) {
+      return NextResponse.json({ error: "No school subdomain" }, { status: 400 });
+    }
+
+    // Find university by slug
     const universitiesSnapshot = await db
       .collection("universities")
-      .where("adminUids", "array-contains", user.uid)
+      .where("slug", "==", schoolSlug)
       .limit(1)
       .get();
 
@@ -126,6 +145,11 @@ export async function PUT(
 
     const universityDoc = universitiesSnapshot.docs[0];
     const university = universityDoc.data();
+    
+    // Verify user has access
+    if (user.role !== "ADMIN" && !university.adminUids?.includes(user.uid)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     // Check if current user has permission (must be OWNER)
     const currentUserRole = university.team?.[user.uid]?.role || "OWNER";

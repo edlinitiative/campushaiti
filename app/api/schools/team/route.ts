@@ -19,10 +19,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find university for this admin
+    // Get school slug from subdomain
+    const schoolSlug = request.headers.get('x-school-slug');
+    
+    if (!schoolSlug) {
+      return NextResponse.json({ error: "No school subdomain" }, { status: 400 });
+    }
+
+    // Find university by slug
     const universitiesSnapshot = await db
       .collection("universities")
-      .where("adminUids", "array-contains", user.uid)
+      .where("slug", "==", schoolSlug)
       .limit(1)
       .get();
 
@@ -32,6 +39,11 @@ export async function GET(request: NextRequest) {
 
     const universityDoc = universitiesSnapshot.docs[0];
     const university = universityDoc.data();
+    
+    // Verify user has access
+    if (user.role !== "ADMIN" && !university.adminUids?.includes(user.uid)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     // Return team members
     const team = university.team || {};
@@ -75,10 +87,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    // Find university for this admin
+    // Get school slug from subdomain
+    const schoolSlug = request.headers.get('x-school-slug');
+    
+    if (!schoolSlug) {
+      return NextResponse.json({ error: "No school subdomain" }, { status: 400 });
+    }
+
+    // Find university by slug
     const universitiesSnapshot = await db
       .collection("universities")
-      .where("adminUids", "array-contains", user.uid)
+      .where("slug", "==", schoolSlug)
       .limit(1)
       .get();
 
@@ -89,6 +108,11 @@ export async function POST(request: NextRequest) {
     const universityDoc = universitiesSnapshot.docs[0];
     const university = universityDoc.data();
     const universityId = universityDoc.id;
+    
+    // Verify user has access
+    if (user.role !== "ADMIN" && !university.adminUids?.includes(user.uid)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     // Check if user has permission to invite (must be OWNER or ADMIN)
     const currentUserRole = university.team?.[user.uid]?.role || "OWNER";

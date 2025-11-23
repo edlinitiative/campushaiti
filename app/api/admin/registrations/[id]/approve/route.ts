@@ -131,12 +131,13 @@ export async function PUT(
       universityId: universityId,
     });
 
-    // Send approval email
+    // Send approval email with subdomain URL
     await sendUniversityApprovedEmail({
       universityName: registration!.universityName,
       contactName: registration!.contactPersonName,
       email: registration!.contactPersonEmail,
       tempPassword: schoolAdminUid && tempPassword ? tempPassword : undefined,
+      universitySlug: slug, // Pass the slug for subdomain URL
     });
 
     // TODO: Create school admin user account and send invitation email
