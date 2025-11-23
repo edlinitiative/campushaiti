@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import SignupAnalytics from "@/components/admin/SignupAnalytics";
 import { PlatformSettings } from "@/components/admin/PlatformSettings";
+import { RoleManagement } from "@/components/admin/RoleManagement";
 import { 
   Building2, 
   GraduationCap, 
@@ -360,6 +361,12 @@ export default function AdminPage() {
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-4">{t("signupAnalytics")}</h2>
         <SignupAnalytics />
+      </div>
+
+      {/* Role Management */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">User Role Management</h2>
+        <RoleManagement />
       </div>
 
       <div className="mb-6">
