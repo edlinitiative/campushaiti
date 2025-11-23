@@ -365,7 +365,7 @@ export default function AdminPage() {
 
       {/* Role Management */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">User Role Management</h2>
+        <h2 className="text-xl font-semibold mb-4">Administrator Management</h2>
         <RoleManagement />
       </div>
 
