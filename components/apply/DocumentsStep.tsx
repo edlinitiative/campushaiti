@@ -507,7 +507,7 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
                       <div className="flex-1">
                         <p className="font-medium text-sm">{doc.filename}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(doc.createdAt.toDate()).toLocaleDateString()} • {(doc.sizeBytes / 1024).toFixed(0)} KB
+                          {doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : 'Unknown date'} • {(doc.sizeBytes / 1024).toFixed(0)} KB
                         </p>
                       </div>
                       <div className="flex gap-2">

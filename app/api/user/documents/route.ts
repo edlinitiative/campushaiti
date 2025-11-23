@@ -27,15 +27,20 @@ export async function GET(request: NextRequest) {
       .where("ownerUid", "==", userId)
       .get();
 
-    const documents = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as any[];
+    const documents = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        // Convert Firestore Timestamp to ISO string for JSON serialization
+        createdAt: data.createdAt?.toDate?.() ? data.createdAt.toDate().toISOString() : null,
+      };
+    });
 
     // Sort by createdAt in JavaScript (temporary until index is deployed)
     documents.sort((a, b) => {
-      const aTime = a.createdAt?.toMillis?.() || 0;
-      const bTime = b.createdAt?.toMillis?.() || 0;
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return bTime - aTime; // DESC order
     });
 
