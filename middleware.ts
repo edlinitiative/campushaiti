@@ -15,6 +15,11 @@ export default function middleware(request: NextRequest) {
   const subdomain = getSubdomain(hostname);
   const url = request.nextUrl.clone();
 
+  // Skip middleware for API routes entirely - let them handle themselves
+  if (url.pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
   // If this is a school subdomain, rewrite URLs to /schools/* routes
   if (subdomain && subdomain !== 'admin') {
     const requestHeaders = new Headers(request.headers);
@@ -77,9 +82,8 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match all routes including API routes (need subdomain for API)
-  // Exclude Next.js internals and static files
+  // Exclude API routes, Next.js internals and static files
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
