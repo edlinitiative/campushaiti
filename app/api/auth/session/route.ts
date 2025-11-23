@@ -22,8 +22,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check Firebase Admin credentials
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_PRIVATE_KEY || !process.env.FIREBASE_CLIENT_EMAIL) {
+      console.error("Missing Firebase Admin credentials:", {
+        hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
+        hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+        hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
+      });
+      return NextResponse.json(
+        { error: "Server configuration error. Firebase Admin credentials not set." },
+        { status: 500 }
+      );
+    }
+
+    console.log("Creating session cookie...");
     // Create session cookie (5 days)
     const sessionCookie = await createSessionCookie(idToken);
+    console.log("Session cookie created successfully");
 
     // Set cookie with proper attributes
     const isProduction = process.env.NODE_ENV === "production";

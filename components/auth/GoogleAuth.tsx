@@ -34,7 +34,9 @@ export default function GoogleAuth() {
       });
 
       if (!sessionResponse.ok) {
-        throw new Error("Failed to create session");
+        const errorData = await sessionResponse.json();
+        console.error("Session creation failed:", errorData);
+        throw new Error(errorData.error || "Failed to create session");
       }
 
       console.log("Session created, getting redirect URL...");

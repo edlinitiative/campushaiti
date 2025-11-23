@@ -85,8 +85,27 @@ export async function setUserRole(uid: string, role: UserRole): Promise<void> {
  * Used after successful authentication
  */
 export async function createSessionCookie(idToken: string, expiresIn: number = 60 * 60 * 24 * 5 * 1000): Promise<string> {
-  const adminAuth = getAdminAuth();
-  return await adminAuth.createSessionCookie(idToken, { expiresIn });
+  try {
+    const adminAuth = getAdminAuth();
+    
+    if (!adminAuth || typeof adminAuth.createSessionCookie !== 'function') {
+      console.error("Firebase Admin Auth not initialized properly");
+      throw new Error("Firebase Admin not initialized. Please check server configuration.");
+    }
+    
+    console.log("Creating session cookie with expiry:", expiresIn);
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+    console.log("Session cookie created successfully");
+    return sessionCookie;
+  } catch (error: any) {
+    console.error("Error in createSessionCookie:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      name: error.name,
+    });
+    throw error;
+  }
 }
 
 /**
