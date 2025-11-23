@@ -118,14 +118,38 @@ export default function PhoneAuth() {
       });
 
       if (!sessionResponse.ok) {
-        const errorData = await sessionResponse.json();
+        let errorData;
+        try {
+          errorData = await sessionResponse.json();
+        } catch (e) {
+          console.error("Failed to parse error response:", e);
+          throw new Error(`Session creation failed with status ${sessionResponse.status}`);
+        }
         console.error("Session creation failed:", errorData);
         throw new Error(errorData.error || "Failed to create session");
       }
 
       // Get role-based redirect URL
       const redirectResponse = await fetch("/api/auth/redirect");
-      const { redirectUrl } = await redirectResponse.json();
+      
+      if (!redirectResponse.ok) {
+        console.error("Redirect endpoint failed:", redirectResponse.status);
+        // Fallback to default dashboard
+        window.location.href = locale === "en" ? "/dashboard" : `/${locale}/dashboard`;
+        return;
+      }
+      
+      let redirectData;
+      try {
+        redirectData = await redirectResponse.json();
+      } catch (e) {
+        console.error("Failed to parse redirect response:", e);
+        // Fallback to default dashboard
+        window.location.href = locale === "en" ? "/dashboard" : `/${locale}/dashboard`;
+        return;
+      }
+      
+      const redirectUrl = redirectData.redirectUrl || "/dashboard";
       const finalUrl = locale === "en" ? redirectUrl : `/${locale}${redirectUrl}`;
       window.location.href = finalUrl;    } catch (err: any) {
       let errorMessage = err.message;
