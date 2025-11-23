@@ -91,19 +91,28 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
 
   const loadDocuments = async () => {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) {
+      console.log("Cannot load documents: User not authenticated");
+      return;
+    }
 
     try {
+      console.log("Loading documents for user:", user.uid);
       const response = await fetch(`/api/user/documents?userId=${user.uid}`);
+      
       if (!response.ok) {
-        console.error("Failed to load documents:", response.statusText);
+        const errorText = await response.text();
+        console.error("Failed to load documents:", response.status, response.statusText, errorText);
+        setFileError(`Failed to load documents: ${response.statusText}`);
         return;
       }
       
       const data = await response.json();
+      console.log("Documents loaded:", data.documents?.length || 0, "documents");
       setDocuments(data.documents || []);
     } catch (error) {
       console.error("Error loading documents:", error);
+      setFileError(error instanceof Error ? error.message : "Failed to load documents");
     }
   };
 
@@ -243,10 +252,14 @@ export default function DocumentsStep({ onNext, onBack }: DocumentsStepProps) {
 
             if (!response.ok) {
               const errorData = await response.json();
+              console.error("Failed to save document metadata:", response.status, errorData);
               throw new Error(errorData.message || "Failed to save document metadata");
             }
 
-            console.log("Document saved successfully");
+            const saveResult = await response.json();
+            console.log("Document saved successfully:", saveResult);
+            
+            console.log("Reloading documents...");
             await loadDocuments();
             setUploading(false);
             setUploadProgress(0);
