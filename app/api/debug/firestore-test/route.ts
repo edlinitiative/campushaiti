@@ -47,20 +47,26 @@ export async function GET(request: NextRequest) {
     // Try to create a test document
     let writeTest = null;
     try {
-      await db.collection("_test").doc("test").set({ test: true, timestamp: Date.now() });
-      const testDoc = await db.collection("_test").doc("test").get();
+      console.log("Attempting to write to Firestore...");
+      const testRef = db.collection("_test").doc("test");
+      await testRef.set({ test: true, timestamp: Date.now() });
+      console.log("Write successful, attempting read...");
+      const testDoc = await testRef.get();
+      console.log("Read successful:", testDoc.exists);
       writeTest = {
         writeSuccess: true,
         readSuccess: testDoc.exists,
         data: testDoc.data(),
       };
       // Clean up
-      await db.collection("_test").doc("test").delete();
+      await testRef.delete();
     } catch (writeError: any) {
+      console.error("Firestore write/read error:", writeError);
       writeTest = {
         writeSuccess: false,
         error: writeError.message,
         errorCode: writeError.code,
+        errorDetails: writeError.details || writeError.toString(),
       };
     }
 
