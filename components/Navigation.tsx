@@ -7,6 +7,7 @@ import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { auth } from "@/lib/firebase/client";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
+import { getSchoolRoute, getAdminRoute, isOnSchoolSubdomain, isOnAdminSubdomain } from "@/lib/utils/routes";
 
 export default function Navigation() {
   const t = useTranslations("nav");
@@ -14,9 +15,14 @@ export default function Navigation() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isSchoolSubdomain, setIsSchoolSubdomain] = useState(false);
+  const [isAdminSubdomain, setIsAdminSubdomain] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    setIsSchoolSubdomain(isOnSchoolSubdomain());
+    setIsAdminSubdomain(isOnAdminSubdomain());
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       
@@ -80,24 +86,27 @@ export default function Navigation() {
             <>
               {user ? (
                 <>
-                  <Link href="/dashboard">
-                    <Button variant="ghost" size="sm">
-                      {t("dashboard")}
-                    </Button>
-                  </Link>
+                  {/* Only show student dashboard on main domain */}
+                  {!isSchoolSubdomain && !isAdminSubdomain && (
+                    <Link href="/dashboard">
+                      <Button variant="ghost" size="sm">
+                        {t("dashboard")}
+                      </Button>
+                    </Link>
+                  )}
                   
-                  {/* Show School Portal link only for SCHOOL_ADMIN users */}
-                  {userRole === "SCHOOL_ADMIN" && (
-                    <Link href="/schools/dashboard">
+                  {/* Show School Portal link only for SCHOOL_ADMIN users on main domain */}
+                  {userRole === "SCHOOL_ADMIN" && !isSchoolSubdomain && !isAdminSubdomain && (
+                    <Link href={getSchoolRoute('/dashboard')}>
                       <Button variant="ghost" size="sm">
                         {t("schoolPortal")}
                       </Button>
                     </Link>
                   )}
                   
-                  {/* Show Admin link only for ADMIN users */}
-                  {userRole === "ADMIN" && (
-                    <Link href="/admin">
+                  {/* Show Admin link only for ADMIN users on main domain */}
+                  {userRole === "ADMIN" && !isAdminSubdomain && (
+                    <Link href={getAdminRoute()}>
                       <Button variant="ghost" size="sm">
                         Admin
                       </Button>

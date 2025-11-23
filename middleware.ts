@@ -13,33 +13,70 @@ const intlMiddleware = createMiddleware({
 export default function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const subdomain = getSubdomain(hostname);
+  const url = request.nextUrl.clone();
 
-  // If this is a school subdomain, add it to headers for API routes to use
-  if (subdomain) {
+  // If this is a school subdomain, rewrite URLs to /schools/* routes
+  if (subdomain && subdomain !== 'admin') {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-school-slug', subdomain);
     
-    // Run intl middleware with modified headers
-    const response = intlMiddleware(request);
+    // Rewrite root paths to /schools paths
+    // e.g., quisqueya.campus.ht/dashboard -> /schools/dashboard
+    if (!url.pathname.startsWith('/schools') && 
+        !url.pathname.startsWith('/api') && 
+        !url.pathname.startsWith('/_next') &&
+        !url.pathname.startsWith('/auth')) {
+      
+      // Rewrite to schools route
+      url.pathname = `/schools${url.pathname}`;
+      
+      const response = NextResponse.rewrite(url, {
+        request: {
+          headers: requestHeaders,
+        },
+      });
+      
+      response.headers.set('x-school-slug', subdomain);
+      return response;
+    }
     
-    // Clone response and add school slug header
+    // For API routes and other paths, just add headers
+    const response = intlMiddleware(request);
     const modifiedResponse = NextResponse.next({
       request: {
         headers: requestHeaders,
       },
     });
     
-    // Copy cookies and other headers from intl middleware
     if (response) {
       response.cookies.getAll().forEach(cookie => {
         modifiedResponse.cookies.set(cookie);
       });
     }
     
-    // Set the school slug header in the response too
     modifiedResponse.headers.set('x-school-slug', subdomain);
-    
     return modifiedResponse;
+  }
+  
+  // If this is admin subdomain, rewrite URLs to /admin/* routes
+  if (subdomain === 'admin') {
+    // Rewrite root paths to /admin paths
+    // e.g., admin.campus.ht/universities -> /admin/universities
+    if (!url.pathname.startsWith('/admin') && 
+        !url.pathname.startsWith('/api') && 
+        !url.pathname.startsWith('/_next') &&
+        !url.pathname.startsWith('/auth') &&
+        url.pathname !== '/') {
+      
+      url.pathname = `/admin${url.pathname}`;
+      return NextResponse.rewrite(url);
+    }
+    
+    // admin.campus.ht/ -> /admin
+    if (url.pathname === '/') {
+      url.pathname = '/admin';
+      return NextResponse.rewrite(url);
+    }
   }
 
   // No subdomain, just run intl middleware
