@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { ArrowLeft, Save, Globe, Mail, Bell, Shield, Database } from "lucide-rea
 
 export default function AdminSettingsPage() {
   const t = useTranslations("admin.settings");
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
     platformName: "Campus Haiti",
@@ -24,6 +25,25 @@ export default function AdminSettingsPage() {
     defaultApplicationFee: 5000,
     welcomeMessage: "Welcome to Campus Haiti - Your gateway to higher education in Haiti",
   });
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const response = await fetch('/api/admin/settings');
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(data);
+      }
+    } catch (err) {
+      console.error("Error loading settings:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -37,7 +57,8 @@ export default function AdminSettingsPage() {
       if (response.ok) {
         alert("Settings saved successfully!");
       } else {
-        alert("Failed to save settings");
+        const data = await response.json();
+        alert(data.error || "Failed to save settings");
       }
     } catch (err) {
       console.error("Error saving settings:", err);
@@ -50,6 +71,16 @@ export default function AdminSettingsPage() {
   const handleChange = (field: string, value: any) => {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-muted-foreground">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
