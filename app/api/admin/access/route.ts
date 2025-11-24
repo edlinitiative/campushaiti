@@ -18,6 +18,21 @@ export async function GET(request: NextRequest) {
 
     const db = getAdminDb();
 
+    // Check if current user has adminAccess document, if not create it
+    const currentUserAccess = await db.collection("adminAccess").doc(user.uid).get();
+    if (!currentUserAccess.exists) {
+      console.log("Creating adminAccess document for existing admin:", user.email);
+      await db.collection("adminAccess").doc(user.uid).set({
+        uid: user.uid,
+        email: user.email || "",
+        name: user.displayName || user.email?.split("@")[0] || "Admin",
+        role: "ADMIN",
+        grantedAt: Date.now(),
+        grantedBy: "auto-created",
+        createdAt: Date.now(),
+      });
+    }
+
     const adminAccessSnapshot = await db
       .collection("adminAccess")
       .orderBy("grantedAt", "desc")
