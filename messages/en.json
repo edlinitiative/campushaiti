@@ -233,7 +233,10 @@
       "previous": "Previous",
       "next": "Next",
       "saving": "Saving...",
-      "saveContinue": "Save & Continue"
+      "saveContinue": "Save & Continue",
+      "saveProgress": "Save Progress",
+      "progressSaved": "Progress saved successfully!",
+      "saveFailed": "Failed to save progress. Please try again."
     },
     "documents": {
       "title": "Required Documents",
@@ -386,7 +389,10 @@
       "notAuthenticated": "Not authenticated. Please sign in again.",
       "noProgramsSelected": "No programs selected. Please go back and select programs.",
       "cannotLoadPrograms": "Cannot load programs. Please ensure you completed the program selection step.",
-      "errorPreparingData": "Error preparing application: {error}"
+      "errorPreparingData": "Error preparing application: {error}",
+      "incompleteApplication": "Your application is incomplete. Please ensure all required sections are filled.",
+      "missingPersonalInfo": "Missing required personal information. Please complete the Profile step.",
+      "missingDocuments": "No documents uploaded. Please upload required documents in the Documents step."
     }
   },
   "dashboard": {

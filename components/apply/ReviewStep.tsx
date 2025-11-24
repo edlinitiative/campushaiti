@@ -143,9 +143,48 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
     }
   };
 
+  const validateSubmission = () => {
+    if (!applicationData) {
+      return { valid: false, message: t("errorLoadingData") };
+    }
+
+    // Check required profile fields
+    if (!applicationData.user.name || !applicationData.user.email) {
+      return { valid: false, message: t("missingPersonalInfo") || "Missing required personal information. Please complete the Profile step." };
+    }
+
+    // Check required documents
+    if (!applicationData.documents || applicationData.documents.length === 0) {
+      return { valid: false, message: t("missingDocuments") || "No documents uploaded. Please upload required documents in the Documents step." };
+    }
+
+    // Check programs selected
+    if (!applicationData.programs || applicationData.programs.length === 0) {
+      return { valid: false, message: t("noProgramsSelected") };
+    }
+
+    // Check payment for programs that require it
+    const programsRequiringPayment = applicationData.programs.filter((p: any) => 
+      p.feeCents && p.feeCents > 0 && !p.paymentReceived
+    );
+
+    // If there are programs requiring payment, check if at least one is paid
+    // For now, we'll allow submission without payment but track it
+    // Schools can enforce payment before review
+
+    return { valid: true };
+  };
+
   const handleSubmit = async () => {
     const user = auth.currentUser;
     if (!user || !applicationData) return;
+
+    // Validate all required fields are complete
+    const validation = validateSubmission();
+    if (!validation.valid) {
+      setError(validation.message || t("incompleteApplication"));
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -309,9 +348,31 @@ export default function ReviewStep({ onBack }: ReviewStepProps) {
           </Alert>
         )}
 
+        {/* Validation Checklist */}
+        <Alert>
+          <AlertDescription>
+            <p className="font-semibold mb-2">Before submitting, ensure:</p>
+            <ul className="space-y-1 text-sm">
+              <li className={applicationData.user.name && applicationData.user.email ? "text-green-600" : "text-red-600"}>
+                {applicationData.user.name && applicationData.user.email ? "✓" : "✗"} Personal information completed
+              </li>
+              <li className={applicationData.documents.length > 0 ? "text-green-600" : "text-red-600"}>
+                {applicationData.documents.length > 0 ? "✓" : "✗"} Documents uploaded ({applicationData.documents.length} files)
+              </li>
+              <li className={applicationData.programs.length > 0 ? "text-green-600" : "text-red-600"}>
+                {applicationData.programs.length > 0 ? "✓" : "✗"} Programs selected ({applicationData.programs.length} programs)
+              </li>
+            </ul>
+          </AlertDescription>
+        </Alert>
+
         <div className="flex gap-2">
           <Button variant="outline" onClick={onBack} disabled={loading}>{t("back")}</Button>
-          <Button onClick={handleSubmit} disabled={loading} className="flex-1">
+          <Button 
+            onClick={handleSubmit} 
+            disabled={loading || !validateSubmission().valid} 
+            className="flex-1"
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

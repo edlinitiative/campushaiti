@@ -318,6 +318,79 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
     }
   };
 
+  // Auto-save draft progress
+  const handleSaveDraft = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const profileData = {
+        uid: user.uid,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        gender: formData.gender,
+        phone: formData.phone,
+        whatsapp: formData.whatsapp,
+        email: user.email,
+        nationality: formData.nationality,
+        birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : null,
+        birthPlace: formData.birthPlace,
+        idNumber: formData.idNumber,
+        address: formData.address,
+        city: formData.city,
+        department: formData.department,
+        country: formData.country,
+        fatherName: formData.fatherName,
+        fatherPhone: formData.fatherPhone,
+        fatherOccupation: formData.fatherOccupation,
+        motherName: formData.motherName,
+        motherPhone: formData.motherPhone,
+        motherOccupation: formData.motherOccupation,
+        guardianName: formData.guardianName,
+        guardianPhone: formData.guardianPhone,
+        guardianRelationship: formData.guardianRelationship,
+        emergencyName: formData.emergencyName,
+        emergencyPhone: formData.emergencyPhone,
+        emergencyRelationship: formData.emergencyRelationship,
+        education: {
+          schoolName: formData.lastSchoolName,
+          city: formData.lastSchoolCity,
+          graduationYear: formData.graduationYear,
+          diplomaType: formData.diplomaType,
+          fieldOfStudy: formData.fieldOfStudy,
+          gpa: formData.gpa,
+          hasBaccalaureat: formData.hasBaccalaureat,
+          baccalaureatSeries: formData.baccalaureatSeries,
+        },
+        essays: {
+          personalStatement: formData.personalStatement,
+          careerGoals: formData.careerGoals,
+          whyThisUniversity: formData.whyThisUniversity,
+        },
+        name: `${formData.firstName} ${formData.lastName}`.trim() || user.email,
+        role: "APPLICANT",
+      };
+
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileData),
+      });
+
+      if (response.ok) {
+        alert(t("progressSaved") || "Progress saved successfully!");
+      } else {
+        throw new Error("Failed to save");
+      }
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      alert(t("saveFailed") || "Failed to save progress. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const haitianDepartments = [
     "Artibonite", "Centre", "Grand'Anse", "Nippes", "Nord", 
     "Nord-Est", "Nord-Ouest", "Ouest", "Sud", "Sud-Est"
@@ -1041,6 +1114,15 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
               </Button>
             )}
             {currentTab === "personal" && <div />}
+            
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleSaveDraft}
+              disabled={loading}
+            >
+              {t("saveProgress")}
+            </Button>
             
             {currentTab !== "essays" ? (
               <Button
