@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 import { getWordCount } from "@/lib/validation";
 
 interface ProfileStepProps {
@@ -322,6 +323,53 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
     "Nord-Est", "Nord-Ouest", "Ouest", "Sud", "Sud-Est"
   ];
 
+  // Check if each section has all required fields completed
+  const isSectionComplete = (section: string) => {
+    switch (section) {
+      case "personal":
+        return !!(
+          formData.firstName &&
+          formData.lastName &&
+          formData.gender &&
+          formData.birthDate &&
+          formData.birthPlace &&
+          formData.phone &&
+          formData.email &&
+          formData.nationality
+        );
+      case "address":
+        return !!(
+          formData.address &&
+          formData.city &&
+          formData.department &&
+          formData.country
+        );
+      case "family":
+        return !!(
+          formData.emergencyName &&
+          formData.emergencyPhone &&
+          formData.emergencyRelationship
+        );
+      case "education":
+        return !!(
+          formData.lastSchoolName &&
+          formData.lastSchoolCity &&
+          formData.graduationYear &&
+          formData.diplomaType &&
+          formData.fieldOfStudy
+        );
+      case "essays":
+        // Essays are now optional, so just check if they exist
+        return !!(
+          formData.personalStatement ||
+          formData.careerGoals ||
+          formData.whyThisUniversity
+        );
+      default:
+        return false;
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -334,11 +382,36 @@ export default function ProfileStep({ onNext }: ProfileStepProps) {
         <form onSubmit={handleSubmit}>
           <Tabs value={currentTab} onValueChange={setCurrentTab}>
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="personal">{t("tabPersonal")}</TabsTrigger>
-              <TabsTrigger value="address">{t("tabAddress")}</TabsTrigger>
-              <TabsTrigger value="family">{t("tabFamily")}</TabsTrigger>
-              <TabsTrigger value="education">{t("tabEducation")}</TabsTrigger>
-              <TabsTrigger value="essays">{t("tabEssays")}</TabsTrigger>
+              <TabsTrigger value="personal" className="relative">
+                {t("tabPersonal")}
+                {isSectionComplete("personal") && (
+                  <CheckCircle2 className="h-4 w-4 text-green-600 ml-1 absolute -top-1 -right-1" />
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="address" className="relative">
+                {t("tabAddress")}
+                {isSectionComplete("address") && (
+                  <CheckCircle2 className="h-4 w-4 text-green-600 ml-1 absolute -top-1 -right-1" />
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="family" className="relative">
+                {t("tabFamily")}
+                {isSectionComplete("family") && (
+                  <CheckCircle2 className="h-4 w-4 text-green-600 ml-1 absolute -top-1 -right-1" />
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="education" className="relative">
+                {t("tabEducation")}
+                {isSectionComplete("education") && (
+                  <CheckCircle2 className="h-4 w-4 text-green-600 ml-1 absolute -top-1 -right-1" />
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="essays" className="relative">
+                {t("tabEssays")}
+                {isSectionComplete("essays") && (
+                  <CheckCircle2 className="h-4 w-4 text-green-600 ml-1 absolute -top-1 -right-1" />
+                )}
+              </TabsTrigger>
             </TabsList>
 
             {/* Personal Information Tab */}
