@@ -22,10 +22,27 @@ export async function GET(request: NextRequest) {
     const currentUserAccess = await db.collection("adminAccess").doc(user.uid).get();
     if (!currentUserAccess.exists) {
       console.log("Creating adminAccess document for existing admin:", user.email);
+      
+      // Try to get user's name from their profile
+      let userName = user.email?.split("@")[0] || "Admin";
+      try {
+        const profileDoc = await db.collection("profiles").doc(user.uid).get();
+        if (profileDoc.exists) {
+          const profileData = profileDoc.data();
+          if (profileData?.firstName && profileData?.lastName) {
+            userName = `${profileData.firstName} ${profileData.lastName}`;
+          } else if (profileData?.firstName) {
+            userName = profileData.firstName;
+          }
+        }
+      } catch (profileError) {
+        console.log("Could not fetch profile for name, using email prefix");
+      }
+      
       await db.collection("adminAccess").doc(user.uid).set({
         uid: user.uid,
         email: user.email || "",
-        name: user.displayName || user.email?.split("@")[0] || "Admin",
+        name: userName,
         role: "ADMIN",
         grantedAt: Date.now(),
         grantedBy: "auto-created",
