@@ -342,7 +342,15 @@
       "selectedPrograms": "selected programs",
       "skipPayment": "I'll pay later (continue without payment)",
       "back": "Back",
-      "continueToReview": "Continue to Review"
+      "continueToReview": "Continue to Review",
+      "payLaterAndContinue": "Pay Later & Continue",
+      "choosePaymentMethod": "Choose Payment Method",
+      "paymentInformation": "Payment Information",
+      "paymentInfo1": "You can pay for all programs now or select individual ones",
+      "paymentInfo2": "Programs not paid for now can be paid later from your dashboard",
+      "paymentInfo3": "Your application will be reviewed regardless of payment status",
+      "paymentInfo4": "Secure payments powered by Stripe and MonCash",
+      "totalToPayNow": "Total to Pay Now"
     },
     "review": {
       "title": "Review & Submit",
@@ -377,7 +385,8 @@
       "back": "Back",
       "notAuthenticated": "Not authenticated. Please sign in again.",
       "noProgramsSelected": "No programs selected. Please go back and select programs.",
-      "cannotLoadPrograms": "Cannot load programs. Please ensure you completed the program selection step."
+      "cannotLoadPrograms": "Cannot load programs. Please ensure you completed the program selection step.",
+      "errorPreparingData": "Error preparing application: {error}"
     }
   },
   "dashboard": {

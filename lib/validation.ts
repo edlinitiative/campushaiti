@@ -259,15 +259,21 @@ export const validateProfileForm = (formData: any) => {
     errors.baccalaureatSeries = "Please select your Baccalauréat series";
   }
   
-  // Essays
-  const personalStatement = validateWordCount(formData.personalStatement, 300, 500);
-  if (!personalStatement.valid) errors.personalStatement = personalStatement.message!;
+  // Essays - Make optional for initial submission
+  if (formData.personalStatement) {
+    const personalStatement = validateWordCount(formData.personalStatement, 100, 1000);
+    if (!personalStatement.valid) errors.personalStatement = personalStatement.message!;
+  }
   
-  const careerGoals = validateWordCount(formData.careerGoals, 200, 300);
-  if (!careerGoals.valid) errors.careerGoals = careerGoals.message!;
+  if (formData.careerGoals) {
+    const careerGoals = validateWordCount(formData.careerGoals, 50, 500);
+    if (!careerGoals.valid) errors.careerGoals = careerGoals.message!;
+  }
   
-  const whyUniversity = validateWordCount(formData.whyThisUniversity, 200, 300);
-  if (!whyUniversity.valid) errors.whyThisUniversity = whyUniversity.message!;
+  if (formData.whyThisUniversity) {
+    const whyUniversity = validateWordCount(formData.whyThisUniversity, 50, 500);
+    if (!whyUniversity.valid) errors.whyThisUniversity = whyUniversity.message!;
+  }
   
   return {
     valid: Object.keys(errors).length === 0,
