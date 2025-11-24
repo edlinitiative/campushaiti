@@ -106,15 +106,15 @@ export async function POST(request: NextRequest) {
     const universityId = `uni_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const universityRef = db.collection("universities").doc(universityId);
     
-    const now = Date.now();
+    const now = new Date();
     await universityRef.set({
       name,
       slug,
       city,
       country,
-      email: contactEmail,
-      phone: contactPhone || "",
-      website: websiteUrl || "",
+      contactEmail,
+      contactPhone: contactPhone || "",
+      websiteUrl: websiteUrl || "",
       description: description || "",
       status: "APPROVED",
       adminUids: [],
