@@ -71,6 +71,16 @@ export default function PasswordAuth({ mode = "signin", onSuccess }: PasswordAut
       if (onSuccess) {
         onSuccess();
       } else {
+        // Check for returnUrl in query params first
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl');
+        
+        if (returnUrl) {
+          // Decode and redirect to the return URL
+          window.location.href = decodeURIComponent(returnUrl);
+          return;
+        }
+        
         // Get role-based redirect URL
         const redirectResponse = await fetch("/api/auth/redirect", {
           method: "GET",
