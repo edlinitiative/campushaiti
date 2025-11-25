@@ -257,11 +257,31 @@ async function setupDemoSchools() {
       process.exit(1);
     }
 
+    // Set user role to SCHOOL_ADMIN
+    const currentClaims = adminUser.customClaims || {};
+    if (currentClaims.role !== 'SCHOOL_ADMIN') {
+      await auth.setCustomUserClaims(adminUser.uid, {
+        ...currentClaims,
+        role: 'SCHOOL_ADMIN',
+      });
+      console.log(`✅ Set user role to SCHOOL_ADMIN\n`);
+    }
+
     for (const school of schools) {
       console.log(`📚 Creating school: ${school.name}...`);
       
+      // Create team member object
+      const teamMember = {
+        uid: adminUser.uid,
+        email: adminUser.email || '',
+        name: adminUser.displayName || adminUser.email?.split('@')[0] || 'Admin',
+        role: 'OWNER',
+        addedAt: new Date().getTime(),
+        addedBy: adminUser.uid,
+      };
+      
       // Create school document
-      const schoolRef = db.collection('schools').doc();
+      const schoolRef = db.collection('universities').doc();
       const schoolData = {
         name: school.name,
         slug: school.slug,
@@ -274,6 +294,10 @@ async function setupDemoSchools() {
         phoneNumber: school.phoneNumber,
         address: school.address,
         status: 'APPROVED',
+        adminUids: [adminUser.uid],
+        team: {
+          [adminUser.uid]: teamMember
+        },
         createdAt: new Date(),
         updatedAt: new Date(),
         approvedAt: new Date(),
@@ -289,8 +313,8 @@ async function setupDemoSchools() {
         const programRef = db.collection('programs').doc();
         const programData = {
           ...program,
-          schoolId: schoolRef.id,
-          schoolName: school.name,
+          universityId: schoolRef.id,
+          universityName: school.name,
           status: 'ACTIVE',
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -300,18 +324,6 @@ async function setupDemoSchools() {
         console.log(`    ✓ ${program.name}`);
       }
       
-      // Add admin user to school team
-      const teamMemberRef = db.collection('schools').doc(schoolRef.id)
-        .collection('team').doc(adminUser.uid);
-      
-      await teamMemberRef.set({
-        uid: adminUser.uid,
-        email: adminUser.email,
-        role: 'OWNER',
-        permissions: ['ALL'],
-        addedAt: new Date(),
-        addedBy: 'SYSTEM',
-      });
       console.log(`  ✓ Added ${adminUser.email} as OWNER\n`);
     }
     
