@@ -32,19 +32,37 @@ export default async function DocumentsPage({
   try {
     const docsSnapshot = await db.collection("documents")
       .where("ownerUid", "==", user.uid)
-      .orderBy("uploadedAt", "desc")
       .get();
     
     documents = docsSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+    
+    // Sort by uploadedAt or createdAt if available
+    documents.sort((a, b) => {
+      const aTime = a.uploadedAt || a.createdAt || 0;
+      const bTime = b.uploadedAt || b.createdAt || 0;
+      return bTime - aTime; // Newest first
+    });
   } catch (error) {
     console.error("Error fetching documents:", error);
   }
 
-  const getDocTypeIcon = (type: string) => {
+  const getDocTypeIcon = (kind: string) => {
     return FileText;
+  };
+
+  const getDocTypeName = (kind: string) => {
+    const typeMap: Record<string, string> = {
+      'BIRTH_CERTIFICATE': 'Birth Certificate',
+      'BACCALAUREAT': 'Baccalauréat',
+      'TRANSCRIPT': 'Transcript',
+      'PASSPORT_PHOTO': 'Passport Photo',
+      'NATIONAL_ID': 'National ID',
+      'RECOMMENDATION_LETTER': 'Recommendation Letter',
+    };
+    return typeMap[kind] || kind;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -114,7 +132,8 @@ export default async function DocumentsPage({
             ) : (
               <div className="space-y-4">
                 {documents.map((doc) => {
-                  const Icon = getDocTypeIcon(doc.type);
+                  const Icon = getDocTypeIcon(doc.kind);
+                  const uploadTime = doc.uploadedAt || doc.createdAt;
                   return (
                     <div
                       key={doc.id}
@@ -125,13 +144,15 @@ export default async function DocumentsPage({
                           <Icon className="h-6 w-6 text-blue-600" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold">{doc.name || doc.fileName}</h4>
+                          <h4 className="font-semibold">{doc.name || doc.fileName || getDocTypeName(doc.kind)}</h4>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                            <span>{doc.type}</span>
+                            <span>{getDocTypeName(doc.kind)}</span>
                             {doc.fileSize && <span>{formatFileSize(doc.fileSize)}</span>}
-                            <span>
-                              {new Date(doc.uploadedAt).toLocaleDateString()}
-                            </span>
+                            {uploadTime && (
+                              <span>
+                                {new Date(uploadTime).toLocaleDateString()}
+                              </span>
+                            )}
                           </div>
                         </div>
                         {doc.verified && (
@@ -168,32 +189,43 @@ export default async function DocumentsPage({
           <CardContent>
             <div className="space-y-3">
               {[
-                { name: t('highSchoolTranscript'), required: true },
-                { name: tDash('birthCertificate'), required: true },
-                { name: t('nationalId'), required: true },
-                { name: tDash('passportPhoto'), required: true },
-                { name: t('recommendationLetter'), required: false },
-              ].map((docType) => (
-                <div
-                  key={docType.name}
-                  className="flex items-center justify-between p-3 border rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 bg-gray-100 rounded">
-                      <FileText className="h-4 w-4 text-gray-600" />
+                { name: t('highSchoolTranscript'), kind: 'TRANSCRIPT', required: true },
+                { name: tDash('birthCertificate'), kind: 'BIRTH_CERTIFICATE', required: true },
+                { name: t('nationalId'), kind: 'NATIONAL_ID', required: true },
+                { name: tDash('passportPhoto'), kind: 'PASSPORT_PHOTO', required: true },
+                { name: t('recommendationLetter'), kind: 'RECOMMENDATION_LETTER', required: false },
+              ].map((docType) => {
+                const uploaded = documents.some(d => d.kind === docType.kind);
+                return (
+                  <div
+                    key={docType.name}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-1.5 rounded ${uploaded ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        {uploaded ? (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <FileText className="h-4 w-4 text-gray-600" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{docType.name}</p>
+                        {docType.required && (
+                          <p className="text-xs text-red-600">{t('required')}</p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{docType.name}</p>
-                      {docType.required && (
-                        <p className="text-xs text-red-600">{t('required')}</p>
+                    <div className="text-sm">
+                      {uploaded ? (
+                        <span className="text-green-600 font-medium">✓ Uploaded</span>
+                      ) : (
+                        <span className="text-muted-foreground">{t('notUploaded')}</span>
                       )}
                     </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('notUploaded')}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
