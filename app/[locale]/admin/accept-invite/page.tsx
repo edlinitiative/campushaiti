@@ -77,6 +77,23 @@ function AcceptInviteContent() {
 
       if (response.ok) {
         setResult(data);
+        
+        // Force refresh the user's ID token to get new custom claims
+        if (user) {
+          try {
+            const newIdToken = await user.getIdToken(true); // Force refresh
+            
+            // Update the session cookie with new token
+            await fetch("/api/auth/session", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ idToken: newIdToken }),
+            });
+          } catch (refreshError) {
+            console.error("Failed to refresh token:", refreshError);
+          }
+        }
+        
         // Redirect to admin dashboard after 3 seconds
         setTimeout(() => {
           router.push("/admin");
