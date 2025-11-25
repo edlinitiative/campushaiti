@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const db = getAdminDb();
 
-    // Check if already invited
+    // Check if already invited and cancel any existing pending invitations
     const existingInvite = await db
       .collection("adminInvitations")
       .where("email", "==", email)
@@ -40,10 +40,10 @@ export async function POST(request: NextRequest) {
       .get();
 
     if (!existingInvite.empty) {
-      return NextResponse.json(
-        { error: "This email already has a pending invitation" },
-        { status: 400 }
-      );
+      // Automatically cancel the old invitation and create a new one
+      const oldInviteId = existingInvite.docs[0].id;
+      await db.collection("adminInvitations").doc(oldInviteId).delete();
+      console.log(`Automatically cancelled old pending invitation for ${email} (ID: ${oldInviteId})`);
     }
 
     // Generate invitation token
