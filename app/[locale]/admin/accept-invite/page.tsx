@@ -4,16 +4,56 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Shield, CheckCircle, XCircle, Loader2, LogIn } from "lucide-react";
+import { auth } from "@/lib/firebase/client";
+import { onAuthStateChanged, type User } from "firebase/auth";
 
 function AcceptInviteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
 
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Check if user is signed in, if not show sign in prompt
+  useEffect(() => {
+    if (!authLoading && !user && token) {
+      // Store the invitation token in sessionStorage so we can retrieve it after sign in
+      sessionStorage.setItem("pendingInviteToken", token);
+    }
+  }, [authLoading, user, token]);
+
+  // Auto-accept if user just signed in with pending token
+  useEffect(() => {
+    const pendingToken = sessionStorage.getItem("pendingInviteToken");
+    if (!authLoading && user && pendingToken && pendingToken === token) {
+      sessionStorage.removeItem("pendingInviteToken");
+      // Small delay to ensure session is fully established
+      setTimeout(() => {
+        handleAccept();
+      }, 1000);
+    }
+  }, [authLoading, user, token]);
+
+  const handleSignIn = () => {
+    // Redirect to sign in page with return URL
+    const returnUrl = encodeURIComponent(`/admin/accept-invite?token=${token}`);
+    router.push(`/auth/signin?returnUrl=${returnUrl}`);
+  };
 
   const handleAccept = async () => {
     if (!token) {
@@ -84,7 +124,33 @@ function AcceptInviteContent() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!result && !error && (
+          {authLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+            </div>
+          ) : !user ? (
+            <>
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-blue-800 font-semibold mb-2">Sign in to accept this invitation</p>
+                <p className="text-sm text-blue-700">
+                  You need to be signed in with your email account to accept this administrator invitation.
+                </p>
+              </div>
+
+              <Button
+                onClick={handleSignIn}
+                className="w-full"
+                size="lg"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In to Accept Invitation
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center">
+                Make sure to sign in with the email address that received this invitation.
+              </p>
+            </>
+          ) : !result && !error ? (
             <>
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
                 <p className="text-blue-800 font-semibold mb-2">What you'll get:</p>
@@ -115,7 +181,7 @@ function AcceptInviteContent() {
                 )}
               </Button>
             </>
-          )}
+          ) : null}
 
           {result && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-md">
@@ -142,19 +208,33 @@ function AcceptInviteContent() {
             <div className="p-4 bg-red-50 border border-red-200 rounded-md">
               <div className="flex items-start gap-3">
                 <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div>
+                <div className="flex-1">
                   <p className="text-red-800 font-semibold">❌ Error</p>
                   <p className="text-sm text-red-700 mt-1">{error}</p>
+                  
+                  {error.includes("must be signed in") && (
+                    <Button
+                      onClick={handleSignIn}
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                    >
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Sign In
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
           )}
 
-          <div className="pt-4 border-t">
-            <p className="text-xs text-muted-foreground text-center">
-              Make sure you're signed in with the email address that received this invitation.
-            </p>
-          </div>
+          {!authLoading && user && !result && !error && (
+            <div className="pt-4 border-t">
+              <p className="text-xs text-muted-foreground text-center">
+                Signed in as <strong>{user.email}</strong>
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
