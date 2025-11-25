@@ -1,28 +1,15 @@
 /**
  * Setup script to create fictional schools and programs for testing
- * Run with: npm run setup-demo-schools
+ * Run with: npm run setup-demo-schools <admin-email>
  */
 
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
+import { getAdminAuth, getAdminDb } from '../lib/firebase/admin';
 
-// Initialize Firebase Admin
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+const db = getAdminDb();
+const auth = getAdminAuth();
 
-const db = getFirestore();
-const auth = getAuth();
-
-// Get the admin user UID from command line or use environment variable
-const adminEmail = process.argv[2] || process.env.ADMIN_EMAIL || 'info@edlight.org';
+// Get the admin user email from command line
+const adminEmail = process.argv[2] || 'info@edlight.org';
 
 const schools = [
   {
