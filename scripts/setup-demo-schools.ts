@@ -3,6 +3,10 @@
  * Run with: npm run setup-demo-schools <admin-email>
  */
 
+// Load environment variables
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 import { getAdminAuth, getAdminDb } from '../lib/firebase/admin';
 
 const db = getAdminDb();
