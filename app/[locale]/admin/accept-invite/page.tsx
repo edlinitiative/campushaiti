@@ -81,22 +81,31 @@ function AcceptInviteContent() {
         // Force refresh the user's ID token to get new custom claims
         if (user) {
           try {
+            console.log("[Accept Invite] Refreshing user token...");
             const newIdToken = await user.getIdToken(true); // Force refresh
             
+            console.log("[Accept Invite] Updating session cookie...");
             // Update the session cookie with new token
-            await fetch("/api/auth/session", {
+            const sessionResponse = await fetch("/api/auth/session", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ idToken: newIdToken }),
             });
             
-            // Wait a moment for session to be set, then do a FULL page reload
+            if (!sessionResponse.ok) {
+              console.error("[Accept Invite] Failed to update session");
+            } else {
+              console.log("[Accept Invite] Session updated successfully");
+            }
+            
+            // Wait for session to be fully set, then do a FULL page reload
             // This ensures the server has the new session cookie
+            console.log("[Accept Invite] Redirecting to admin dashboard...");
             setTimeout(() => {
               window.location.href = "/admin"; // Full reload, not router.push
-            }, 2000);
+            }, 2500);
           } catch (refreshError) {
-            console.error("Failed to refresh token:", refreshError);
+            console.error("[Accept Invite] Failed to refresh token:", refreshError);
             // Fallback to router push
             setTimeout(() => {
               router.push("/admin");

@@ -13,7 +13,15 @@ export async function GET(request: NextRequest) {
     // Verify user is authenticated and is an admin
     const user = await getServerUser();
     
+    console.log("[Admin Stats] User:", user ? {
+      uid: user.uid,
+      email: user.email,
+      role: user.role,
+      adminAccessLevel: user.adminAccessLevel
+    } : "null");
+    
     if (!user || user.role !== "ADMIN") {
+      console.log("[Admin Stats] Unauthorized - User role:", user?.role);
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

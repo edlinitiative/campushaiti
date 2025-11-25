@@ -91,6 +91,10 @@ export async function POST(request: NextRequest) {
 
     // Set user role to ADMIN (but with VIEWER access level in adminAccess collection)
     await getAdminAuth().setCustomUserClaims(user.uid, { role: "ADMIN" });
+    
+    console.log(`[Accept Invite] Admin access granted to ${user.uid}`);
+    console.log(`[Accept Invite] Custom claims set: role=ADMIN`);
+    console.log(`[Accept Invite] AdminAccess record: role=VIEWER`);
 
     // Update invitation status
     await invitationDoc.ref.update({
