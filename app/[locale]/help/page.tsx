@@ -3,8 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/lib/navigation";
-import { Mail, MessageCircle, Book, Phone } from "lucide-react";
-import { ChatButton } from "@/components/ChatButton";
+import { Mail, Book, Phone } from "lucide-react";
 
 export default function HelpPage() {
   const t = useTranslations("help");
@@ -56,7 +55,7 @@ export default function HelpPage() {
 
           <Card>
             <CardHeader>
-              <MessageCircle className="h-8 w-8 text-blue-600 mb-2" />
+              <Mail className="h-8 w-8 text-blue-600 mb-2" />
               <CardTitle>{t("contactSupport")}</CardTitle>
               <CardDescription>
                 {t("contactSupportDesc")}
@@ -161,7 +160,7 @@ export default function HelpPage() {
         </Card>
 
         {/* Contact Section */}
-        <div className="mt-12 grid md:grid-cols-3 gap-6">
+        <div className="mt-12 grid md:grid-cols-2 gap-6">
           <Card>
             <CardContent className="pt-6 text-center">
               <Mail className="h-10 w-10 text-blue-600 mx-auto mb-3" />
@@ -185,17 +184,6 @@ export default function HelpPage() {
               <a href="tel:+5091234567" className="text-blue-600 hover:underline text-sm">
                 {t("phoneNumber")}
               </a>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <MessageCircle className="h-10 w-10 text-blue-600 mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">{t("liveChatTitle")}</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {t("liveChatDesc")}
-              </p>
-              <ChatButton text={t("startChat")} />
             </CardContent>
           </Card>
         </div>
