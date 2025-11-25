@@ -38,12 +38,27 @@ export function RoleManagement() {
   const [upgradingUid, setUpgradingUid] = useState<string | null>(null);
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingAdminUid, setDeletingAdminUid] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [currentUserAccess, setCurrentUserAccess] = useState<{ role: string; uid: string } | null>(null);
 
   useEffect(() => {
     loadAdmins();
     loadInvitations();
+    loadCurrentUserAccess();
   }, []);
+
+  const loadCurrentUserAccess = async () => {
+    try {
+      const response = await fetch("/api/admin/access/me");
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentUserAccess(data);
+      }
+    } catch (err) {
+      console.error("Error loading current user access:", err);
+    }
+  };
 
   const loadAdmins = async () => {
     try {
@@ -196,6 +211,31 @@ export function RoleManagement() {
     }).catch(() => {
       alert("Failed to copy link. Please copy manually:\n\n" + inviteUrl);
     });
+  };
+
+  const handleDeleteAdmin = async (uid: string, email: string) => {
+    if (!confirm(`Are you sure you want to remove admin access for ${email}?\n\nThis will revoke their admin role and remove them from the admin access list.`)) {
+      return;
+    }
+
+    setDeletingAdminUid(uid);
+    try {
+      const response = await fetch(`/api/admin/access/${uid}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Admin access removed successfully");
+        loadAdmins(); // Refresh the list
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to remove admin");
+      }
+    } catch (err) {
+      alert("An error occurred while removing admin");
+    } finally {
+      setDeletingAdminUid(null);
+    }
   };
 
   return (
@@ -414,48 +454,72 @@ export function RoleManagement() {
             <p className="text-sm text-muted-foreground">No administrators yet</p>
           ) : (
             <div className="space-y-3">
-              {admins.map((admin) => (
-                <div
-                  key={admin.uid}
-                  className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md"
-                >
-                  <div>
-                    <p className="font-medium text-sm">{admin.email}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Added {new Date(admin.grantedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={admin.role === "ADMIN" ? "default" : "outline"}
-                      className={admin.role === "ADMIN" ? "bg-green-600" : "bg-blue-100"}
-                    >
-                      {admin.role}
-                    </Badge>
-                    {admin.role === "VIEWER" ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUpgradeAccess(admin.uid, "ADMIN")}
-                        disabled={upgradingUid === admin.uid}
+              {admins.map((admin) => {
+                const isSuperAdmin = currentUserAccess?.role === "ADMIN";
+                const isCurrentUser = currentUserAccess?.uid === admin.uid;
+                const canDelete = isSuperAdmin && !isCurrentUser;
+                
+                return (
+                  <div
+                    key={admin.uid}
+                    className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">
+                        {admin.email}
+                        {isCurrentUser && <span className="text-xs text-muted-foreground ml-2">(You)</span>}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Added {new Date(admin.grantedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={admin.role === "ADMIN" ? "default" : "outline"}
+                        className={admin.role === "ADMIN" ? "bg-green-600" : "bg-blue-100"}
                       >
-                        <ChevronUp className="w-4 h-4 mr-1" />
-                        Upgrade to Admin
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUpgradeAccess(admin.uid, "VIEWER")}
-                        disabled={upgradingUid === admin.uid}
-                      >
-                        <ChevronDown className="w-4 h-4 mr-1" />
-                        Downgrade to Viewer
-                      </Button>
-                    )}
+                        {admin.role}
+                      </Badge>
+                      {isSuperAdmin && (
+                        <>
+                          {admin.role === "VIEWER" ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleUpgradeAccess(admin.uid, "ADMIN")}
+                              disabled={upgradingUid === admin.uid}
+                            >
+                              <ChevronUp className="w-4 h-4 mr-1" />
+                              Upgrade to Admin
+                            </Button>
+                          ) : !isCurrentUser && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleUpgradeAccess(admin.uid, "VIEWER")}
+                              disabled={upgradingUid === admin.uid}
+                            >
+                              <ChevronDown className="w-4 h-4 mr-1" />
+                              Downgrade to Viewer
+                            </Button>
+                          )}
+                          {canDelete && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteAdmin(admin.uid, admin.email)}
+                              disabled={deletingAdminUid === admin.uid}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
