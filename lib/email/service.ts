@@ -62,6 +62,16 @@ async function sendWithResend(options: EmailOptions): Promise<boolean> {
 
     if (error) {
       console.error("Resend API error:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      
+      // Common Resend errors:
+      if (error.message?.includes("not verified")) {
+        console.error("⚠️ FROM_EMAIL domain not verified in Resend dashboard");
+        console.error("   Go to https://resend.com/domains to verify your domain");
+      } else if (error.message?.includes("Invalid API key")) {
+        console.error("⚠️ RESEND_API_KEY is invalid");
+      }
+      
       return false;
     }
 
@@ -69,6 +79,10 @@ async function sendWithResend(options: EmailOptions): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Resend error:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     return false;
   }
 }

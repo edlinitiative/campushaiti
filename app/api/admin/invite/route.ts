@@ -131,8 +131,19 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error sending admin invitation:", error);
+    
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+    
     return NextResponse.json(
-      { error: "Failed to send invitation" },
+      { 
+        error: "Failed to send invitation",
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
