@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, UserPlus, Mail, Clock, CheckCircle, ChevronUp, ChevronDown } from "lucide-react";
+import { Shield, UserPlus, Mail, Clock, CheckCircle, ChevronUp, ChevronDown, RefreshCw, Trash2 } from "lucide-react";
 
 interface AdminAccess {
   uid: string;
@@ -33,6 +33,8 @@ export function RoleManagement() {
   const [admins, setAdmins] = useState<AdminAccess[]>([]);
   const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [upgradingUid, setUpgradingUid] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadAdmins();
@@ -119,6 +121,55 @@ export function RoleManagement() {
     }
   };
 
+  const handleResendInvitation = async (invitationId: string) => {
+    setResendingId(invitationId);
+    try {
+      const response = await fetch("/api/admin/invite/resend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ invitationId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message || "Invitation resent successfully!");
+      } else {
+        alert(data.error || "Failed to resend invitation");
+      }
+    } catch (err) {
+      alert("An error occurred while resending invitation");
+    } finally {
+      setResendingId(null);
+    }
+  };
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    if (!confirm("Are you sure you want to cancel this invitation?")) {
+      return;
+    }
+
+    setDeletingId(invitationId);
+    try {
+      const response = await fetch(`/api/admin/invite?id=${invitationId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        loadInvitations(); // Refresh list
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to cancel invitation");
+      }
+    } catch (err) {
+      alert("An error occurred while cancelling invitation");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -199,16 +250,42 @@ export function RoleManagement() {
                   key={invite.id}
                   className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-md"
                 >
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium text-sm">{invite.email}</p>
                     <p className="text-xs text-muted-foreground">
                       Invited by {invite.invitedByName} •{" "}
                       {new Date(invite.createdAt).toLocaleDateString()}
                     </p>
+                    {invite.expiresAt < Date.now() && (
+                      <p className="text-xs text-red-600 font-medium mt-1">
+                        ⚠️ Expired - Create a new invitation
+                      </p>
+                    )}
                   </div>
-                  <Badge variant="outline" className="bg-amber-100">
-                    Pending
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-amber-100">
+                      Pending
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResendInvitation(invite.id)}
+                      disabled={resendingId === invite.id || invite.expiresAt < Date.now()}
+                      title="Resend invitation email"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${resendingId === invite.id ? 'animate-spin' : ''}`} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleCancelInvitation(invite.id)}
+                      disabled={deletingId === invite.id}
+                      title="Cancel invitation"
+                      className="text-red-600 hover:text-red-700 hover:border-red-300"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

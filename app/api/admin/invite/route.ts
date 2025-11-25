@@ -66,7 +66,10 @@ export async function POST(request: NextRequest) {
     // Send invitation email
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://campus.ht"}/admin/accept-invite?token=${token}`;
     
-    await sendEmail({
+    console.log("Sending admin invitation email to:", email);
+    console.log("Invite URL:", inviteUrl);
+    
+    const emailSent = await sendEmail({
       to: email,
       subject: "You've been invited to join Campus Haiti as an Administrator",
       text: `You've been invited by ${user.email} to join Campus Haiti as a platform administrator. Accept your invitation here: ${inviteUrl}`,
@@ -95,6 +98,19 @@ export async function POST(request: NextRequest) {
         </div>
       `,
     });
+    
+    if (!emailSent) {
+      console.error("Failed to send invitation email to:", email);
+      console.error("Email provider configured:", process.env.SENDGRID_API_KEY ? "SendGrid" : process.env.SMTP_HOST ? "SMTP" : "None");
+      // Delete the invitation since email failed
+      await invitationRef.delete();
+      return NextResponse.json(
+        { error: "Failed to send invitation email. Please check email configuration." },
+        { status: 500 }
+      );
+    }
+    
+    console.log("Admin invitation email sent successfully to:", email);
 
     return NextResponse.json({
       success: true,
@@ -141,6 +157,44 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching admin invitations:", error);
     return NextResponse.json(
       { error: "Failed to fetch invitations" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/admin/invite?id=invitationId
+ * Cancel/delete a pending invitation
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getServerUser();
+
+    if (!user || user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const invitationId = searchParams.get("id");
+
+    if (!invitationId) {
+      return NextResponse.json(
+        { error: "Invitation ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const db = getAdminDb();
+    await db.collection("adminInvitations").doc(invitationId).delete();
+
+    return NextResponse.json({
+      success: true,
+      message: "Invitation cancelled successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting invitation:", error);
+    return NextResponse.json(
+      { error: "Failed to cancel invitation" },
       { status: 500 }
     );
   }
