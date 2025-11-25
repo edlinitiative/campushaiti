@@ -46,6 +46,9 @@ async function sendWithResend(options: EmailOptions): Promise<boolean> {
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
+    
+    // Use onboarding@resend.dev as default since it doesn't require domain verification
+    // Set FROM_EMAIL only if you have verified your domain in Resend
     const fromEmail = process.env.FROM_EMAIL || "onboarding@resend.dev";
 
     console.log("Sending email via Resend to:", options.to);
@@ -68,6 +71,7 @@ async function sendWithResend(options: EmailOptions): Promise<boolean> {
       if (error.message?.includes("not verified")) {
         console.error("⚠️ FROM_EMAIL domain not verified in Resend dashboard");
         console.error("   Go to https://resend.com/domains to verify your domain");
+        console.error("   OR remove FROM_EMAIL from environment variables to use onboarding@resend.dev");
       } else if (error.message?.includes("Invalid API key")) {
         console.error("⚠️ RESEND_API_KEY is invalid");
       }

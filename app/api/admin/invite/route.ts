@@ -109,11 +109,12 @@ export async function POST(request: NextRequest) {
     if (!emailSent) {
       console.warn("❌ Email delivery failed!");
       console.warn("Possible reasons:");
-      console.warn("  1. No email provider configured (check environment variables)");
-      console.warn("  2. API key is invalid");
-      console.warn("  3. FROM_EMAIL domain not verified (for Resend)");
+      console.warn("  1. FROM_EMAIL domain not verified in Resend - remove FROM_EMAIL env var or verify domain");
+      console.warn("  2. No email provider configured (check environment variables)");
+      console.warn("  3. API key is invalid");
       console.warn("  4. Network/API error");
       console.warn("Invitation created successfully. Share the link manually with the user.");
+      console.warn("Invite URL:", inviteUrl);
     } else {
       console.log("✅ Email sent successfully!");
     }
@@ -123,11 +124,12 @@ export async function POST(request: NextRequest) {
       success: true,
       message: emailSent 
         ? `Invitation sent to ${email}` 
-        : `Invitation created for ${email}. Email delivery failed - share the link manually.`,
+        : `Invitation created! Copy the link below and send it manually.`,
       invitationId: invitationRef.id,
       expiresAt,
       emailSent,
-      inviteUrl, // Include the URL in response for easy copying
+      inviteUrl, // Always include the URL in response
+      warning: !emailSent ? "Email delivery failed. Remove FROM_EMAIL environment variable or verify your domain at https://resend.com/domains" : undefined,
     });
   } catch (error) {
     console.error("Error sending admin invitation:", error);
@@ -175,8 +177,24 @@ export async function GET(request: NextRequest) {
     }));
 
     return NextResponse.json({ invitations });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching admin invitations:", error);
+    
+    // If it's a missing index error, provide helpful link
+    if (error?.code === 9 && error?.details?.includes("requires an index")) {
+      const indexUrl = error.details.match(/https:\/\/[^\s]+/)?.[0];
+      console.error("Missing Firestore index. Create it here:", indexUrl);
+      
+      return NextResponse.json(
+        { 
+          error: "Database index required",
+          indexUrl,
+          message: "Click the link to create the required index, then try again."
+        },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
       { error: "Failed to fetch invitations" },
       { status: 500 }

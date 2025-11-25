@@ -290,6 +290,11 @@ export function RoleManagement() {
                     ⚠️ Email could not be sent. Please share the link below manually.
                   </p>
                 )}
+                {result.warning && (
+                  <p className="text-sm text-amber-700 mt-2 font-medium">
+                    💡 {result.warning}
+                  </p>
+                )}
               </div>
               
               {newInviteUrl && (
