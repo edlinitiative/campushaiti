@@ -134,6 +134,9 @@ export default async function DocumentsPage({
                 {documents.map((doc) => {
                   const Icon = getDocTypeIcon(doc.kind);
                   const uploadTime = doc.uploadedAt || doc.createdAt;
+                  const uploadDate = uploadTime ? new Date(uploadTime) : null;
+                  const isValidDate = uploadDate && !isNaN(uploadDate.getTime());
+                  
                   return (
                     <div
                       key={doc.id}
@@ -148,9 +151,9 @@ export default async function DocumentsPage({
                           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                             <span>{getDocTypeName(doc.kind)}</span>
                             {doc.fileSize && <span>{formatFileSize(doc.fileSize)}</span>}
-                            {uploadTime && (
+                            {isValidDate && (
                               <span>
-                                {new Date(uploadTime).toLocaleDateString()}
+                                {uploadDate.toLocaleDateString()}
                               </span>
                             )}
                           </div>
