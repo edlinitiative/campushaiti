@@ -29,10 +29,15 @@ export async function POST(request: NextRequest) {
 
     const db = getAdminDb();
 
+    console.log("=== RESENDING ADMIN INVITATION ===");
+    console.log("Invitation ID:", invitationId);
+    console.log("Requested by:", user.email);
+
     // Get the invitation
     const invitationDoc = await db.collection("adminInvitations").doc(invitationId).get();
 
     if (!invitationDoc.exists) {
+      console.error("Invitation not found:", invitationId);
       return NextResponse.json(
         { error: "Invitation not found" },
         { status: 404 }
@@ -41,7 +46,11 @@ export async function POST(request: NextRequest) {
 
     const invitation = invitationDoc.data();
 
+    console.log("Invitation status:", invitation?.status);
+    console.log("Invitation email:", invitation?.email);
+
     if (invitation?.status !== "PENDING") {
+      console.error("Cannot resend non-pending invitation. Status:", invitation?.status);
       return NextResponse.json(
         { error: "Can only resend pending invitations" },
         { status: 400 }
@@ -50,6 +59,7 @@ export async function POST(request: NextRequest) {
 
     // Check if expired
     if (invitation.expiresAt < Date.now()) {
+      console.error("Invitation has expired. Expires at:", invitation.expiresAt);
       return NextResponse.json(
         { error: "Invitation has expired. Please create a new one." },
         { status: 400 }
