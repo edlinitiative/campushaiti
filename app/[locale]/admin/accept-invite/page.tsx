@@ -89,15 +89,25 @@ function AcceptInviteContent() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ idToken: newIdToken }),
             });
+            
+            // Wait a moment for session to be set, then do a FULL page reload
+            // This ensures the server has the new session cookie
+            setTimeout(() => {
+              window.location.href = "/admin"; // Full reload, not router.push
+            }, 2000);
           } catch (refreshError) {
             console.error("Failed to refresh token:", refreshError);
+            // Fallback to router push
+            setTimeout(() => {
+              router.push("/admin");
+            }, 3000);
           }
+        } else {
+          // No user (shouldn't happen), just redirect
+          setTimeout(() => {
+            router.push("/admin");
+          }, 3000);
         }
-        
-        // Redirect to admin dashboard after 3 seconds
-        setTimeout(() => {
-          router.push("/admin");
-        }, 3000);
       } else {
         setError(data.error || "Failed to accept invitation");
       }
