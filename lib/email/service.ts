@@ -18,17 +18,57 @@ interface EmailOptions {
  */
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
   try {
-    // Check which email provider is configured
-    if (process.env.SENDGRID_API_KEY) {
+    // Priority order: Resend > SendGrid > SMTP
+    if (process.env.RESEND_API_KEY) {
+      return await sendWithResend(options);
+    } else if (process.env.SENDGRID_API_KEY) {
       return await sendWithSendGrid(options);
     } else if (process.env.SMTP_HOST) {
       return await sendWithSMTP(options);
     } else {
-      console.warn("No email provider configured. Email not sent:", options.subject);
+      console.warn("No email provider configured (RESEND_API_KEY, SENDGRID_API_KEY, or SMTP_HOST). Email not sent:", options.subject);
+      console.warn("To enable emails, add one of these to your environment variables:");
+      console.warn("  - RESEND_API_KEY=re_... (recommended)");
+      console.warn("  - SENDGRID_API_KEY=SG...");
+      console.warn("  - SMTP_HOST=smtp.gmail.com");
       return false;
     }
   } catch (error) {
     console.error("Failed to send email:", error);
+    return false;
+  }
+}
+
+/**
+ * Send email using Resend (recommended)
+ */
+async function sendWithResend(options: EmailOptions): Promise<boolean> {
+  try {
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const fromEmail = process.env.FROM_EMAIL || "onboarding@resend.dev";
+
+    console.log("Sending email via Resend to:", options.to);
+    console.log("From:", fromEmail);
+    console.log("Subject:", options.subject);
+
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    });
+
+    if (error) {
+      console.error("Resend API error:", error);
+      return false;
+    }
+
+    console.log("Email sent successfully via Resend. ID:", data?.id);
+    return true;
+  } catch (error) {
+    console.error("Resend error:", error);
     return false;
   }
 }

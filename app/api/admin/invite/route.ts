@@ -66,8 +66,15 @@ export async function POST(request: NextRequest) {
     // Send invitation email
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://campus.ht"}/admin/accept-invite?token=${token}`;
     
-    console.log("Sending admin invitation email to:", email);
+    console.log("=== ADMIN INVITATION EMAIL ===");
+    console.log("To:", email);
+    console.log("Invited by:", user.email);
     console.log("Invite URL:", inviteUrl);
+    console.log("Environment check:");
+    console.log("  - RESEND_API_KEY:", process.env.RESEND_API_KEY ? "✅ Configured" : "❌ Not set");
+    console.log("  - SENDGRID_API_KEY:", process.env.SENDGRID_API_KEY ? "✅ Configured" : "❌ Not set");
+    console.log("  - FROM_EMAIL:", process.env.FROM_EMAIL || "Using default");
+    console.log("Attempting to send email...");
     
     const emailSent = await sendEmail({
       to: email,
@@ -100,12 +107,17 @@ export async function POST(request: NextRequest) {
     });
     
     if (!emailSent) {
-      console.warn("Failed to send invitation email to:", email);
-      console.warn("Email provider configured:", process.env.SENDGRID_API_KEY ? "SendGrid" : process.env.SMTP_HOST ? "SMTP" : "None");
+      console.warn("❌ Email delivery failed!");
+      console.warn("Possible reasons:");
+      console.warn("  1. No email provider configured (check environment variables)");
+      console.warn("  2. API key is invalid");
+      console.warn("  3. FROM_EMAIL domain not verified (for Resend)");
+      console.warn("  4. Network/API error");
       console.warn("Invitation created successfully. Share the link manually with the user.");
     } else {
-      console.log("Admin invitation email sent successfully to:", email);
+      console.log("✅ Email sent successfully!");
     }
+    console.log("==============================");
 
     return NextResponse.json({
       success: true,
