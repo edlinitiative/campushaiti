@@ -23,6 +23,7 @@ export default async function DocumentsPage({
   }
 
   const t = await getTranslations("userDashboard.documentsPage");
+  const tDash = await getTranslations("userDashboard");
   const db = getAdminDb();
 
   // Fetch documents
@@ -67,25 +68,25 @@ export default async function DocumentsPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
-              Upload New Document
+              {t('uploadNew')}
             </CardTitle>
             <CardDescription>
-              Upload transcripts, certificates, or other required documents
+              {t('uploadNewDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer">
               <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
               <p className="text-sm text-gray-600 mb-2">
-                Click to upload or drag and drop
+                {t('clickToUpload')}
               </p>
               <p className="text-xs text-gray-500">
-                PDF, JPG, PNG up to 10MB
+                {t('fileFormats')}
               </p>
             </div>
             <p className="text-sm text-amber-600 mt-4 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              Document upload functionality coming soon
+              {t('uploadComingSoon')}
             </p>
           </CardContent>
         </Card>
@@ -95,19 +96,19 @@ export default async function DocumentsPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Your Documents ({documents.length})
+              {t('yourDocuments', { count: documents.length })}
             </CardTitle>
             <CardDescription>
-              View and manage all your uploaded documents
+              {t('manageDocuments')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {documents.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-lg font-semibold mb-2">No documents yet</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('noDocumentsYet')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Upload your first document to get started
+                  {t('uploadFirst')}
                 </p>
               </div>
             ) : (
@@ -136,7 +137,7 @@ export default async function DocumentsPage({
                         {doc.verified && (
                           <Badge variant="default" className="bg-green-500">
                             <CheckCircle className="h-3 w-3 mr-1" />
-                            Verified
+                            {t('verified')}
                           </Badge>
                         )}
                       </div>
@@ -159,19 +160,19 @@ export default async function DocumentsPage({
         {/* Required Documents Checklist */}
         <Card>
           <CardHeader>
-            <CardTitle>Required Documents</CardTitle>
+            <CardTitle>{t('requiredDocsTitle')}</CardTitle>
             <CardDescription>
-              Make sure you have all required documents for your applications
+              {t('requiredDocsDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {[
-                { name: "High School Transcript", required: true },
-                { name: "Birth Certificate", required: true },
-                { name: "National ID", required: true },
-                { name: "Passport Photo", required: true },
-                { name: "Recommendation Letter", required: false },
+                { name: t('highSchoolTranscript'), required: true },
+                { name: tDash('birthCertificate'), required: true },
+                { name: t('nationalId'), required: true },
+                { name: tDash('passportPhoto'), required: true },
+                { name: t('recommendationLetter'), required: false },
               ].map((docType) => (
                 <div
                   key={docType.name}
@@ -184,12 +185,12 @@ export default async function DocumentsPage({
                     <div>
                       <p className="font-medium">{docType.name}</p>
                       {docType.required && (
-                        <p className="text-xs text-red-600">Required</p>
+                        <p className="text-xs text-red-600">{t('required')}</p>
                       )}
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Not uploaded
+                    {t('notUploaded')}
                   </div>
                 </div>
               ))}

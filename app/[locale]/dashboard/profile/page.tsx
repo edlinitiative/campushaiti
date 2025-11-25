@@ -22,16 +22,24 @@ export default async function ProfilePage({
     redirect(signinPath);
   }
 
-  const t = await getTranslations("userDashboard");
+  const t = await getTranslations("userDashboard.profilePage");
   const db = getAdminDb();
 
   // Fetch user profile data
   let profile: any = null;
+  let userData: any = null;
   
   try {
-    const profileDoc = await db.collection("applicants").doc(user.uid).get();
+    // Get full profile from profiles collection
+    const profileDoc = await db.collection("profiles").doc(user.uid).get();
     if (profileDoc.exists) {
       profile = profileDoc.data();
+    }
+
+    // Get basic user data
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    if (userDoc.exists) {
+      userData = userDoc.data();
     }
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -52,34 +60,34 @@ export default async function ProfilePage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Personal Information
+              {t('personalInfo')}
             </CardTitle>
             <CardDescription>
-              Update your personal details
+              {t('personalInfoDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName">{t('firstName')}</Label>
                 <Input
                   id="firstName"
-                  defaultValue={profile?.firstName || ""}
-                  placeholder="Enter your first name"
+                  defaultValue={profile?.firstName || userData?.fullName?.split(' ')[0] || ""}
+                  placeholder={t('firstNamePlaceholder')}
                 />
               </div>
               <div>
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t('lastName')}</Label>
                 <Input
                   id="lastName"
-                  defaultValue={profile?.lastName || ""}
-                  placeholder="Enter your last name"
+                  defaultValue={profile?.lastName || userData?.fullName?.split(' ').slice(1).join(' ') || ""}
+                  placeholder={t('lastNamePlaceholder')}
                 />
               </div>
             </div>
             
             <div>
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <Label htmlFor="dateOfBirth">{t('dateOfBirth')}</Label>
               <Input
                 id="dateOfBirth"
                 type="date"
@@ -88,13 +96,13 @@ export default async function ProfilePage({
             </div>
 
             <div>
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">{t('phoneNumber')}</Label>
               <div className="flex gap-2">
                 <Phone className="h-10 w-10 p-2 border rounded-md bg-gray-50" />
                 <Input
                   id="phone"
                   type="tel"
-                  defaultValue={profile?.phone || ""}
+                  defaultValue={profile?.phone || userData?.phoneNumber || ""}
                   placeholder="+509 1234 5678"
                   className="flex-1"
                 />
@@ -103,7 +111,7 @@ export default async function ProfilePage({
 
             <p className="text-sm text-amber-600 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              Profile editing functionality coming soon
+              {t('editComingSoon')}
             </p>
           </CardContent>
         </Card>
@@ -113,47 +121,47 @@ export default async function ProfilePage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              Address
+              {t('address')}
             </CardTitle>
             <CardDescription>
-              Your current address information
+              {t('addressDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="street">Street Address</Label>
+              <Label htmlFor="street">{t('streetAddress')}</Label>
               <Input
                 id="street"
-                defaultValue={profile?.address?.street || ""}
-                placeholder="123 Main Street"
+                defaultValue={profile?.address?.street || profile?.streetAddress || ""}
+                placeholder={t('streetPlaceholder')}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city">{t('city')}</Label>
                 <Input
                   id="city"
-                  defaultValue={profile?.address?.city || ""}
-                  placeholder="Port-au-Prince"
+                  defaultValue={profile?.address?.city || profile?.city || ""}
+                  placeholder={t('cityPlaceholder')}
                 />
               </div>
               <div>
-                <Label htmlFor="department">Department</Label>
+                <Label htmlFor="department">{t('department')}</Label>
                 <Input
                   id="department"
-                  defaultValue={profile?.address?.department || ""}
-                  placeholder="Ouest"
+                  defaultValue={profile?.address?.department || profile?.state || ""}
+                  placeholder={t('departmentPlaceholder')}
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="country">Country</Label>
+              <Label htmlFor="country">{t('country')}</Label>
               <Input
                 id="country"
-                defaultValue={profile?.address?.country || "Haiti"}
-                placeholder="Haiti"
+                defaultValue={profile?.address?.country || profile?.country || "Haiti"}
+                placeholder={t('countryPlaceholder')}
               />
             </div>
           </CardContent>
@@ -164,15 +172,15 @@ export default async function ProfilePage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Account Security
+              {t('accountSecurity')}
             </CardTitle>
             <CardDescription>
-              Manage your account security settings
+              {t('accountSecurityDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">{t('emailAddress')}</Label>
               <div className="flex gap-2">
                 <Mail className="h-10 w-10 p-2 border rounded-md bg-gray-50" />
                 <Input
@@ -184,7 +192,7 @@ export default async function ProfilePage({
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Contact support to change your email address
+                {t('emailNote')}
               </p>
             </div>
 
@@ -193,14 +201,14 @@ export default async function ProfilePage({
                 <div>
                   <h4 className="font-semibold flex items-center gap-2">
                     <Key className="h-4 w-4" />
-                    Password
+                    {t('password')}
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Last changed: Never
+                    {t('lastChanged')}: {t('never')}
                   </p>
                 </div>
                 <Button variant="outline" disabled>
-                  Change Password
+                  {t('changePassword')}
                 </Button>
               </div>
             </div>
@@ -208,29 +216,29 @@ export default async function ProfilePage({
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold">Two-Factor Authentication</h4>
+                  <h4 className="font-semibold">{t('twoFactorAuth')}</h4>
                   <p className="text-sm text-muted-foreground">
-                    Add an extra layer of security to your account
+                    {t('twoFactorDesc')}
                   </p>
                 </div>
                 <Button variant="outline" disabled>
-                  Enable 2FA
+                  {t('enable2FA')}
                 </Button>
               </div>
             </div>
 
             <p className="text-sm text-amber-600 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              Security settings functionality coming soon
+              {t('securityComingSoon')}
             </p>
           </CardContent>
         </Card>
 
         {/* Save Changes */}
         <div className="flex justify-end gap-4">
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline">{t('cancel')}</Button>
           <Button disabled>
-            Save Changes
+            {t('saveChanges')}
           </Button>
         </div>
       </div>
