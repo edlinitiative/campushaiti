@@ -134,7 +134,24 @@ export default async function DocumentsPage({
                 {documents.map((doc) => {
                   const Icon = getDocTypeIcon(doc.kind);
                   const uploadTime = doc.uploadedAt || doc.createdAt;
-                  const uploadDate = uploadTime ? new Date(uploadTime) : null;
+                  
+                  // Handle Firestore Timestamp conversion
+                  let uploadDate = null;
+                  if (uploadTime) {
+                    if (uploadTime.toDate) {
+                      // Firestore Timestamp
+                      uploadDate = uploadTime.toDate();
+                    } else if (typeof uploadTime === 'number') {
+                      // Unix timestamp in milliseconds
+                      uploadDate = new Date(uploadTime);
+                    } else if (uploadTime._seconds) {
+                      // Firestore Timestamp object
+                      uploadDate = new Date(uploadTime._seconds * 1000);
+                    } else {
+                      // Try to parse as date
+                      uploadDate = new Date(uploadTime);
+                    }
+                  }
                   const isValidDate = uploadDate && !isNaN(uploadDate.getTime());
                   
                   return (
