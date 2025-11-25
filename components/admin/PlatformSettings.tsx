@@ -7,14 +7,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, MessageCircle, Wrench, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, Wrench, CheckCircle, AlertCircle } from "lucide-react";
 
 export function PlatformSettings() {
   const t = useTranslations("admin.platformSettings");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
-    liveChatEnabled: true,
     maintenanceMode: false,
   });
   const [message, setMessage] = useState<{
@@ -106,25 +105,6 @@ export function PlatformSettings() {
         )}
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-3">
-              <MessageCircle className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <Label htmlFor="liveChatEnabled">{t("liveChatTitle")}</Label>
-                <p className="text-sm text-muted-foreground">
-                  {t("liveChatDescription")}
-                </p>
-              </div>
-            </div>
-            <Switch
-              id="liveChatEnabled"
-              checked={settings.liveChatEnabled}
-              onCheckedChange={(checked) =>
-                setSettings({ ...settings, liveChatEnabled: checked })
-              }
-            />
-          </div>
-
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div className="flex items-center space-x-3">
               <Wrench className="h-5 w-5 text-muted-foreground" />

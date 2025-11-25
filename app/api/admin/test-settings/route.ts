@@ -8,7 +8,6 @@ export async function POST(request: NextRequest) {
     // Try to write to platform_settings
     await db.collection("platform_settings").doc("general").set(
       {
-        liveChatEnabled: true,
         maintenanceMode: false,
         updatedAt: Date.now(),
         test: true,

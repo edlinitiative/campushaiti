@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
     const settings = settingsDoc.exists ? settingsDoc.data() : {};
 
     return NextResponse.json({
-      liveChatEnabled: settings?.liveChatEnabled ?? true,
       maintenanceMode: settings?.maintenanceMode ?? false,
     });
   } catch (error: any) {
@@ -60,14 +59,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
 
-    const { liveChatEnabled, maintenanceMode } = await request.json();
+    const { maintenanceMode } = await request.json();
 
-    console.log("Updating platform settings:", { liveChatEnabled, maintenanceMode });
+    console.log("Updating platform settings:", { maintenanceMode });
 
     // Update platform settings
     await db.collection("platform_settings").doc("general").set(
       {
-        liveChatEnabled: liveChatEnabled ?? true,
         maintenanceMode: maintenanceMode ?? false,
         updatedAt: Date.now(),
         updatedBy: decodedToken.uid,
