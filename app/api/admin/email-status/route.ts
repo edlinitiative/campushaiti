@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
           recommendation: "Gmail SMTP - 500 emails/day free",
         },
       },
-      warnings: [],
-      instructions: {},
+      warnings: [] as string[],
+      instructions: {} as { title: string; steps: string[] } | Record<string, never>,
     };
 
     // Determine which provider will be used
