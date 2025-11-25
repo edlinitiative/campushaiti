@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, RefreshCw, CheckCircle, XCircle } from "lucide-react";
+import { auth } from "@/lib/firebase/client";
 
 export default function FixAccessPage() {
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [fixing, setFixing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [fixed, setFixed] = useState(false);
 
   useEffect(() => {
@@ -25,6 +27,47 @@ export default function FixAccessPage() {
       console.error("Error checking status:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshSession = async () => {
+    setRefreshing(true);
+    try {
+      const user = auth.currentUser;
+      
+      if (!user) {
+        alert("No user signed in");
+        return;
+      }
+
+      // Force refresh the ID token to get new custom claims
+      console.log("Forcing token refresh...");
+      const newIdToken = await user.getIdToken(true);
+      
+      // Update the session cookie with the new token
+      console.log("Updating session cookie...");
+      const sessionResponse = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: newIdToken }),
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error("Failed to update session");
+      }
+
+      console.log("Session updated successfully!");
+      alert("Session refreshed! Redirecting to admin dashboard...");
+      
+      // Wait a moment then redirect with full page reload
+      setTimeout(() => {
+        window.location.href = "/admin";
+      }, 1000);
+    } catch (error) {
+      console.error("Error refreshing session:", error);
+      alert("Failed to refresh session. Please try signing out and back in.");
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -163,18 +206,26 @@ export default function FixAccessPage() {
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded">
                   <p className="text-blue-800 font-semibold">🔄 Session Refresh Needed</p>
                   <p className="text-sm text-blue-700 mt-1">
-                    Your admin access is configured correctly, but your session needs to be refreshed.
+                    Your admin access is configured correctly, but your session has old credentials. Click below to refresh.
                   </p>
                 </div>
                 <Button
-                  onClick={async () => {
-                    await fetch("/api/auth/signout", { method: "POST" });
-                    window.location.href = "/auth/signin";
-                  }}
+                  onClick={refreshSession}
+                  disabled={refreshing}
                   className="w-full"
                   size="lg"
                 >
-                  Sign Out and Sign Back In
+                  {refreshing ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Refreshing Session...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refresh Session & Access Admin
+                    </>
+                  )}
                 </Button>
               </div>
             ) : (
