@@ -100,23 +100,22 @@ export async function POST(request: NextRequest) {
     });
     
     if (!emailSent) {
-      console.error("Failed to send invitation email to:", email);
-      console.error("Email provider configured:", process.env.SENDGRID_API_KEY ? "SendGrid" : process.env.SMTP_HOST ? "SMTP" : "None");
-      // Delete the invitation since email failed
-      await invitationRef.delete();
-      return NextResponse.json(
-        { error: "Failed to send invitation email. Please check email configuration." },
-        { status: 500 }
-      );
+      console.warn("Failed to send invitation email to:", email);
+      console.warn("Email provider configured:", process.env.SENDGRID_API_KEY ? "SendGrid" : process.env.SMTP_HOST ? "SMTP" : "None");
+      console.warn("Invitation created successfully. Share the link manually with the user.");
+    } else {
+      console.log("Admin invitation email sent successfully to:", email);
     }
-    
-    console.log("Admin invitation email sent successfully to:", email);
 
     return NextResponse.json({
       success: true,
-      message: `Invitation sent to ${email}`,
+      message: emailSent 
+        ? `Invitation sent to ${email}` 
+        : `Invitation created for ${email}. Email delivery failed - share the link manually.`,
       invitationId: invitationRef.id,
       expiresAt,
+      emailSent,
+      inviteUrl, // Include the URL in response for easy copying
     });
   } catch (error) {
     console.error("Error sending admin invitation:", error);

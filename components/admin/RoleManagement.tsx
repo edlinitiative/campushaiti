@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, UserPlus, Mail, Clock, CheckCircle, ChevronUp, ChevronDown, RefreshCw, Trash2 } from "lucide-react";
+import { Shield, UserPlus, Mail, Clock, CheckCircle, ChevronUp, ChevronDown, RefreshCw, Trash2, Copy, Check } from "lucide-react";
 
 interface AdminAccess {
   uid: string;
@@ -22,6 +22,7 @@ interface PendingInvitation {
   invitedByName: string;
   createdAt: number;
   expiresAt: number;
+  token: string;
 }
 
 export function RoleManagement() {
@@ -30,11 +31,14 @@ export function RoleManagement() {
   const [loadingAdmins, setLoadingAdmins] = useState(true);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [newInviteUrl, setNewInviteUrl] = useState<string | null>(null);
+  const [copiedNew, setCopiedNew] = useState(false);
   const [admins, setAdmins] = useState<AdminAccess[]>([]);
   const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [upgradingUid, setUpgradingUid] = useState<string | null>(null);
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     loadAdmins();
@@ -71,6 +75,8 @@ export function RoleManagement() {
     setLoading(true);
     setResult(null);
     setError(null);
+    setNewInviteUrl(null);
+    setCopiedNew(false);
 
     try {
       const response = await fetch("/api/admin/invite", {
@@ -85,6 +91,7 @@ export function RoleManagement() {
 
       if (response.ok) {
         setResult(data);
+        setNewInviteUrl(data.inviteUrl);
         setEmail("");
         loadInvitations(); // Refresh invitations list
       } else {
@@ -94,6 +101,17 @@ export function RoleManagement() {
       setError(err.message || "An error occurred");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyNewInviteLink = () => {
+    if (newInviteUrl) {
+      navigator.clipboard.writeText(newInviteUrl).then(() => {
+        setCopiedNew(true);
+        setTimeout(() => setCopiedNew(false), 2000);
+      }).catch(() => {
+        alert("Failed to copy link. Please copy manually:\n\n" + newInviteUrl);
+      });
     }
   };
 
@@ -170,6 +188,16 @@ export function RoleManagement() {
     }
   };
 
+  const handleCopyInviteLink = (token: string, invitationId: string) => {
+    const inviteUrl = `${window.location.origin}/admin/accept-invite?token=${token}`;
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      setCopiedId(invitationId);
+      setTimeout(() => setCopiedId(null), 2000);
+    }).catch(() => {
+      alert("Failed to copy link. Please copy manually:\n\n" + inviteUrl);
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -213,12 +241,47 @@ export function RoleManagement() {
           </Button>
 
           {result && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-green-800 font-semibold">✅ Invitation Sent!</p>
-              <p className="text-sm text-green-700 mt-1">{result.message}</p>
-              <p className="text-xs text-green-600 mt-2">
-                They will receive an email with instructions to accept.
-              </p>
+            <div className="p-4 bg-green-50 border border-green-200 rounded-md space-y-3">
+              <div>
+                <p className="text-green-800 font-semibold">✅ Invitation Created!</p>
+                <p className="text-sm text-green-700 mt-1">{result.message}</p>
+                {!result.emailSent && (
+                  <p className="text-sm text-amber-700 mt-1">
+                    ⚠️ Email could not be sent. Please share the link below manually.
+                  </p>
+                )}
+              </div>
+              
+              {newInviteUrl && (
+                <div className="bg-white border border-green-300 rounded p-3">
+                  <p className="text-xs font-medium text-green-900 mb-2">Invitation Link:</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 text-xs bg-gray-50 p-2 rounded border break-all">
+                      {newInviteUrl}
+                    </code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCopyNewInviteLink}
+                    >
+                      {copiedNew ? (
+                        <>
+                          <Check className="w-4 h-4 mr-1 text-green-600" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4 mr-1" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-green-700 mt-2">
+                    💡 Share this link via email, WhatsApp, Slack, or any messaging app
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -245,49 +308,89 @@ export function RoleManagement() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {invitations.map((invite) => (
-                <div
-                  key={invite.id}
-                  className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-md"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{invite.email}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Invited by {invite.invitedByName} •{" "}
-                      {new Date(invite.createdAt).toLocaleDateString()}
-                    </p>
-                    {invite.expiresAt < Date.now() && (
-                      <p className="text-xs text-red-600 font-medium mt-1">
-                        ⚠️ Expired - Create a new invitation
+              {invitations.map((invite) => {
+                const inviteUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/admin/accept-invite?token=${invite.token}`;
+                const isExpired = invite.expiresAt < Date.now();
+                
+                return (
+                  <div
+                    key={invite.id}
+                    className="p-3 bg-amber-50 border border-amber-200 rounded-md space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{invite.email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Invited by {invite.invitedByName} •{" "}
+                          {new Date(invite.createdAt).toLocaleDateString()}
+                        </p>
+                        {isExpired && (
+                          <p className="text-xs text-red-600 font-medium mt-1">
+                            ⚠️ Expired - Create a new invitation
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-amber-100">
+                          Pending
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleResendInvitation(invite.id)}
+                          disabled={resendingId === invite.id || isExpired}
+                          title="Resend invitation email"
+                        >
+                          <RefreshCw className={`w-4 h-4 ${resendingId === invite.id ? 'animate-spin' : ''}`} />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCancelInvitation(invite.id)}
+                          disabled={deletingId === invite.id}
+                          title="Cancel invitation"
+                          className="text-red-600 hover:text-red-700 hover:border-red-300"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Invitation Link */}
+                    <div className="bg-white border border-amber-300 rounded p-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-amber-900 mb-1">Invitation Link:</p>
+                          <p className="text-xs font-mono text-gray-600 truncate">{inviteUrl}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopyInviteLink(invite.token, invite.id)}
+                          disabled={isExpired}
+                          title="Copy invitation link"
+                          className="flex-shrink-0"
+                        >
+                          {copiedId === invite.id ? (
+                            <>
+                              <Check className="w-4 h-4 mr-1 text-green-600" />
+                              <span className="text-green-600">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-4 h-4 mr-1" />
+                              Copy Link
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-amber-700 mt-2">
+                        💡 Share this link directly with {invite.email} via your preferred method (email, WhatsApp, Slack, etc.)
                       </p>
-                    )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-amber-100">
-                      Pending
-                    </Badge>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleResendInvitation(invite.id)}
-                      disabled={resendingId === invite.id || invite.expiresAt < Date.now()}
-                      title="Resend invitation email"
-                    >
-                      <RefreshCw className={`w-4 h-4 ${resendingId === invite.id ? 'animate-spin' : ''}`} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleCancelInvitation(invite.id)}
-                      disabled={deletingId === invite.id}
-                      title="Cancel invitation"
-                      className="text-red-600 hover:text-red-700 hover:border-red-300"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
