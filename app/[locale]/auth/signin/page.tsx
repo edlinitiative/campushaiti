@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import PasswordAuth from "@/components/auth/PasswordAuth";
 import PhoneAuth from "@/components/auth/PhoneAuth";
 import EmailLinkAuth from "@/components/auth/EmailLinkAuth";
-import PasskeyAuth from "@/components/auth/PasskeyAuth";
 import GoogleAuth from "@/components/auth/GoogleAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,10 +30,9 @@ export default function SignInPage() {
             </div>
 
             <Tabs defaultValue="password" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="password">{t("password")}</TabsTrigger>
                 <TabsTrigger value="phone">{t("phone")}</TabsTrigger>
-                <TabsTrigger value="passkey">{t("passkey")}</TabsTrigger>
                 <TabsTrigger value="email">{t("emailLink")}</TabsTrigger>
               </TabsList>
               <TabsContent value="password" className="mt-4">
@@ -42,9 +40,6 @@ export default function SignInPage() {
               </TabsContent>
               <TabsContent value="phone" className="mt-4">
                 <PhoneAuth />
-              </TabsContent>
-              <TabsContent value="passkey" className="mt-4">
-                <PasskeyAuth />
               </TabsContent>
               <TabsContent value="email" className="mt-4">
                 <EmailLinkAuth />
