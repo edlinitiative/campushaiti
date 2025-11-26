@@ -26,17 +26,17 @@ export async function GET(request: NextRequest) {
 
     // Platform admins have access to all universities
     if (decodedClaims.role === "ADMIN") {
-      const universitiesSnapshot = await db.collection("universities")
-        .orderBy("name")
-        .get();
+      const universitiesSnapshot = await db.collection("universities").get();
       
-      const universities = universitiesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        name: doc.data().name,
-        slug: doc.data().slug,
-        city: doc.data().city,
-        country: doc.data().country,
-      }));
+      const universities = universitiesSnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          name: doc.data().name,
+          slug: doc.data().slug,
+          city: doc.data().city,
+          country: doc.data().country,
+        }))
+        .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
       return NextResponse.json({ universities });
     }
@@ -44,7 +44,6 @@ export async function GET(request: NextRequest) {
     // School admins: find universities where user is in adminUids
     const universitiesSnapshot = await db.collection("universities")
       .where("adminUids", "array-contains", decodedClaims.uid)
-      .orderBy("name")
       .get();
 
     if (universitiesSnapshot.empty) {
@@ -54,13 +53,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const universities = universitiesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      name: doc.data().name,
-      slug: doc.data().slug,
-      city: doc.data().city,
-      country: doc.data().country,
-    }));
+    const universities = universitiesSnapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        name: doc.data().name,
+        slug: doc.data().slug,
+        city: doc.data().city,
+        country: doc.data().country,
+      }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
     return NextResponse.json({ universities });
   } catch (error) {
