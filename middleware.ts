@@ -26,14 +26,26 @@ export default function middleware(request: NextRequest) {
     requestHeaders.set('x-school-slug', subdomain);
     
     // Rewrite root paths to /schools paths
-    // e.g., quisqueya.campus.ht/dashboard -> /schools/dashboard
+    // e.g., uc.campushaiti.org/dashboard -> /schools/dashboard
     if (!url.pathname.startsWith('/schools') && 
         !url.pathname.startsWith('/api') && 
         !url.pathname.startsWith('/_next') &&
         !url.pathname.startsWith('/auth')) {
       
-      // Rewrite to schools route with headers
-      url.pathname = `/schools${url.pathname}`;
+      // First apply intl middleware to get the locale
+      const intlResponse = intlMiddleware(request);
+      
+      // Get the locale from the pathname (if added by intl middleware)
+      const locale = url.pathname.split('/')[1];
+      const hasLocale = locales.includes(locale as any);
+      
+      // Build the rewrite path
+      const pathWithoutLocale = hasLocale ? url.pathname.substring(locale.length + 1) : url.pathname;
+      const rewritePath = hasLocale 
+        ? `/${locale}/schools${pathWithoutLocale || '/dashboard'}`
+        : `/schools${url.pathname}`;
+      
+      url.pathname = rewritePath;
       
       const response = NextResponse.rewrite(url, {
         request: {
@@ -45,7 +57,7 @@ export default function middleware(request: NextRequest) {
       return response;
     }
     
-    // For API routes, pass through with headers
+    // For already /schools paths, just add headers
     const response = NextResponse.next({
       request: {
         headers: requestHeaders,
@@ -58,21 +70,31 @@ export default function middleware(request: NextRequest) {
   
   // If this is admin subdomain, rewrite URLs to /admin/* routes
   if (subdomain === 'admin') {
+    // First apply intl middleware
+    const intlResponse = intlMiddleware(request);
+    
     // Rewrite root paths to /admin paths
-    // e.g., admin.campus.ht/universities -> /admin/universities
     if (!url.pathname.startsWith('/admin') && 
         !url.pathname.startsWith('/api') && 
         !url.pathname.startsWith('/_next') &&
         !url.pathname.startsWith('/auth') &&
         url.pathname !== '/') {
       
-      url.pathname = `/admin${url.pathname}`;
+      const locale = url.pathname.split('/')[1];
+      const hasLocale = locales.includes(locale as any);
+      
+      const pathWithoutLocale = hasLocale ? url.pathname.substring(locale.length + 1) : url.pathname;
+      const rewritePath = hasLocale 
+        ? `/${locale}/admin${pathWithoutLocale || ''}`
+        : `/admin${url.pathname}`;
+      
+      url.pathname = rewritePath;
       return NextResponse.rewrite(url);
     }
     
-    // admin.campus.ht/ -> /admin
+    // admin.campushaiti.org/ -> /admin
     if (url.pathname === '/') {
-      url.pathname = '/admin';
+      url.pathname = `/${defaultLocale}/admin`;
       return NextResponse.rewrite(url);
     }
   }
