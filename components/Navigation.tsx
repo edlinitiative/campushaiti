@@ -40,6 +40,17 @@ export default function Navigation() {
     return () => unsubscribe();
   }, []);
 
+  // Helper to get path based on subdomain context
+  const getPath = (path: string) => {
+    if (isSchoolSubdomain) {
+      return `/schools${path}`;
+    }
+    if (isAdminSubdomain) {
+      return `/admin${path}`;
+    }
+    return path;
+  };
+
   const handleSignOut = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -57,23 +68,25 @@ export default function Navigation() {
           <Link href="/" className="text-xl font-bold">
             Campus Haiti
           </Link>
-          <div className="hidden md:flex space-x-4">
-            <Link href="/" className="text-sm hover:underline">
-              {t("home")}
-            </Link>
-            <Link href="/apply" className="text-sm hover:underline">
-              {t("apply")}
-            </Link>
-            <Link href="/partners" className="text-sm hover:underline">
-              {t("partners")}
-            </Link>
-            {/* <Link href="/schools/register" className="text-sm hover:underline">
-              {t("forSchools")}
-            </Link> */}
-            <Link href="/help" className="text-sm hover:underline">
-              {t("help")}
-            </Link>
-          </div>
+          {!isSchoolSubdomain && !isAdminSubdomain && (
+            <div className="hidden md:flex space-x-4">
+              <Link href="/" className="text-sm hover:underline">
+                {t("home")}
+              </Link>
+              <Link href="/apply" className="text-sm hover:underline">
+                {t("apply")}
+              </Link>
+              <Link href="/partners" className="text-sm hover:underline">
+                {t("partners")}
+              </Link>
+              {/* <Link href="/schools/register" className="text-sm hover:underline">
+                {t("forSchools")}
+              </Link> */}
+              <Link href="/help" className="text-sm hover:underline">
+                {t("help")}
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center space-x-4">
@@ -119,12 +132,16 @@ export default function Navigation() {
                 </>
               ) : (
                 <>
-                  <Link href="/auth/signup">
-                    <Button variant="outline" size="sm">{t("signUp")}</Button>
-                  </Link>
-                  <Link href="/auth/signin">
-                    <Button size="sm">{t("signIn")}</Button>
-                  </Link>
+                  {!isSchoolSubdomain && !isAdminSubdomain && (
+                    <>
+                      <Link href="/auth/signup">
+                        <Button variant="outline" size="sm">{t("signUp")}</Button>
+                      </Link>
+                      <Link href="/auth/signin">
+                        <Button size="sm">{t("signIn")}</Button>
+                      </Link>
+                    </>
+                  )}
                 </>
               )}
             </>
