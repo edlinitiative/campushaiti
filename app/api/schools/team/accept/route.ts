@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Invitation accepted successfully",
       universityName: university.name,
+      universitySlug: university.slug,
       role: invitation.role,
     });
   } catch (error) {

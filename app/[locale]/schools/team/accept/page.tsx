@@ -42,9 +42,10 @@ export default function AcceptInvitationPage() {
         setUniversityName(data.universityName);
         setRole(data.role);
         
-        // Redirect to school selector after 3 seconds
+        // Redirect to the specific school's subdomain dashboard after 3 seconds
         setTimeout(() => {
-          router.push("/schools/selector");
+          const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.org';
+          window.location.href = `https://${data.universitySlug}.${rootDomain}/dashboard`;
         }, 3000);
       } else {
         setError(data.error || "Failed to accept invitation");

@@ -26,7 +26,8 @@ export default function SchoolDashboardPage() {
   useEffect(() => {
     // If accessing from main domain (no subdomain), redirect to selector
     if (typeof window !== 'undefined' && !isOnSchoolSubdomain()) {
-      router.push('/schools/selector');
+      // Use full URL to redirect to main domain's selector
+      window.location.href = `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.org'}/schools/selector`;
       return;
     }
     

@@ -24,10 +24,10 @@ export async function GET(request: NextRequest) {
     // Handle error from Stripe
     if (error) {
       console.error("Stripe Connect error:", error, errorDescription);
-      // On error, redirect to selector page since we don't have university context
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.headers.get("origin");
+      // On error, redirect to selector page on main domain since we don't have university context
+      const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.org';
       return NextResponse.redirect(
-        `${baseUrl}/schools/selector?stripe_error=${encodeURIComponent(errorDescription || error)}`
+        `https://${rootDomain}/schools/selector?stripe_error=${encodeURIComponent(errorDescription || error)}`
       );
     }
 
@@ -89,9 +89,9 @@ export async function GET(request: NextRequest) {
     const universityDoc = await db.collection("universities").doc(universityId).get();
     if (!universityDoc.exists) {
       console.error("University not found:", universityId);
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.headers.get("origin");
+      const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.org';
       return NextResponse.redirect(
-        `${baseUrl}/schools/selector?stripe_error=University+not+found`
+        `https://${rootDomain}/schools/selector?stripe_error=University+not+found`
       );
     }
 
@@ -109,17 +109,17 @@ export async function GET(request: NextRequest) {
       const settingsUrl = getSchoolSubdomainUrl(universitySlug, '/dashboard/settings?stripe_success=true');
       return NextResponse.redirect(settingsUrl);
     } else {
-      // Fallback if no slug
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.headers.get("origin");
+      // Fallback if no slug - redirect to main domain selector
+      const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.org';
       return NextResponse.redirect(
-        `${baseUrl}/schools/selector?stripe_success=true`
+        `https://${rootDomain}/schools/selector?stripe_success=true`
       );
     }
   } catch (error) {
     console.error("Error handling Stripe callback:", error);
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.headers.get("origin");
+    const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.org';
     return NextResponse.redirect(
-      `${baseUrl}/schools/selector?stripe_error=An+error+occurred`
+      `https://${rootDomain}/schools/selector?stripe_error=An+error+occurred`
     );
   }
 }
