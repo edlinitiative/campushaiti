@@ -15,10 +15,28 @@ export default function middleware(request: NextRequest) {
   const subdomain = getSubdomain(hostname);
   const url = request.nextUrl.clone();
 
-  // Skip middleware for API routes and static files
-  if (url.pathname.startsWith('/api') || 
-      url.pathname.startsWith('/_next') ||
+  // Skip middleware for static files only
+  if (url.pathname.startsWith('/_next') ||
       url.pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|woff|woff2)$/)) {
+    return NextResponse.next();
+  }
+
+  // For API routes on school subdomains, add the header but don't rewrite
+  if (url.pathname.startsWith('/api') && subdomain && subdomain !== 'admin') {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-school-slug', subdomain);
+    
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+    response.headers.set('x-school-slug', subdomain);
+    return response;
+  }
+
+  // Skip middleware for other API routes
+  if (url.pathname.startsWith('/api')) {
     return NextResponse.next();
   }
 

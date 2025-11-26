@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get school slug from subdomain (set by middleware)
-    const schoolSlug = getSchoolSlugFromHeaders(request.headers);
+    const schoolSlug = request.headers.get('x-school-slug');
     
     if (!schoolSlug) {
       return NextResponse.json(
