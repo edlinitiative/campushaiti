@@ -102,7 +102,7 @@ Since the invitation system requires an existing admin to invite others, you nee
 
 **Option A: Use emergency endpoint (temporary)**
 ```bash
-curl -X POST https://campus.ht/api/admin/set-role \
+curl -X POST https://campushaiti.org/api/admin/set-role \
   -H "Content-Type: application/json" \
   -d '{"email":"info@dlight.org","role":"ADMIN"}'
 ```

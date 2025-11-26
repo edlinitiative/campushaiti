@@ -3,6 +3,7 @@ import { getServerUser } from "@/lib/auth/server-auth";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { TeamRole } from "@/lib/types/firestore";
 import { sendTeamInvitationEmail } from "@/lib/email/service";
+import { getSchoolSubdomainUrl } from "@/lib/utils/subdomain";
 
 export const dynamic = "force-dynamic";
 
@@ -153,8 +154,8 @@ export async function POST(request: NextRequest) {
       expiresAt,
     });
 
-    // Send invitation email
-    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/schools/team/accept?token=${token}`;
+    // Send invitation email - use school subdomain for better UX
+    const inviteUrl = getSchoolSubdomainUrl(university.slug, `/team/accept?token=${token}`);
     
     await sendTeamInvitationEmail({
       email,

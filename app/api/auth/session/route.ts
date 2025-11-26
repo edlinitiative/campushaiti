@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
       secure: isProduction,
       sameSite: "lax",
       path: "/",
+      domain: isProduction ? ".campushaiti.org" : undefined, // Allow cookie across subdomains
       maxAge: 60 * 60 * 24 * 5, // 5 days
     });
 

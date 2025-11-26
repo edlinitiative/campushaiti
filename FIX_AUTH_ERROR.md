@@ -22,13 +22,13 @@ This means Firebase Authentication is not properly configured for your project.
 1. Still in **Authentication** → **Settings** tab
 2. Scroll to **Authorized domains** section
 3. Click **Add domain**
-4. Add your Vercel domain:
+4. Add your production domain:
    ```
-   campushaiti.vercel.app
+   campushaiti.org
    ```
-5. Also add any preview domains if needed:
+5. Also add wildcard for school subdomains:
    ```
-   *.vercel.app
+   *.campushaiti.org
    ```
 6. Click **Add**
 
@@ -41,7 +41,7 @@ This means Firebase Authentication is not properly configured for your project.
 
 ### 4. Test the Fix
 
-1. Go back to: https://campushaiti.vercel.app/en/auth/signin
+1. Go back to: https://campushaiti.org/en/auth/signin
 2. Try signing in with email
 3. The error should be gone!
 

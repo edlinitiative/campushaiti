@@ -28,7 +28,7 @@ Add these environment variables in Vercel dashboard:
 ### Stripe Connect (Required for payment features)
 ```
 STRIPE_CONNECT_CLIENT_ID=ca_xxxxx
-NEXT_PUBLIC_APP_URL=https://campushaiti.vercel.app
+NEXT_PUBLIC_APP_URL=https://campushaiti.org
 ```
 
 The existing Stripe variables should already be set:

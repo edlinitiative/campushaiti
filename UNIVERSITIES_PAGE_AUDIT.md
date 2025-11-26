@@ -1,6 +1,6 @@
 # Universities Admin Page Audit Report
 **Date:** November 24, 2025  
-**Page URL:** https://campushaiti.vercel.app/admin/universities  
+**Page URL:** https://campushaiti.org/admin/universities  
 **Status:** ⚠️ CRITICAL ISSUES FOUND
 
 ---
