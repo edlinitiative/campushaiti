@@ -15,8 +15,10 @@ export default function middleware(request: NextRequest) {
   const subdomain = getSubdomain(hostname);
   const url = request.nextUrl.clone();
 
-  // Skip middleware for API routes entirely - let them handle themselves
-  if (url.pathname.startsWith('/api')) {
+  // Skip middleware for API routes and static files
+  if (url.pathname.startsWith('/api') || 
+      url.pathname.startsWith('/_next') ||
+      url.pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|woff|woff2)$/)) {
     return NextResponse.next();
   }
 
@@ -25,40 +27,26 @@ export default function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-school-slug', subdomain);
     
-    // Rewrite root paths to /schools paths
-    // e.g., uc.campushaiti.org/dashboard -> /schools/dashboard
-    if (!url.pathname.startsWith('/schools') && 
-        !url.pathname.startsWith('/api') && 
-        !url.pathname.startsWith('/_next') &&
-        !url.pathname.startsWith('/auth')) {
-      
-      // First apply intl middleware to get the locale
-      const intlResponse = intlMiddleware(request);
-      
-      // Get the locale from the pathname (if added by intl middleware)
-      const locale = url.pathname.split('/')[1];
-      const hasLocale = locales.includes(locale as any);
-      
-      // Build the rewrite path
-      const pathWithoutLocale = hasLocale ? url.pathname.substring(locale.length + 1) : url.pathname;
-      const rewritePath = hasLocale 
-        ? `/${locale}/schools${pathWithoutLocale || '/dashboard'}`
-        : `/schools${url.pathname}`;
-      
-      url.pathname = rewritePath;
-      
-      const response = NextResponse.rewrite(url, {
+    // Don't rewrite if already on /schools path
+    if (url.pathname.startsWith('/schools') || url.pathname.startsWith('/en/schools') || url.pathname.startsWith('/fr/schools') || url.pathname.startsWith('/ht/schools')) {
+      const response = NextResponse.next({
         request: {
           headers: requestHeaders,
         },
       });
-      
       response.headers.set('x-school-slug', subdomain);
       return response;
     }
     
-    // For already /schools paths, just add headers
-    const response = NextResponse.next({
+    // Rewrite to /en/schools/* (default locale)
+    // e.g., uc.campushaiti.org/dashboard -> /en/schools/dashboard
+    const newPath = url.pathname === '/' || url.pathname === '' 
+      ? `/${defaultLocale}/schools/dashboard`
+      : `/${defaultLocale}/schools${url.pathname}`;
+    
+    url.pathname = newPath;
+    
+    const response = NextResponse.rewrite(url, {
       request: {
         headers: requestHeaders,
       },
@@ -70,33 +58,18 @@ export default function middleware(request: NextRequest) {
   
   // If this is admin subdomain, rewrite URLs to /admin/* routes
   if (subdomain === 'admin') {
-    // First apply intl middleware
-    const intlResponse = intlMiddleware(request);
-    
-    // Rewrite root paths to /admin paths
-    if (!url.pathname.startsWith('/admin') && 
-        !url.pathname.startsWith('/api') && 
-        !url.pathname.startsWith('/_next') &&
-        !url.pathname.startsWith('/auth') &&
-        url.pathname !== '/') {
-      
-      const locale = url.pathname.split('/')[1];
-      const hasLocale = locales.includes(locale as any);
-      
-      const pathWithoutLocale = hasLocale ? url.pathname.substring(locale.length + 1) : url.pathname;
-      const rewritePath = hasLocale 
-        ? `/${locale}/admin${pathWithoutLocale || ''}`
-        : `/admin${url.pathname}`;
-      
-      url.pathname = rewritePath;
-      return NextResponse.rewrite(url);
+    // Don't rewrite if already on /admin path
+    if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/en/admin') || url.pathname.startsWith('/fr/admin') || url.pathname.startsWith('/ht/admin')) {
+      return NextResponse.next();
     }
     
-    // admin.campushaiti.org/ -> /admin
-    if (url.pathname === '/') {
-      url.pathname = `/${defaultLocale}/admin`;
-      return NextResponse.rewrite(url);
-    }
+    // Rewrite to /en/admin/*
+    const newPath = url.pathname === '/' || url.pathname === '' 
+      ? `/${defaultLocale}/admin`
+      : `/${defaultLocale}/admin${url.pathname}`;
+    
+    url.pathname = newPath;
+    return NextResponse.rewrite(url);
   }
 
   // No subdomain, just run intl middleware
