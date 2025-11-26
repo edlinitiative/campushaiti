@@ -132,16 +132,12 @@ export default function Navigation() {
                 </>
               ) : (
                 <>
-                  {!isSchoolSubdomain && !isAdminSubdomain && (
-                    <>
-                      <Link href="/auth/signup">
-                        <Button variant="outline" size="sm">{t("signUp")}</Button>
-                      </Link>
-                      <Link href="/auth/signin">
-                        <Button size="sm">{t("signIn")}</Button>
-                      </Link>
-                    </>
-                  )}
+                  <Link href="/auth/signup">
+                    <Button variant="outline" size="sm">{t("signUp")}</Button>
+                  </Link>
+                  <Link href="/auth/signin">
+                    <Button size="sm">{t("signIn")}</Button>
+                  </Link>
                 </>
               )}
             </>

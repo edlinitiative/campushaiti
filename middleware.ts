@@ -27,6 +27,11 @@ export default function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-school-slug', subdomain);
     
+    // Don't rewrite auth routes - use global auth
+    if (url.pathname.startsWith('/auth') || url.pathname.startsWith('/en/auth') || url.pathname.startsWith('/fr/auth') || url.pathname.startsWith('/ht/auth')) {
+      return intlMiddleware(request);
+    }
+    
     // Don't rewrite if already on /schools path
     if (url.pathname.startsWith('/schools') || url.pathname.startsWith('/en/schools') || url.pathname.startsWith('/fr/schools') || url.pathname.startsWith('/ht/schools')) {
       const response = NextResponse.next({
