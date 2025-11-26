@@ -74,7 +74,7 @@ export const emailTemplates = {
             </div>
             <div class="footer">
               <p>Campus Haiti - Connecting Students with Opportunities</p>
-              <p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://campus.ht'}/help">Help Center</a> | <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://campus.ht'}/contact">Contact Support</a></p>
+              <p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://campushaiti.org'}/help">Help Center</a> | <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://campushaiti.org'}/contact">Contact Support</a></p>
             </div>
           </div>
         </body>

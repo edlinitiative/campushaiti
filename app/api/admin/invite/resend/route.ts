@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send invitation email
-    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://campus.ht"}/admin/accept-invite?token=${invitation.token}`;
+    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://campushaiti.org"}/admin/accept-invite?token=${invitation.token}`;
 
     console.log("Resending admin invitation email to:", invitation.email);
     console.log("Invite URL:", inviteUrl);

@@ -136,7 +136,7 @@ export default function SchoolSelectorPage() {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <code className="text-xs bg-muted px-2 py-1 rounded">
-                    {uni.slug}.campus.ht
+                    {uni.slug}.campushaiti.org
                   </code>
                   <Button size="sm" variant="ghost">
                     Open Portal →

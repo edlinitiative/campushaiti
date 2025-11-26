@@ -1,16 +1,16 @@
 /*
  * Subdomain utilities for multi-tenant school portals
- * Each school gets their own subdomain: quisqueya.campushaiti.app
+ * Each school gets their own subdomain: quisqueya.campushaiti.org
  */
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.app';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.org';
 const RESERVED_SUBDOMAINS = ['www', 'admin', 'api', 'app', 'staging', 'dev', 'test', 'campushaiti'];
 
 /**
  * Extract subdomain from hostname
  * Examples:
- *   quisqueya.campushaiti.app -> quisqueya
- *   www.campushaiti.app -> null
+ *   quisqueya.campushaiti.org -> quisqueya
+ *   www.campushaiti.org -> null
  *   localhost -> null
  *   quisqueya.campushaiti.vercel.app -> quisqueya (Vercel preview)
  */
@@ -69,7 +69,7 @@ export function isSchoolSubdomain(hostname: string): boolean {
  */
 export function getSchoolSubdomainUrl(slug: string, path: string = ''): string {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-  const domain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.app';
+  const domain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'campushaiti.org';
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   
   return `${protocol}://${slug}.${domain}${cleanPath}`;

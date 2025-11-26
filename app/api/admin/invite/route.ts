@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     const invitationRef = await db.collection("adminInvitations").add(invitation);
 
     // Send invitation email
-    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://campus.ht"}/admin/accept-invite?token=${token}`;
+    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://campushaiti.org"}/admin/accept-invite?token=${token}`;
     
     console.log("=== ADMIN INVITATION EMAIL ===");
     console.log("To:", email);
