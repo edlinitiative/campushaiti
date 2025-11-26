@@ -44,10 +44,21 @@ export default function middleware(request: NextRequest) {
     }
     
     // Rewrite to /en/schools/* (default locale)
+    // Handle both /dashboard and /en/dashboard patterns
+    let pathToRewrite = url.pathname;
+    
+    // Strip locale prefix if present
+    for (const locale of locales) {
+      if (url.pathname.startsWith(`/${locale}/`)) {
+        pathToRewrite = url.pathname.substring(locale.length + 1); // Remove /en/ or /fr/ or /ht/
+        break;
+      }
+    }
+    
     // e.g., uc.campushaiti.org/dashboard -> /en/schools/dashboard
-    const newPath = url.pathname === '/' || url.pathname === '' 
+    const newPath = pathToRewrite === '/' || pathToRewrite === '' 
       ? `/${defaultLocale}/schools/dashboard`
-      : `/${defaultLocale}/schools${url.pathname}`;
+      : `/${defaultLocale}/schools${pathToRewrite}`;
     
     url.pathname = newPath;
     
