@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/auth/server-auth";
 import { getSubdomain } from "@/lib/utils/subdomain";
-import { db } from "@/lib/firebase/admin";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         redirectUrl = "/dashboard";
       } else {
         // On main domain - check how many schools user has access to
+        const db = getAdminDb();
         const universitiesSnapshot = await db
           .collection("universities")
           .where("adminUids", "array-contains", user.uid)
