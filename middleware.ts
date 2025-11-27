@@ -111,8 +111,9 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Exclude API routes, Next.js internals and static files
+  // Match all routes including API routes (needed for school subdomain header passing)
+  // Only exclude Next.js internals and static files
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
