@@ -8,6 +8,7 @@ import { auth } from "@/lib/firebase/client";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { getSchoolRoute, getAdminRoute, isOnSchoolSubdomain, isOnAdminSubdomain } from "@/lib/utils/routes";
+import NextLink from "next/link";
 
 export default function Navigation() {
   const t = useTranslations("nav");
@@ -65,9 +66,9 @@ export default function Navigation() {
     <nav className="border-b">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-6">
-          <Link href="/" className="text-xl font-bold">
+          <NextLink href="/" className="text-xl font-bold">
             Campus Haiti
-          </Link>
+          </NextLink>
           {!isSchoolSubdomain && !isAdminSubdomain && (
             <div className="hidden md:flex space-x-4">
               <Link href="/" className="text-sm hover:underline">
