@@ -15,18 +15,22 @@ export async function GET(request: NextRequest) {
 
     const sessionCookie = request.cookies.get("session")?.value;
     if (!sessionCookie) {
+      console.log('[Programs API] No session cookie found');
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const decodedClaims = await getAdminAuth().verifySessionCookie(sessionCookie);
+    console.log('[Programs API] User authenticated:', { uid: decodedClaims.uid, role: decodedClaims.role });
     
     // Verify user is school admin or admin
     if (decodedClaims.role !== "SCHOOL_ADMIN" && decodedClaims.role !== "ADMIN") {
+      console.log('[Programs API] User role not authorized:', decodedClaims.role);
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Get school slug from subdomain
     const schoolSlug = request.headers.get('x-school-slug');
+    console.log('[Programs API] School slug from header:', schoolSlug);
     
     if (!schoolSlug) {
       return NextResponse.json({ programs: [] });
@@ -44,8 +48,15 @@ export async function GET(request: NextRequest) {
     
     // Verify user has access to this university
     const universityData = universitiesSnapshot.docs[0].data();
+    console.log('[Programs API] University found:', { 
+      name: universityData.name, 
+      adminUids: universityData.adminUids,
+      userUid: decodedClaims.uid,
+      hasAccess: universityData.adminUids?.includes(decodedClaims.uid)
+    });
     if (decodedClaims.role !== "ADMIN" && 
         !universityData.adminUids?.includes(decodedClaims.uid)) {
+      console.log('[Programs API] User does not have access to this university');
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
