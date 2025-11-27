@@ -48,7 +48,8 @@ export default function SchoolHomePage() {
 
   const checkAuthentication = async () => {
     try {
-      const response = await fetch('/api/auth/session');
+      // Check if user has session cookie by trying to fetch user profile
+      const response = await fetch('/api/user/profile');
       setIsAuthenticated(response.ok);
     } catch (error) {
       setIsAuthenticated(false);
@@ -61,12 +62,18 @@ export default function SchoolHomePage() {
       if (uniResponse.ok) {
         const uniData = await uniResponse.json();
         setUniversity(uniData.university);
+      } else {
+        const errorData = await uniResponse.json();
+        console.error('Error loading university:', errorData);
       }
 
       const programsResponse = await fetch('/api/schools/public/programs');
       if (programsResponse.ok) {
         const programsData = await programsResponse.json();
         setPrograms(programsData.programs || []);
+      } else {
+        const errorData = await programsResponse.json();
+        console.error('Error loading programs:', errorData);
       }
     } catch (error) {
       console.error('Error loading university data:', error);

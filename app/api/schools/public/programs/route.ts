@@ -8,6 +8,12 @@ export async function GET(request: NextRequest) {
     const db = getAdminDb();
     const schoolSlug = request.headers.get('x-school-slug');
     
+    console.log('Public programs API called:', {
+      schoolSlug,
+      hostname: request.headers.get('host'),
+      pathname: request.nextUrl.pathname
+    });
+    
     if (!schoolSlug) {
       return NextResponse.json({ error: "No school subdomain detected" }, { status: 400 });
     }
