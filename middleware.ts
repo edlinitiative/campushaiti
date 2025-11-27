@@ -73,9 +73,9 @@ export default function middleware(request: NextRequest) {
       }
     }
     
-    // e.g., uc.campushaiti.org/dashboard -> /en/schools/dashboard
+    // e.g., uc.campushaiti.org/ -> /en/schools/home (public page)
     const newPath = pathToRewrite === '/' || pathToRewrite === '' 
-      ? `/${defaultLocale}/schools/dashboard`
+      ? `/${defaultLocale}/schools/home`
       : `/${defaultLocale}/schools${pathToRewrite}`;
     
     url.pathname = newPath;
