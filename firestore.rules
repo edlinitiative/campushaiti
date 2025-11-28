@@ -167,14 +167,6 @@ service cloud.firestore {
       allow delete: if isOwner(resource.data.ownerUid) || isAdmin();
     }
     
-    // Payments collection - read own payments, create new, admin can manage
-    match /payments/{id} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAdmin(); // Only admin/server can update payment status
-      allow delete: if isAdmin();
-    }
-    
     // Notifications collection - users can read their own notifications
     match /notifications/{id} {
       allow read: if isAuthenticated() && resource.data.recipientUid == request.auth.uid;

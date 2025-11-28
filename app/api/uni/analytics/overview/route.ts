@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await auth.verifySessionCookie(sessionCookie, true);
+    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+    const userId = decodedClaims.uid;
 
     // Get university ID from header
     const schoolSlug = request.headers.get("x-school-slug");
@@ -35,6 +36,25 @@ export async function GET(request: NextRequest) {
     }
 
     const universityId = universitiesSnapshot.docs[0].id;
+
+    // Check permissions
+    if (decodedClaims.role !== "ADMIN") {
+      const universityData = universitiesSnapshot.docs[0].data();
+      const isLegacyAdmin = universityData.adminUids?.includes(userId);
+
+      if (!isLegacyAdmin) {
+        const staffDoc = await db
+          .collection("universities")
+          .doc(universityId)
+          .collection("staff")
+          .doc(userId)
+          .get();
+
+        if (!staffDoc.exists) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      }
+    }
 
     // Get all applications
     const applicationsSnapshot = await db
