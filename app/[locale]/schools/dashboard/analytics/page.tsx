@@ -8,8 +8,6 @@ import ApplicationFunnel from "@/components/uni/ApplicationFunnel";
 import ProgramPerformance from "@/components/uni/ProgramPerformance";
 import { useEffect, useState } from "react";
 
-export const dynamic = 'force-dynamic';
-
 export default function SchoolAnalyticsPage() {
   const t = useTranslations("schools.analytics");
   const [mounted, setMounted] = useState(false);
