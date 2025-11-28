@@ -6,9 +6,30 @@ import { Download } from "lucide-react";
 import DashboardKPIs from "@/components/uni/DashboardKPIs";
 import ApplicationFunnel from "@/components/uni/ApplicationFunnel";
 import ProgramPerformance from "@/components/uni/ProgramPerformance";
+import { useEffect, useState } from "react";
+
+export const dynamic = 'force-dynamic';
 
 export default function SchoolAnalyticsPage() {
   const t = useTranslations("schools.analytics");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="p-8">
+        <div className="h-8 bg-muted animate-pulse rounded mb-8" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="h-32 bg-muted animate-pulse rounded" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const handleExport = async () => {
     try {
