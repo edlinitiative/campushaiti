@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BarChart3, Download, Mail, CheckSquare, XSquare } from "lucide-react";
+import { BarChart3, Download, Mail, CheckSquare, XSquare, LayoutGrid } from "lucide-react";
 import { getDemoApplications } from "@/lib/demo-data";
 import {
   Dialog,
@@ -311,6 +311,12 @@ export default function SchoolApplicationsPage() {
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/schools/dashboard/applications/board">
+              <LayoutGrid className="w-4 h-4 mr-2" />
+              Board View
+            </Link>
+          </Button>
           <Button variant="outline" asChild>
             <Link href="/dashboard/analytics">
               <BarChart3 className="w-4 h-4 mr-2" />
