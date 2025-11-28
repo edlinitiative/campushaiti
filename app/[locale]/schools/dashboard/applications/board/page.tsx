@@ -60,7 +60,8 @@ export default async function ApplicationBoardPage() {
   );
 
   // Get user profiles for student names
-  const userIds = [...new Set(applicationsSnapshot.docs.map((doc) => doc.data().userId))];
+  const userIdsSet = new Set(applicationsSnapshot.docs.map((doc) => doc.data().userId));
+  const userIds = Array.from(userIdsSet);
   const usersPromises = userIds.map((userId) =>
     db.collection("users").doc(userId).get()
   );

@@ -119,19 +119,21 @@ export function TemplateList({ templates, universityId }: TemplateListProps) {
   return (
     <>
       <div className="space-y-6">
-        {Object.entries(grouped).map(([type, typeTemplates]) => (
+        {Object.entries(grouped).map(([type, typeTemplates]) => {
+          const templates = typeTemplates as any[];
+          return (
           <div key={type}>
             <div className="flex items-center gap-2 mb-3">
               <Badge className={TYPE_COLORS[type] || TYPE_COLORS.general}>
                 {TYPE_LABELS[type] || type}
               </Badge>
               <span className="text-sm text-gray-500">
-                {typeTemplates.length} template{typeTemplates.length !== 1 ? "s" : ""}
+                {templates.length} template{templates.length !== 1 ? "s" : ""}
               </span>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {typeTemplates.map((template) => (
+              {templates.map((template) => (
                 <Card key={template.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -181,7 +183,8 @@ export function TemplateList({ templates, universityId }: TemplateListProps) {
               ))}
             </div>
           </div>
-        ))}
+        );
+        })}
       </div>
 
       {/* Delete Confirmation Dialog */}

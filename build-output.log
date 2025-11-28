@@ -1,0 +1,26 @@
+
+> campus-haiti@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.33
+  - Environments: .env.local
+  - Experiments (use with caution):
+    · isrFlushToDisk
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./app/[locale]/schools/dashboard/applications/board/page.tsx:63:23
+Type error: Type 'Set<any>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+
+[0m [90m 61 |[39m[0m
+[0m [90m 62 |[39m   [90m// Get user profiles for student names[39m[0m
+[0m[31m[1m>[22m[39m[90m 63 |[39m   [36mconst[39m userIds [33m=[39m [[33m...[39m[36mnew[39m [33mSet[39m(applicationsSnapshot[33m.[39mdocs[33m.[39mmap((doc) [33m=>[39m doc[33m.[39mdata()[33m.[39muserId))][33m;[39m[0m
+[0m [90m    |[39m                       [31m[1m^[22m[39m[0m
+[0m [90m 64 |[39m   [36mconst[39m usersPromises [33m=[39m userIds[33m.[39mmap((userId) [33m=>[39m[0m
+[0m [90m 65 |[39m     db[33m.[39mcollection([32m"users"[39m)[33m.[39mdoc(userId)[33m.[39m[36mget[39m()[0m
+[0m [90m 66 |[39m   )[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
