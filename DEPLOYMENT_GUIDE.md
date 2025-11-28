@@ -165,3 +165,134 @@ Set up alerts for:
 - Unusual registration patterns
 
 Use Firebase Cloud Monitoring or integrate with your preferred monitoring solution.
+
+---
+
+## 11. University Portal - New Features (Phases 1-7)
+
+The University Admin Portal has been enhanced with 7 major phases. All code is committed and ready for deployment.
+
+### Phase Commits:
+- Phase 1: `0c28fdb` - Enhanced Data Model & Roles
+- Phase 2: `2bebfbb` - Application Kanban Board
+- Phase 3: `fb93441` - Application Detail Page
+- Phase 4: `ba1cdf0` - Message Templates
+- Phase 5: `fd7e256` - Payment Management
+- Phase 6: `8fd3b21` - Enhanced Analytics
+- Phase 7: `7c21f73` - Security & Testing
+
+### New Collections Verify:
+Check Firestore for these new structures:
+
+**Staff Subcollection**:
+```
+universities/{universityId}/staff/{userId}
+  - role: "UNI_ADMIN" | "UNI_REVIEWER" | "UNI_FINANCE" | "UNI_VIEWER"
+  - permissions: string[]
+  - createdAt: Timestamp
+```
+
+**Application Subcollections**:
+```
+applicationItems/{applicationId}/documents/{docId}
+applicationItems/{applicationId}/notes/{noteId}
+applicationItems/{applicationId}/timeline/{eventId}
+```
+
+**Message Templates**:
+```
+messageTemplates/{templateId}
+  - universityId: string
+  - type: "missing_docs" | "interview" | "acceptance" | "rejection" | "general"
+  - name: string
+  - subject: string
+  - body: string (with {{variables}})
+```
+
+### Testing New Features:
+
+**1. Application Kanban Board**:
+- Navigate to `/schools/dashboard/pipeline`
+- Verify drag-and-drop works between status columns
+- Test bulk reviewer assignment
+
+**2. Application Detail Page**:
+- Click any application card
+- Verify 4 tabs load: Overview, Documents, Notes, Timeline
+- Test document approve/reject
+- Add internal and external notes
+- Check timeline shows all events
+
+**3. Message Templates**:
+- Navigate to `/schools/dashboard/templates`
+- Create new template with variables like `{{studentName}}`
+- Verify live preview works
+- Test duplicate and delete
+
+**4. Payment Management**:
+- Navigate to `/schools/dashboard/payments`
+- Verify payment table with filters
+- Test CSV export
+- Update payment status
+
+**5. Analytics Dashboard**:
+- Navigate to `/schools/dashboard/analytics`
+- Verify 8 KPI cards display
+- Check funnel chart renders
+- Test program performance table
+- Export analytics CSV
+
+### Security Verification:
+
+**Permission Checks**:
+```bash
+# Test as UNI_REVIEWER (should NOT be able to delete)
+# Test as UNI_FINANCE (should ONLY update payments)
+# Test as UNI_VIEWER (should be read-only)
+```
+
+**Firestore Rules**:
+- Staff subcollection secured ✅
+- Timeline events immutable ✅
+- Internal notes hidden from students ✅
+- Payment updates restricted ✅
+- Analytics require university access ✅
+
+### New API Endpoints:
+All endpoints require session authentication and university access verification:
+- `/api/uni/permissions` - Get user role/permissions
+- `/api/uni/applications/[id]/status` - Update application status
+- `/api/uni/applications/bulk-assign` - Bulk assign reviewer
+- `/api/uni/applications/[id]/documents/[docId]` - Document CRUD
+- `/api/uni/applications/[id]/notes` - Notes CRUD
+- `/api/uni/templates` - Template list/create
+- `/api/uni/templates/[id]` - Template CRUD
+- `/api/uni/templates/[id]/duplicate` - Clone template
+- `/api/uni/payments/[id]` - Payment status updates
+- `/api/uni/analytics/overview` - Dashboard KPIs
+- `/api/uni/analytics/funnel` - Application funnel
+- `/api/uni/analytics/programs` - Program performance
+
+### Documentation for Users:
+
+After deployment, share these guides with university staff:
+- **User Guide**: `/UNIVERSITY_ADMIN_GUIDE.md` - Complete feature walkthrough
+- **Security Checklist**: `/SECURITY_TESTING.md` - Testing procedures
+- **Implementation Summary**: `/IMPLEMENTATION_SUMMARY.md` - Technical overview
+
+### Post-Deployment Checklist:
+
+University Portal specific:
+- [ ] Verify Firestore rules deployed (includes new subcollections)
+- [ ] Add at least one staff member to test university's staff subcollection
+- [ ] Create test application with documents
+- [ ] Test kanban drag-and-drop
+- [ ] Test template creation and preview
+- [ ] Test payment status updates
+- [ ] Verify analytics display correctly
+- [ ] Test all 4 roles (ADMIN, REVIEWER, FINANCE, VIEWER)
+- [ ] Verify timeline events are immutable
+- [ ] Check internal notes hidden from students
+- [ ] Test CSV exports (payments and analytics)
+
+---
