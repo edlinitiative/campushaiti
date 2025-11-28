@@ -36,6 +36,19 @@ service cloud.firestore {
              request.auth.uid in get(/databases/$(database)/documents/universities/$(universityId)).data.adminUids;
     }
     
+    // Check if user is staff member of university (new granular roles)
+    function isUniversityStaff(universityId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/universities/$(universityId)/staff/$(request.auth.uid));
+    }
+    
+    // Check if user has access to university (admin, legacy adminUids, or staff)
+    function hasUniversityAccess(universityId) {
+      return isAdmin() || 
+             isSchoolAdminOf(universityId) || 
+             isUniversityStaff(universityId);
+    }
+    
     // Users collection - users can read/update their own data, admins can manage all
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin() || isReviewer();
@@ -56,8 +69,14 @@ service cloud.firestore {
     match /universities/{id} {
       allow read: if isAuthenticated();
       allow create: if isAdmin();
-      allow update: if isAdmin() || isSchoolAdminOf(id);
+      allow update: if isAdmin() || hasUniversityAccess(id);
       allow delete: if isAdmin();
+      
+      // University staff subcollection - granular roles
+      match /staff/{userId} {
+        allow read: if hasUniversityAccess(id);
+        allow write: if isAdmin() || (hasUniversityAccess(id) && get(/databases/$(database)/documents/universities/$(id)/staff/$(request.auth.uid)).data.role == 'UNI_ADMIN');
+      }
     }
     
     // University Registrations - anyone can create, only admins can review
@@ -92,12 +111,51 @@ service cloud.firestore {
                      (resource.data.userId == request.auth.uid || 
                       isAdmin() || 
                       isReviewer() ||
-                      (isSchoolAdmin() && request.auth.uid in get(/databases/$(database)/documents/universities/$(resource.data.universityId)).data.adminUids));
+                      hasUniversityAccess(resource.data.universityId));
       allow create: if isAuthenticated();
       allow update: if isAuthenticated() || 
                        isAdmin() || 
-                       (isSchoolAdmin() && request.auth.uid in get(/databases/$(database)/documents/universities/$(resource.data.universityId)).data.adminUids);
+                       hasUniversityAccess(resource.data.universityId);
       allow delete: if isAdmin();
+      
+      // Application documents subcollection
+      match /documents/{docId} {
+        allow read: if isAuthenticated() && 
+                       (get(/databases/$(database)/documents/applicationItems/$(id)).data.userId == request.auth.uid || 
+                        isAdmin() || 
+                        hasUniversityAccess(get(/databases/$(database)/documents/applicationItems/$(id)).data.universityId));
+        allow write: if isAuthenticated() && 
+                        (get(/databases/$(database)/documents/applicationItems/$(id)).data.userId == request.auth.uid || 
+                         isAdmin() || 
+                         hasUniversityAccess(get(/databases/$(database)/documents/applicationItems/$(id)).data.universityId));
+      }
+      
+      // Application notes subcollection
+      match /notes/{noteId} {
+        allow read: if isAuthenticated() && 
+                       ((!resource.data.isInternal && get(/databases/$(database)/documents/applicationItems/$(id)).data.userId == request.auth.uid) || 
+                        isAdmin() || 
+                        hasUniversityAccess(get(/databases/$(database)/documents/applicationItems/$(id)).data.universityId));
+        allow create: if isAuthenticated() && 
+                         (get(/databases/$(database)/documents/applicationItems/$(id)).data.userId == request.auth.uid || 
+                          isAdmin() || 
+                          hasUniversityAccess(get(/databases/$(database)/documents/applicationItems/$(id)).data.universityId));
+        allow update: if isAuthenticated() && 
+                         (resource.data.authorId == request.auth.uid || isAdmin());
+        allow delete: if isAdmin();
+      }
+      
+      // Application timeline subcollection (audit trail - append only)
+      match /timeline/{eventId} {
+        allow read: if isAuthenticated() && 
+                       (get(/databases/$(database)/documents/applicationItems/$(id)).data.userId == request.auth.uid || 
+                        isAdmin() || 
+                        hasUniversityAccess(get(/databases/$(database)/documents/applicationItems/$(id)).data.universityId));
+        allow create: if isAuthenticated() && 
+                         (isAdmin() || 
+                          hasUniversityAccess(get(/databases/$(database)/documents/applicationItems/$(id)).data.universityId));
+        allow update, delete: if false; // Timeline events are immutable
+      }
     }
     
     // Documents collection - users can CRUD their own documents
@@ -154,6 +212,25 @@ service cloud.firestore {
     match /platformSettings/{id} {
       allow read: if isAuthenticated();
       allow write: if false; // Only server/admin can update platform settings
+    }
+    
+    // Message Templates - university-specific templates
+    match /messageTemplates/{id} {
+      allow read: if isAuthenticated() && hasUniversityAccess(resource.data.universityId);
+      allow create: if isAuthenticated() && hasUniversityAccess(request.resource.data.universityId);
+      allow update: if isAuthenticated() && hasUniversityAccess(resource.data.universityId);
+      allow delete: if isAdmin() || hasUniversityAccess(resource.data.universityId);
+    }
+    
+    // Payments - enhanced rules for finance role
+    match /payments/{id} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.studentId == request.auth.uid || 
+                      isAdmin() || 
+                      hasUniversityAccess(resource.data.universityId));
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || hasUniversityAccess(resource.data.universityId);
+      allow delete: if isAdmin();
     }
   }
 }
